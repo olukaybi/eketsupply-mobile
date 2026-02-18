@@ -223,3 +223,14 @@
 - [x] Check RLS policies allow data access
 - [x] Test artisan query with proper error handling
 - [x] Verify sample data exists in database
+
+
+## Artisan Bookings Management (Current)
+- [x] Create artisan bookings screen with tabs (pending, active, completed)
+- [x] Fetch artisan's bookings from database
+- [x] Display booking cards with customer info and details
+- [x] Implement accept booking action
+- [x] Implement reject booking action
+- [x] Implement complete booking action
+- [x] Add booking status updates to database
+- [ ] Send notifications on booking status changes
