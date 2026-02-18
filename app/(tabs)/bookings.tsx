@@ -4,6 +4,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { router } from "expo-router";
+import { notifyBookingAccepted, notifyBookingRejected, notifyBookingCompleted } from "@/lib/notification-service";
 
 type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
 type TabType = 'pending' | 'active' | 'completed';
@@ -99,6 +100,10 @@ export default function ArtisanBookingsScreen() {
 
   async function handleAcceptBooking(bookingId: string) {
     try {
+      // Get booking details for notification
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
       const { error } = await supabase
         .from('bookings')
         .update({ 
@@ -112,7 +117,24 @@ export default function ArtisanBookingsScreen() {
         return;
       }
 
-      Alert.alert('Success', 'Booking accepted!');
+      // Get artisan name for notification
+      const { data: artisanData } = await supabase
+        .from('artisans')
+        .select('profiles!artisans_profile_id_fkey(full_name)')
+        .eq('profile_id', user?.id)
+        .single();
+
+      const artisanName = (artisanData?.profiles as any)?.full_name || 'Artisan';
+
+      // Send push notification to customer
+      await notifyBookingAccepted(
+        booking.customer_id,
+        artisanName,
+        booking.service_description,
+        bookingId
+      );
+
+      Alert.alert('Success', 'Booking accepted! Customer has been notified.');
       fetchBookings();
     } catch (err) {
       console.error('Error accepting booking:', err);
@@ -131,6 +153,10 @@ export default function ArtisanBookingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Get booking details for notification
+              const booking = bookings.find(b => b.id === bookingId);
+              if (!booking) return;
+
               const { error } = await supabase
                 .from('bookings')
                 .update({ 
@@ -143,6 +169,23 @@ export default function ArtisanBookingsScreen() {
                 Alert.alert('Error', 'Failed to reject booking');
                 return;
               }
+
+              // Get artisan name for notification
+              const { data: artisanData } = await supabase
+                .from('artisans')
+                .select('profiles!artisans_profile_id_fkey(full_name)')
+                .eq('profile_id', user?.id)
+                .single();
+
+              const artisanName = (artisanData?.profiles as any)?.full_name || 'Artisan';
+
+              // Send push notification to customer
+              await notifyBookingRejected(
+                booking.customer_id,
+                artisanName,
+                booking.service_description,
+                bookingId
+              );
 
               Alert.alert('Booking Rejected', 'The customer has been notified.');
               fetchBookings();
@@ -165,6 +208,10 @@ export default function ArtisanBookingsScreen() {
           text: 'Complete',
           onPress: async () => {
             try {
+              // Get booking details for notification
+              const booking = bookings.find(b => b.id === bookingId);
+              if (!booking) return;
+
               const { error } = await supabase
                 .from('bookings')
                 .update({ 
@@ -179,7 +226,24 @@ export default function ArtisanBookingsScreen() {
                 return;
               }
 
-              Alert.alert('Success', 'Job marked as completed!');
+              // Get artisan name for notification
+              const { data: artisanData } = await supabase
+                .from('artisans')
+                .select('profiles!artisans_profile_id_fkey(full_name)')
+                .eq('profile_id', user?.id)
+                .single();
+
+              const artisanName = (artisanData?.profiles as any)?.full_name || 'Artisan';
+
+              // Send push notification to customer
+              await notifyBookingCompleted(
+                booking.customer_id,
+                artisanName,
+                booking.service_description,
+                bookingId
+              );
+
+              Alert.alert('Success', 'Job marked as completed! Customer has been notified.');
               fetchBookings();
             } catch (err) {
               console.error('Error completing booking:', err);

@@ -234,3 +234,12 @@
 - [x] Implement complete booking action
 - [x] Add booking status updates to database
 - [ ] Send notifications on booking status changes
+
+
+## Push Notification Integration (Current)
+- [x] Create notification service for sending push notifications
+- [x] Send notification when booking is accepted
+- [x] Send notification when booking is rejected
+- [x] Send notification when booking is completed
+- [x] Store notifications in database for history
+- [ ] Test notifications on device
