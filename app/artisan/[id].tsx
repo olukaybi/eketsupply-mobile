@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { supabase } from "@/lib/supabase";
 
 type Review = {
   id: string;
@@ -18,63 +19,138 @@ type Service = {
   duration: string;
 };
 
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: "1",
-    author: "Ngozi Eze",
-    rating: 5,
-    date: "2 days ago",
-    text: "Excellent work! Very professional and completed the job on time. Highly recommended!",
-  },
-  {
-    id: "2",
-    author: "Emeka Johnson",
-    rating: 4,
-    date: "1 week ago",
-    text: "Good service, but took a bit longer than expected. Overall satisfied with the quality.",
-  },
-  {
-    id: "3",
-    author: "Fatima Bello",
-    rating: 5,
-    date: "2 weeks ago",
-    text: "Amazing craftsmanship! Will definitely hire again for future projects.",
-  },
-];
-
-const MOCK_SERVICES: Service[] = [
-  { id: "1", name: "Pipe Repair", price: "₦5,000 - ₦10,000", duration: "2-3 hours" },
-  { id: "2", name: "Toilet Installation", price: "₦8,000 - ₦15,000", duration: "3-4 hours" },
-  { id: "3", name: "Water Heater Repair", price: "₦10,000 - ₦20,000", duration: "4-5 hours" },
-  { id: "4", name: "Drain Cleaning", price: "₦3,000 - ₦8,000", duration: "1-2 hours" },
-];
-
-const MOCK_PORTFOLIO = [
-  "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400",
-  "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400",
-  "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400",
-  "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400",
-];
+type ArtisanProfile = {
+  id: string;
+  name: string;
+  service: string;
+  rating: number;
+  reviews: number;
+  location: string;
+  verified: boolean;
+  bio: string;
+  completedJobs: number;
+  responseTime: string;
+  availability: string;
+};
 
 export default function ArtisanProfileScreen() {
   const { id } = useLocalSearchParams();
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [artisan, setArtisan] = useState<ArtisanProfile | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock artisan data
-  const artisan = {
-    id: id as string,
-    name: "Chidi Okafor",
-    service: "Plumbing",
-    rating: 4.8,
-    reviews: 127,
-    location: "Lagos, Nigeria",
-    verified: true,
-    bio: "Professional plumber with 10+ years of experience. Specializing in residential and commercial plumbing services. Licensed and insured.",
-    completedJobs: 245,
-    responseTime: "Within 2 hours",
-    availability: "Mon-Sat, 8AM-6PM",
-  };
+  // Fetch artisan data from Supabase
+  useEffect(() => {
+    async function fetchArtisanData() {
+      try {
+        setLoading(true);
+        
+        // Fetch artisan profile
+        const { data: artisanData, error: artisanError } = await supabase
+          .from('artisans')
+          .select(`
+            *,
+            profiles!artisans_profile_id_fkey(full_name, email)
+          `)
+          .eq('id', id)
+          .single();
+
+        if (artisanError) {
+          console.error('Error fetching artisan:', artisanError);
+          return;
+        }
+
+        if (artisanData) {
+          setArtisan({
+            id: artisanData.id,
+            name: artisanData.profiles.full_name,
+            service: artisanData.service_category,
+            rating: artisanData.rating,
+            reviews: artisanData.total_reviews,
+            location: artisanData.location,
+            verified: artisanData.verified,
+            bio: artisanData.bio || 'No bio available',
+            completedJobs: artisanData.completed_jobs,
+            responseTime: artisanData.response_time,
+            availability: artisanData.availability,
+          });
+        }
+
+        // Fetch services
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('services')
+          .select('*')
+          .eq('artisan_id', id);
+
+        if (servicesError) {
+          console.error('Error fetching services:', servicesError);
+        } else if (servicesData) {
+          setServices(servicesData.map(s => ({
+            id: s.id,
+            name: s.name,
+            price: `₦${s.price_min.toLocaleString()} - ₦${s.price_max.toLocaleString()}`,
+            duration: s.duration,
+          })));
+        }
+
+        // Fetch reviews
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('artisan_id', id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+        } else if (reviewsData) {
+          setReviews(reviewsData.map(r => ({
+            id: r.id,
+            author: r.reviewer_name,
+            rating: r.rating,
+            date: new Date(r.created_at).toLocaleDateString(),
+            text: r.comment,
+          })));
+        }
+      } catch (err) {
+        console.error('Error in fetchArtisanData:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchArtisanData();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <ScreenContainer>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#0a7ea4" />
+          <Text className="text-muted text-sm mt-4">Loading artisan profile...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  if (!artisan) {
+    return (
+      <ScreenContainer>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-foreground text-lg font-semibold mb-2">Artisan Not Found</Text>
+          <Text className="text-muted text-sm text-center mb-4">The artisan profile you're looking for doesn't exist.</Text>
+          <TouchableOpacity onPress={() => router.back()} className="bg-primary px-6 py-3 rounded-full">
+            <Text className="text-background font-semibold">Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   const renderReview = ({ item }: { item: Review }) => (
     <View className="bg-surface rounded-xl p-4 mb-3 border border-border">
@@ -190,19 +266,25 @@ export default function ArtisanProfileScreen() {
         {/* Services */}
         <View className="px-6 mb-6">
           <Text className="text-lg font-bold text-foreground mb-3">Services Offered</Text>
-          <FlatList
-            data={MOCK_SERVICES}
-            renderItem={renderService}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-          />
+          {services.length > 0 ? (
+            <FlatList
+              data={services}
+              renderItem={renderService}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          ) : (
+            <View className="items-center py-8">
+              <Text className="text-muted text-sm">No services listed</Text>
+            </View>
+          )}
         </View>
 
         {/* Portfolio */}
         <View className="px-6 mb-6">
           <Text className="text-lg font-bold text-foreground mb-3">Portfolio</Text>
           <View className="flex-row flex-wrap">
-            {MOCK_PORTFOLIO.map((uri, index) => (
+            {[1, 2, 3, 4].map((index) => (
               <View key={index} className="w-1/2 p-1">
                 <View className="bg-surface rounded-xl overflow-hidden border border-border" style={{ height: 150 }}>
                   <View className="flex-1 bg-muted/20 items-center justify-center">
@@ -222,12 +304,18 @@ export default function ArtisanProfileScreen() {
               <Text className="text-sm text-primary font-medium">See All</Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={MOCK_REVIEWS}
-            renderItem={renderReview}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-          />
+          {reviews.length > 0 ? (
+            <FlatList
+              data={reviews}
+              renderItem={renderReview}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          ) : (
+            <View className="items-center py-8">
+              <Text className="text-muted text-sm">No reviews yet</Text>
+            </View>
+          )}
         </View>
 
         {/* Bottom Padding for Fixed Buttons */}

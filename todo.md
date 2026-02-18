@@ -176,3 +176,18 @@
 - [x] Add portfolio gallery component
 - [ ] Implement booking modals
 - [ ] Set up navigation between screens
+
+
+## Supabase Integration (Current)
+- [x] Install Supabase client library
+- [x] Configure Supabase environment variables
+- [x] Create Supabase client instance
+- [x] Update useAuth hook with real Supabase authentication
+- [x] Create artisans database table
+- [x] Create services database table
+- [x] Create reviews database table
+- [x] Seed database with sample artisan data
+- [x] Update home screen to fetch real artisans
+- [x] Update artisan profile to fetch real data
+- [ ] Test authentication flow end-to-end
+- [ ] Test data fetching and display

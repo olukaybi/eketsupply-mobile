@@ -2,6 +2,7 @@ import * as Api from "@/lib/_core/api";
 import * as Auth from "@/lib/_core/auth";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
+import { supabase } from "@/lib/supabase";
 
 type UseAuthOptions = {
   autoFetch?: boolean;
@@ -84,19 +85,37 @@ export function useAuth(options?: UseAuthOptions) {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Implement actual Supabase sign in
-      // For now, simulate successful login
-      const mockUser: Auth.User = {
-        id: 1,
-        openId: "mock-open-id",
-        name: email.split("@")[0],
+      
+      // Sign in with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
+        password,
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user returned from sign in");
+
+      // Fetch user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', authData.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const userInfo: Auth.User = {
+        id: parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16), // Convert UUID to number
+        openId: authData.user.id,
+        name: profile.full_name || email.split("@")[0],
+        email: profile.email || email,
         loginMethod: "email",
         lastSignedIn: new Date(),
       };
-      await Auth.setUserInfo(mockUser);
-      await Auth.setSessionToken("mock-session-token");
-      setUser(mockUser);
+
+      await Auth.setUserInfo(userInfo);
+      await Auth.setSessionToken(authData.session?.access_token || "");
+      setUser(userInfo);
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to sign in");
       setError(error);
@@ -110,19 +129,52 @@ export function useAuth(options?: UseAuthOptions) {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Implement actual Supabase sign up
-      // For now, simulate successful registration
-      const mockUser: Auth.User = {
-        id: 1,
-        openId: "mock-open-id",
+      
+      // Sign up with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            user_type: userType,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user returned from sign up");
+
+      // Update profile with additional info
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: name,
+          user_type: userType,
+        })
+        .eq('user_id', authData.user.id);
+
+      if (updateError) console.warn("Profile update warning:", updateError);
+
+      // Fetch the profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', authData.user.id)
+        .single();
+
+      const userInfo: Auth.User = {
+        id: profile ? parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16) : 1,
+        openId: authData.user.id,
         name,
         email,
         loginMethod: "email",
         lastSignedIn: new Date(),
       };
-      await Auth.setUserInfo(mockUser);
-      await Auth.setSessionToken("mock-session-token");
-      setUser(mockUser);
+
+      await Auth.setUserInfo(userInfo);
+      await Auth.setSessionToken(authData.session?.access_token || "");
+      setUser(userInfo);
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Failed to sign up");
       setError(error);

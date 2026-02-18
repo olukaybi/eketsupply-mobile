@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabase";
 
 type ServiceCategory = {
   id: string;
@@ -33,42 +34,81 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
   { id: "8", name: "Tiling", icon: "⬜", count: 42 },
 ];
 
-const FEATURED_ARTISANS: Artisan[] = [
-  {
-    id: "1",
-    name: "Chidi Okafor",
-    service: "Plumbing",
-    rating: 4.8,
-    reviews: 127,
-    location: "Lagos, Nigeria",
-    price: "₦5,000 - ₦15,000",
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "Amaka Nwosu",
-    service: "Electrical",
-    rating: 4.9,
-    reviews: 203,
-    location: "Abuja, Nigeria",
-    price: "₦8,000 - ₦20,000",
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "Tunde Adeyemi",
-    service: "Carpentry",
-    rating: 4.7,
-    reviews: 156,
-    location: "Ibadan, Nigeria",
-    price: "₦10,000 - ₦30,000",
-    verified: true,
-  },
-];
+type ArtisanData = {
+  id: string;
+  profile_id: string;
+  service_category: string;
+  bio: string | null;
+  location: string;
+  rating: number;
+  total_reviews: number;
+  completed_jobs: number;
+  response_time: string;
+  availability: string;
+  verified: boolean;
+  profiles: {
+    full_name: string;
+    email: string;
+  };
+  services: Array<{
+    price_min: number;
+    price_max: number;
+  }>;
+};
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const [loadingArtisans, setLoadingArtisans] = useState(true);
+
+  // Fetch artisans from Supabase
+  useEffect(() => {
+    async function fetchArtisans() {
+      try {
+        setLoadingArtisans(true);
+        const { data, error } = await supabase
+          .from('artisans')
+          .select(`
+            *,
+            profiles!artisans_profile_id_fkey(full_name, email),
+            services(price_min, price_max)
+          `)
+          .eq('verified', true)
+          .order('rating', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          console.error('Error fetching artisans:', error);
+          return;
+        }
+
+        if (data) {
+          const formattedArtisans: Artisan[] = data.map((artisan: ArtisanData) => {
+            const minPrice = artisan.services[0]?.price_min || 5000;
+            const maxPrice = artisan.services[0]?.price_max || 15000;
+            return {
+              id: artisan.id,
+              name: artisan.profiles.full_name,
+              service: artisan.service_category,
+              rating: artisan.rating,
+              reviews: artisan.total_reviews,
+              location: artisan.location,
+              price: `₦${minPrice.toLocaleString()} - ₦${maxPrice.toLocaleString()}`,
+              verified: artisan.verified,
+            };
+          });
+          setArtisans(formattedArtisans);
+        }
+      } catch (err) {
+        console.error('Error in fetchArtisans:', err);
+      } finally {
+        setLoadingArtisans(false);
+      }
+    }
+
+    fetchArtisans();
+  }, []);
 
   const handleCategoryPress = (category: ServiceCategory) => {
     // TODO: Navigate to category detail screen
@@ -186,14 +226,25 @@ export default function HomeScreen() {
               <Text className="text-sm text-primary font-medium">See All</Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            horizontal
-            data={FEATURED_ARTISANS}
-            renderItem={renderArtisanCard}
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24 }}
-          />
+          {loadingArtisans ? (
+            <View className="items-center justify-center py-8">
+              <ActivityIndicator size="large" color="#0a7ea4" />
+              <Text className="text-muted text-sm mt-2">Loading artisans...</Text>
+            </View>
+          ) : artisans.length > 0 ? (
+            <FlatList
+              horizontal
+              data={artisans}
+              renderItem={renderArtisanCard}
+              keyExtractor={(item) => item.id}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 24 }}
+            />
+          ) : (
+            <View className="items-center justify-center py-8 px-6">
+              <Text className="text-muted text-sm text-center">No artisans found. Please check your database setup.</Text>
+            </View>
+          )}
         </View>
 
         {/* Recent Activity */}
