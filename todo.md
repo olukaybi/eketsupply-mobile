@@ -243,3 +243,29 @@
 - [x] Send notification when booking is completed
 - [x] Store notifications in database for history
 - [ ] Test notifications on device
+
+
+## Customer Features (Current Sprint)
+
+### Customer Bookings Screen
+- [x] Update bookings tab to show customer view for non-artisans
+- [x] Display customer's booking history with status badges
+- [x] Show booking details and artisan info
+- [x] Add cancel booking functionality
+- [x] Display notifications for booking updates
+
+### In-App Chat System
+- [x] Create chat database schema
+- [x] Build chat screen UI with message bubbles
+- [x] Implement real-time messaging with Supabase
+- [ ] Add chat button to booking cards
+- [ ] Show unread message indicators
+- [ ] Send notifications for new messages
+
+### Review System
+- [x] Create reviews database table (if not exists)
+- [x] Build review submission modal with star rating
+- [x] Add review button to completed bookings
+- [x] Display reviews on artisan profiles
+- [x] Calculate and update artisan ratings
+- [x] Prevent duplicate reviews
