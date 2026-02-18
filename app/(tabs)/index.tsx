@@ -51,8 +51,7 @@ type ArtisanData = {
     email: string;
   };
   services: Array<{
-    price_min: number;
-    price_max: number;
+    price: string;
   }>;
 };
 
@@ -72,7 +71,7 @@ export default function HomeScreen() {
           .select(`
             *,
             profiles!artisans_profile_id_fkey(full_name, email),
-            services(price_min, price_max)
+            services(price)
           `)
           .eq('verified', true)
           .order('rating', { ascending: false })
@@ -85,8 +84,7 @@ export default function HomeScreen() {
 
         if (data) {
           const formattedArtisans: Artisan[] = data.map((artisan: ArtisanData) => {
-            const minPrice = artisan.services[0]?.price_min || 5000;
-            const maxPrice = artisan.services[0]?.price_max || 15000;
+            const price = artisan.services[0]?.price || '₦5,000 - ₦15,000';
             return {
               id: artisan.id,
               name: artisan.profiles.full_name,
@@ -94,7 +92,7 @@ export default function HomeScreen() {
               rating: artisan.rating,
               reviews: artisan.total_reviews,
               location: artisan.location,
-              price: `₦${minPrice.toLocaleString()} - ₦${maxPrice.toLocaleString()}`,
+              price: price,
               verified: artisan.verified,
             };
           });

@@ -215,3 +215,11 @@
 - [x] Send booking confirmation notifications
 - [x] Send job update notifications
 - [ ] Test notifications on device
+
+
+## Bug Fixes - Artisan Fetching Error (Current)
+- [x] Debug "error fetching artisans" issue
+- [x] Verify Supabase connection is working
+- [x] Check RLS policies allow data access
+- [x] Test artisan query with proper error handling
+- [x] Verify sample data exists in database
