@@ -191,3 +191,27 @@
 - [x] Update artisan profile to fetch real data
 - [ ] Test authentication flow end-to-end
 - [ ] Test data fetching and display
+
+
+## Database Migration & Setup
+- [ ] Run supabase_schema.sql in Supabase SQL Editor
+- [ ] Verify tables created (profiles, artisans, services, reviews)
+- [ ] Verify sample data inserted
+- [ ] Test authentication with new database
+- [ ] Test artisan data fetching
+
+## Booking System Implementation
+- [x] Create bookings database table
+- [x] Implement Request Quote modal with form
+- [x] Implement Instant Booking modal with date picker
+- [x] Add booking submission to database
+- [x] Show booking confirmation screen
+- [ ] Add booking history view
+
+## Push Notifications
+- [x] Configure Expo push notifications
+- [x] Request notification permissions
+- [x] Store device push tokens in database
+- [x] Send booking confirmation notifications
+- [x] Send job update notifications
+- [ ] Test notifications on device

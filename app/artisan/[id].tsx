@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator, TextInput, Alert, Platform } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
+import { useNotifications } from "@/hooks/use-notifications";
+import * as Haptics from "expo-haptics";
 
 type Review = {
   id: string;
@@ -35,12 +38,34 @@ type ArtisanProfile = {
 
 export default function ArtisanProfileScreen() {
   const { id } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { sendLocalNotification } = useNotifications();
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [artisan, setArtisan] = useState<ArtisanProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Quote form state
+  const [quoteForm, setQuoteForm] = useState({
+    serviceDescription: '',
+    location: '',
+    preferredDate: '',
+    notes: '',
+  });
+
+  // Booking form state
+  const [bookingForm, setBookingForm] = useState({
+    selectedService: '',
+    serviceDescription: '',
+    preferredDate: '',
+    preferredTime: '',
+    location: '',
+    paymentMethod: 'cash',
+    notes: '',
+  });
 
   // Fetch artisan data from Supabase
   useEffect(() => {
@@ -126,6 +151,162 @@ export default function ArtisanProfileScreen() {
       fetchArtisanData();
     }
   }, [id]);
+
+  // Handle quote submission
+  const handleQuoteSubmit = async () => {
+    if (!user) {
+      Alert.alert('Authentication Required', 'Please sign in to request a quote.');
+      return;
+    }
+
+    if (!quoteForm.serviceDescription || !quoteForm.location) {
+      Alert.alert('Missing Information', 'Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.openId)
+        .single();
+
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      // Insert booking
+      const { error } = await supabase.from('bookings').insert({
+        customer_id: profile.id,
+        artisan_id: id,
+        booking_type: 'quote',
+        service_description: quoteForm.serviceDescription,
+        location: quoteForm.location,
+        preferred_date: quoteForm.preferredDate || null,
+        customer_notes: quoteForm.notes || null,
+      });
+
+      if (error) throw error;
+
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+
+      // Send local notification
+      await sendLocalNotification(
+        'Quote Requested!',
+        `Your quote request has been sent to ${artisan?.name}.`,
+        { type: 'quote', artisanId: id }
+      );
+
+      Alert.alert(
+        'Quote Requested!',
+        `Your quote request has been sent to ${artisan?.name}. They will respond soon.`,
+        [{ text: 'OK', onPress: () => setShowQuoteModal(false) }]
+      );
+
+      // Reset form
+      setQuoteForm({
+        serviceDescription: '',
+        location: '',
+        preferredDate: '',
+        notes: '',
+      });
+    } catch (error) {
+      console.error('Error submitting quote:', error);
+      Alert.alert('Error', 'Failed to submit quote request. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle booking submission
+  const handleBookingSubmit = async () => {
+    if (!user) {
+      Alert.alert('Authentication Required', 'Please sign in to book a service.');
+      return;
+    }
+
+    if (!bookingForm.selectedService || !bookingForm.preferredDate || !bookingForm.preferredTime || !bookingForm.location) {
+      Alert.alert('Missing Information', 'Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.openId)
+        .single();
+
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      // Get selected service details
+      const selectedService = services.find(s => s.id === bookingForm.selectedService);
+
+      // Insert booking
+      const { error } = await supabase.from('bookings').insert({
+        customer_id: profile.id,
+        artisan_id: id,
+        service_id: bookingForm.selectedService,
+        booking_type: 'instant',
+        service_description: bookingForm.serviceDescription,
+        preferred_date: `${bookingForm.preferredDate} ${bookingForm.preferredTime}`,
+        location: bookingForm.location,
+        payment_method: bookingForm.paymentMethod,
+        customer_notes: bookingForm.notes || null,
+      });
+
+      if (error) throw error;
+
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+
+      // Send local notification
+      await sendLocalNotification(
+        'Booking Confirmed!',
+        `Your booking with ${artisan?.name} has been confirmed.`,
+        { type: 'booking', artisanId: id }
+      );
+
+      Alert.alert(
+        'Booking Confirmed!',
+        `Your booking with ${artisan?.name} has been confirmed. You will receive a notification once the artisan accepts.`,
+        [{ text: 'OK', onPress: () => setShowBookingModal(false) }]
+      );
+
+      // Reset form
+      setBookingForm({
+        selectedService: '',
+        serviceDescription: '',
+        preferredDate: '',
+        preferredTime: '',
+        location: '',
+        paymentMethod: 'cash',
+        notes: '',
+      });
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      Alert.alert('Error', 'Failed to confirm booking. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -339,6 +520,224 @@ export default function ArtisanProfileScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Request Quote Modal */}
+      <Modal
+        visible={showQuoteModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowQuoteModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-background rounded-t-3xl px-6 pt-6 pb-8" style={{ maxHeight: '90%' }}>
+            {/* Header */}
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold text-foreground">Request Quote</Text>
+              <TouchableOpacity onPress={() => setShowQuoteModal(false)}>
+                <Text className="text-2xl text-muted">×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Service Description */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Service Needed *</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="Describe the service you need..."
+                  placeholderTextColor="#9BA1A6"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  value={quoteForm.serviceDescription}
+                  onChangeText={(text) => setQuoteForm({...quoteForm, serviceDescription: text})}
+                />
+              </View>
+
+              {/* Location */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Location *</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="Enter your location"
+                  placeholderTextColor="#9BA1A6"
+                  value={quoteForm.location}
+                  onChangeText={(text) => setQuoteForm({...quoteForm, location: text})}
+                />
+              </View>
+
+              {/* Preferred Date */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Preferred Date (Optional)</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="e.g., Next Monday or 2026-02-20"
+                  placeholderTextColor="#9BA1A6"
+                  value={quoteForm.preferredDate}
+                  onChangeText={(text) => setQuoteForm({...quoteForm, preferredDate: text})}
+                />
+              </View>
+
+              {/* Additional Notes */}
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-foreground mb-2">Additional Notes</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="Any specific requirements or questions?"
+                  placeholderTextColor="#9BA1A6"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  value={quoteForm.notes}
+                  onChangeText={(text) => setQuoteForm({...quoteForm, notes: text})}
+                />
+              </View>
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                onPress={handleQuoteSubmit}
+                disabled={submitting}
+                className="bg-primary rounded-full py-4 mb-4"
+                style={{ opacity: submitting ? 0.6 : 1 }}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-background text-center font-semibold text-base">Submit Quote Request</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Instant Booking Modal */}
+      <Modal
+        visible={showBookingModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowBookingModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-background rounded-t-3xl px-6 pt-6 pb-8" style={{ maxHeight: '90%' }}>
+            {/* Header */}
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold text-foreground">Book Now</Text>
+              <TouchableOpacity onPress={() => setShowBookingModal(false)}>
+                <Text className="text-2xl text-muted">×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Select Service */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Select Service *</Text>
+                {services.map((service) => (
+                  <TouchableOpacity
+                    key={service.id}
+                    onPress={() => setBookingForm({...bookingForm, selectedService: service.id, serviceDescription: service.name})}
+                    className={`bg-surface border-2 rounded-xl p-4 mb-2 ${
+                      bookingForm.selectedService === service.id ? 'border-primary' : 'border-border'
+                    }`}
+                  >
+                    <Text className="text-base font-semibold text-foreground mb-1">{service.name}</Text>
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-sm text-muted">{service.duration}</Text>
+                      <Text className="text-sm font-medium text-primary">{service.price}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Date & Time */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Preferred Date & Time *</Text>
+                <View className="flex-row gap-2">
+                  <TextInput
+                    className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                    placeholder="Date (e.g., 2026-02-20)"
+                    placeholderTextColor="#9BA1A6"
+                    value={bookingForm.preferredDate}
+                    onChangeText={(text) => setBookingForm({...bookingForm, preferredDate: text})}
+                  />
+                  <TextInput
+                    className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                    placeholder="Time (e.g., 10:00 AM)"
+                    placeholderTextColor="#9BA1A6"
+                    value={bookingForm.preferredTime}
+                    onChangeText={(text) => setBookingForm({...bookingForm, preferredTime: text})}
+                  />
+                </View>
+              </View>
+
+              {/* Location */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Service Location *</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="Enter your address"
+                  placeholderTextColor="#9BA1A6"
+                  value={bookingForm.location}
+                  onChangeText={(text) => setBookingForm({...bookingForm, location: text})}
+                />
+              </View>
+
+              {/* Payment Method */}
+              <View className="mb-4">
+                <Text className="text-sm font-medium text-foreground mb-2">Payment Method *</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {['cash', 'transfer', 'card', 'escrow'].map((method) => (
+                    <TouchableOpacity
+                      key={method}
+                      onPress={() => setBookingForm({...bookingForm, paymentMethod: method})}
+                      className={`px-4 py-2 rounded-full border-2 ${
+                        bookingForm.paymentMethod === method
+                          ? 'bg-primary border-primary'
+                          : 'bg-surface border-border'
+                      }`}
+                    >
+                      <Text className={`text-sm font-medium ${
+                        bookingForm.paymentMethod === method ? 'text-background' : 'text-foreground'
+                      }`}>
+                        {method.charAt(0).toUpperCase() + method.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Additional Notes */}
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-foreground mb-2">Special Instructions</Text>
+                <TextInput
+                  className="bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder="Any special instructions for the artisan?"
+                  placeholderTextColor="#9BA1A6"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  value={bookingForm.notes}
+                  onChangeText={(text) => setBookingForm({...bookingForm, notes: text})}
+                />
+              </View>
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                onPress={handleBookingSubmit}
+                disabled={submitting}
+                className="bg-primary rounded-full py-4 mb-4"
+                style={{ opacity: submitting ? 0.6 : 1 }}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-background text-center font-semibold text-base">Confirm Booking</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
