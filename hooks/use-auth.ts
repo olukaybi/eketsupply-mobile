@@ -80,6 +80,58 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, []);
 
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // TODO: Implement actual Supabase sign in
+      // For now, simulate successful login
+      const mockUser: Auth.User = {
+        id: 1,
+        openId: "mock-open-id",
+        name: email.split("@")[0],
+        email,
+        loginMethod: "email",
+        lastSignedIn: new Date(),
+      };
+      await Auth.setUserInfo(mockUser);
+      await Auth.setSessionToken("mock-session-token");
+      setUser(mockUser);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Failed to sign in");
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, name: string, userType: "seeker" | "artisan") => {
+    try {
+      setLoading(true);
+      setError(null);
+      // TODO: Implement actual Supabase sign up
+      // For now, simulate successful registration
+      const mockUser: Auth.User = {
+        id: 1,
+        openId: "mock-open-id",
+        name,
+        email,
+        loginMethod: "email",
+        lastSignedIn: new Date(),
+      };
+      await Auth.setUserInfo(mockUser);
+      await Auth.setSessionToken("mock-session-token");
+      setUser(mockUser);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Failed to sign up");
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await Api.logout();
@@ -138,6 +190,8 @@ export function useAuth(options?: UseAuthOptions) {
     error,
     isAuthenticated,
     refresh: fetchUser,
+    signIn,
+    signUp,
     logout,
   };
 }

@@ -163,3 +163,16 @@
 - [x] Run unit tests
 - [x] Fix any identified bugs
 - [x] Ensure dev server stability
+
+
+## Current Development Sprint
+- [x] Create sign-in screen with email/password
+- [x] Create sign-up screen with seeker/artisan tabs
+- [x] Add password visibility toggle to auth forms
+- [x] Integrate Supabase authentication (mock for now)
+- [x] Build home screen with service categories
+- [x] Add search functionality
+- [x] Create artisan profile screen
+- [x] Add portfolio gallery component
+- [ ] Implement booking modals
+- [ ] Set up navigation between screens
