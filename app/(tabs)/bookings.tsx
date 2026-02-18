@@ -54,6 +54,7 @@ export default function BookingsScreen() {
   const [userType, setUserType] = useState<UserType>('customer');
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (user) {
@@ -159,6 +160,37 @@ export default function BookingsScreen() {
       setRefreshing(false);
     }
   }
+
+  async function fetchUnreadCounts() {
+    try {
+      if (!bookings.length) return;
+
+      const counts: Record<string, number> = {};
+      
+      for (const booking of bookings) {
+        const { count } = await supabase
+          .from('chat_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('booking_id', booking.id)
+          .eq('read', false)
+          .neq('sender_id', user?.id);
+
+        if (count && count > 0) {
+          counts[booking.id] = count;
+        }
+      }
+
+      setUnreadCounts(counts);
+    } catch (err) {
+      console.error('Error fetching unread counts:', err);
+    }
+  }
+
+  useEffect(() => {
+    if (bookings.length > 0) {
+      fetchUnreadCounts();
+    }
+  }, [bookings]);
 
   async function handleCancelBooking(bookingId: string) {
     Alert.alert(
@@ -502,6 +534,24 @@ export default function BookingsScreen() {
                     <Text className="text-sm text-foreground">{booking.customer_notes}</Text>
                   </View>
                 )}
+
+                {/* Chat Button - Available for all bookings */}
+                <View className="relative">
+                  <TouchableOpacity
+                    className="bg-surface border border-primary py-3 rounded-xl mt-2 flex-row items-center justify-center gap-2"
+                    onPress={() => router.push(`/chat/${booking.id}`)}
+                  >
+                    <Text className="text-2xl">💬</Text>
+                    <Text className="font-semibold text-primary">Chat</Text>
+                  </TouchableOpacity>
+                  {unreadCounts[booking.id] > 0 && (
+                    <View className="absolute -top-1 -right-1 bg-error w-6 h-6 rounded-full items-center justify-center">
+                      <Text className="text-xs font-bold text-background">
+                        {unreadCounts[booking.id] > 9 ? '9+' : unreadCounts[booking.id]}
+                      </Text>
+                    </View>
+                  )}
+                </View>
 
                 {/* Action Buttons */}
                 {userType === 'artisan' && activeTab === 'pending' && (

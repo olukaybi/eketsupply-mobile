@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Modal, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Modal, Alert, Image, ScrollView } from "react-native";
 import { supabase } from "@/lib/supabase";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 
 interface ReviewModalProps {
   visible: boolean;
@@ -25,6 +26,66 @@ export function ReviewModal({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+
+  async function pickImage() {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow access to your photos');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+        selectionLimit: 3 - photos.length,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newPhotos = result.assets.map(asset => asset.uri);
+        setPhotos(prev => [...prev, ...newPhotos].slice(0, 3));
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (err) {
+      console.error('Error picking image:', err);
+    }
+  }
+
+  async function uploadPhotos(): Promise<string[]> {
+    const uploadedUrls: string[] = [];
+
+    for (const photoUri of photos) {
+      try {
+        const response = await fetch(photoUri);
+        const blob = await response.blob();
+        const fileName = `review_${bookingId}_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+
+        const { data, error } = await supabase.storage
+          .from('review-photos')
+          .upload(fileName, blob, {
+            contentType: 'image/jpeg',
+            cacheControl: '3600',
+          });
+
+        if (error) {
+          console.error('Error uploading photo:', error);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('review-photos')
+          .getPublicUrl(fileName);
+
+        uploadedUrls.push(publicUrl);
+      } catch (err) {
+        console.error('Error processing photo:', err);
+      }
+    }
+
+    return uploadedUrls;
+  }
 
   async function submitReview() {
     if (rating === 0) {
@@ -54,6 +115,9 @@ export function ReviewModal({
         return;
       }
 
+      // Upload photos if any
+      const photoUrls = photos.length > 0 ? await uploadPhotos() : [];
+
       // Insert review
       const { error: reviewError } = await supabase
         .from('reviews')
@@ -63,6 +127,7 @@ export function ReviewModal({
           booking_id: bookingId,
           rating,
           comment: comment.trim(),
+          photos: photoUrls.length > 0 ? photoUrls : null,
         });
 
       if (reviewError) {
@@ -161,6 +226,33 @@ export function ReviewModal({
             <Text className="text-xs text-muted mt-2 text-right">
               {comment.length}/500
             </Text>
+          </View>
+
+          {/* Photo Upload */}
+          <View className="mb-6">
+            <Text className="text-sm font-semibold text-foreground mb-3">Photos (Optional)</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-3">
+              {photos.map((photo, index) => (
+                <View key={index} className="relative">
+                  <Image source={{ uri: photo }} className="w-24 h-24 rounded-xl" />
+                  <TouchableOpacity
+                    className="absolute -top-2 -right-2 bg-error w-6 h-6 rounded-full items-center justify-center"
+                    onPress={() => setPhotos(prev => prev.filter((_, i) => i !== index))}
+                  >
+                    <Text className="text-background font-bold text-xs">×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {photos.length < 3 && (
+                <TouchableOpacity
+                  className="w-24 h-24 rounded-xl border-2 border-dashed border-border items-center justify-center bg-surface"
+                  onPress={pickImage}
+                >
+                  <Text className="text-4xl text-muted">📷</Text>
+                  <Text className="text-xs text-muted mt-1">Add Photo</Text>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
           </View>
 
           {/* Submit Button */}

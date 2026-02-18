@@ -269,3 +269,20 @@
 - [x] Display reviews on artisan profiles
 - [x] Calculate and update artisan ratings
 - [x] Prevent duplicate reviews
+
+
+## Enhancements (Current Sprint)
+
+### Chat Integration
+- [x] Add chat button to all booking cards
+- [x] Navigate to chat screen from booking card
+- [x] Fetch unread message count for each booking
+- [x] Display unread badge on booking cards
+- [ ] Show notification dot on bookings tab icon
+
+### Photo Upload for Reviews
+- [x] Add image picker to review modal
+- [x] Upload photos to Supabase storage
+- [x] Store photo URLs in reviews table
+- [ ] Display review photos on artisan profiles
+- [ ] Add photo gallery viewer
