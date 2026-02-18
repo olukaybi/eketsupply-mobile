@@ -28,11 +28,11 @@ const schemeFromBundleId = `manus${timestamp}`;
 
 const env = {
   // App branding - update these values directly (do not use env vars)
-  appName: "EketSupply Mobile",
+  appName: "EketSupply",
   appSlug: "eketsupply-mobile",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "https://private-us-east-1.manuscdn.com/sessionFile/8OVIXE3jkv1ifPBj8BDpha/sandbox/1sLDEPctjuywK7xivCBk2C-img-1_1771379554000_na1fn_aWNvYmcucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=OdMbO8geyPoBERQlYXXyHmyhZp-pq6~zW~JbR1BUiNjYHr8VQjWHYlW1-dsGBGgkepmlPdCdNG-LfGWeYP~HJd6ABFKALfN0CYW65pVpnzh~7R5l4MXCnorxuS1ZYWbuqcYIFO62beM~9h~TTLENDb3LEC60NoyFuyQethzfvd3mhfTE4x14ydvN0atpVbRtqyioMWpvkEqANzac3AAb1aNGshLZIf9Q2mx7wPAzlH7NwEKLrILSkOfEFBQ8D6GHiRlccSlyAPMMcloZqKbOBlT~WIdxGYS9JjbDYGXX4NHeptubSF4mVXmZG8hJCXMVisHrdjHpXH2NY7JUMABstg__",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
