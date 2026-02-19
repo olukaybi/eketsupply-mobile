@@ -58,7 +58,10 @@ type ArtisanData = {
 export default function HomeScreen() {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const [filteredArtisans, setFilteredArtisans] = useState<Artisan[]>([]);
   const [loadingArtisans, setLoadingArtisans] = useState(true);
 
   // Fetch artisans from Supabase
@@ -97,6 +100,7 @@ export default function HomeScreen() {
             };
           });
           setArtisans(formattedArtisans);
+          setFilteredArtisans(formattedArtisans);
         }
       } catch (err) {
         console.error('Error in fetchArtisans:', err);
@@ -108,9 +112,41 @@ export default function HomeScreen() {
     fetchArtisans();
   }, []);
 
+  // Filter artisans based on search, category, and location
+  useEffect(() => {
+    let filtered = [...artisans];
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(artisan =>
+        artisan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        artisan.service.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by category
+    if (selectedCategory) {
+      filtered = filtered.filter(artisan =>
+        artisan.service.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // Filter by location
+    if (selectedLocation) {
+      filtered = filtered.filter(artisan =>
+        artisan.location.toLowerCase().includes(selectedLocation.toLowerCase())
+      );
+    }
+
+    setFilteredArtisans(filtered);
+  }, [searchQuery, selectedCategory, selectedLocation, artisans]);
+
   const handleCategoryPress = (category: ServiceCategory) => {
-    // TODO: Navigate to category detail screen
-    console.log("Category pressed:", category.name);
+    if (selectedCategory === category.name) {
+      setSelectedCategory(null); // Deselect if already selected
+    } else {
+      setSelectedCategory(category.name);
+    }
   };
 
   const handleArtisanPress = (artisan: Artisan) => {
@@ -118,17 +154,25 @@ export default function HomeScreen() {
     console.log("Artisan pressed:", artisan.name);
   };
 
-  const renderCategoryItem = ({ item }: { item: ServiceCategory }) => (
-    <TouchableOpacity
-      onPress={() => handleCategoryPress(item)}
-      className="bg-surface rounded-2xl p-4 mr-3 items-center justify-center border border-border"
-      style={{ width: 110, height: 110 }}
-    >
-      <Text className="text-4xl mb-2">{item.icon}</Text>
-      <Text className="text-sm font-semibold text-foreground text-center">{item.name}</Text>
-      <Text className="text-xs text-muted mt-1">{item.count} pros</Text>
-    </TouchableOpacity>
-  );
+  const renderCategoryItem = ({ item }: { item: ServiceCategory }) => {
+    const isSelected = selectedCategory === item.name;
+    return (
+      <TouchableOpacity
+        onPress={() => handleCategoryPress(item)}
+        className="items-center mr-4"
+      >
+        <View className={`w-20 h-20 rounded-2xl items-center justify-center mb-2 border-2 ${
+          isSelected ? 'bg-primary border-primary' : 'bg-surface border-border'
+        }`}>
+          <Text className="text-4xl">{item.icon}</Text>
+        </View>
+        <Text className={`text-xs font-medium text-center ${
+          isSelected ? 'text-primary' : 'text-foreground'
+        }`}>{item.name}</Text>
+        <Text className="text-xs text-muted">{item.count}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   const renderArtisanCard = ({ item }: { item: Artisan }) => (
     <TouchableOpacity
@@ -193,12 +237,36 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* Location */}
-          <TouchableOpacity className="flex-row items-center mb-4">
-            <Text className="text-muted mr-1">📍</Text>
-            <Text className="text-sm text-foreground font-medium">Lagos, Nigeria</Text>
-            <Text className="text-muted ml-1">▼</Text>
-          </TouchableOpacity>
+          {/* Location Filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2 mb-4">
+            <TouchableOpacity
+              onPress={() => setSelectedLocation(null)}
+              className={`px-4 py-2 rounded-full border ${
+                !selectedLocation ? 'bg-primary border-primary' : 'bg-surface border-border'
+              }`}
+            >
+              <Text className={`text-sm font-medium ${
+                !selectedLocation ? 'text-background' : 'text-foreground'
+              }`}>
+                All Locations
+              </Text>
+            </TouchableOpacity>
+            {['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan'].map((location) => (
+              <TouchableOpacity
+                key={location}
+                onPress={() => setSelectedLocation(location)}
+                className={`px-4 py-2 rounded-full border ${
+                  selectedLocation === location ? 'bg-primary border-primary' : 'bg-surface border-border'
+                }`}
+              >
+                <Text className={`text-sm font-medium ${
+                  selectedLocation === location ? 'text-background' : 'text-foreground'
+                }`}>
+                  {location}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
         {/* Service Categories */}
@@ -219,20 +287,35 @@ export default function HomeScreen() {
         {/* Featured Artisans */}
         <View className="mb-6">
           <View className="px-6 mb-3 flex-row justify-between items-center">
-            <Text className="text-lg font-bold text-foreground">Featured Artisans</Text>
-            <TouchableOpacity>
-              <Text className="text-sm text-primary font-medium">See All</Text>
-            </TouchableOpacity>
+            <Text className="text-lg font-bold text-foreground">
+              {selectedCategory || selectedLocation || searchQuery ? 'Search Results' : 'Featured Artisans'}
+            </Text>
+            {(selectedCategory || selectedLocation) && (
+              <TouchableOpacity onPress={() => {
+                setSelectedCategory(null);
+                setSelectedLocation(null);
+                setSearchQuery('');
+              }}>
+                <Text className="text-sm text-error font-medium">Clear Filters</Text>
+              </TouchableOpacity>
+            )}
           </View>
+          {(selectedCategory || selectedLocation || searchQuery) && (
+            <View className="px-6 mb-2">
+              <Text className="text-sm text-muted">
+                {filteredArtisans.length} artisan{filteredArtisans.length !== 1 ? 's' : ''} found
+              </Text>
+            </View>
+          )}
           {loadingArtisans ? (
             <View className="items-center justify-center py-8">
               <ActivityIndicator size="large" color="#0a7ea4" />
               <Text className="text-muted text-sm mt-2">Loading artisans...</Text>
             </View>
-          ) : artisans.length > 0 ? (
+          ) : filteredArtisans.length > 0 ? (
             <FlatList
               horizontal
-              data={artisans}
+              data={filteredArtisans}
               renderItem={renderArtisanCard}
               keyExtractor={(item) => item.id}
               showsHorizontalScrollIndicator={false}

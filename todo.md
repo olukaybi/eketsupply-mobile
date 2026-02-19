@@ -286,3 +286,29 @@
 - [x] Store photo URLs in reviews table
 - [ ] Display review photos on artisan profiles
 - [ ] Add photo gallery viewer
+
+
+## New Features (Current Sprint)
+
+### Photo Gallery Viewer
+- [x] Create fullscreen image viewer component
+- [x] Add swipe gesture to navigate between photos
+- [x] Display photo index indicator (1/3)
+- [x] Add close button and zoom functionality
+- [x] Integrate viewer into artisan profile reviews
+
+### Bookings Tab Notification Badge
+- [x] Calculate total unread messages across all bookings
+- [x] Add red badge to bookings tab icon
+- [x] Update badge count in real-time
+- [x] Clear badge when user views messages
+
+### Home Screen Search & Filters
+- [x] Add search bar to home screen
+- [x] Implement category filter chips
+- [x] Add location filter chips
+- [x] Filter artisans by search query
+- [x] Filter artisans by category
+- [x] Filter artisans by location
+- [x] Show filter results count
+- [x] Add clear filters button

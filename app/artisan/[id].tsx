@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator, TextInput, Alert, Platform } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { PhotoGalleryViewer } from "@/components/photo-gallery-viewer";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -13,6 +14,7 @@ type Review = {
   rating: number;
   date: string;
   text: string;
+  photos?: string[] | null;
 };
 
 type Service = {
@@ -42,6 +44,9 @@ export default function ArtisanProfileScreen() {
   const { sendLocalNotification } = useNotifications();
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const [artisan, setArtisan] = useState<ArtisanProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -351,6 +356,25 @@ export default function ArtisanProfileScreen() {
         </View>
       </View>
       <Text className="text-sm text-muted leading-relaxed">{item.text}</Text>
+      {item.photos && item.photos.length > 0 && (
+        <View className="flex-row gap-2 mt-3">
+          {item.photos.map((photo, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                setGalleryPhotos(item.photos!);
+                setGalleryInitialIndex(index);
+                setGalleryVisible(true);
+              }}
+            >
+              <Image
+                source={{ uri: photo }}
+                className="w-20 h-20 rounded-lg"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 
@@ -738,6 +762,14 @@ export default function ArtisanProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Photo Gallery Viewer */}
+      <PhotoGalleryViewer
+        visible={galleryVisible}
+        onClose={() => setGalleryVisible(false)}
+        photos={galleryPhotos}
+        initialIndex={galleryInitialIndex}
+      />
     </ScreenContainer>
   );
 }
