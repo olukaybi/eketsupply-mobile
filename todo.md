@@ -351,3 +351,15 @@
 - [x] Set photo limit (e.g., max 12 photos)
 - [x] Update artisan profile to show portfolio gallery
 - [x] Add loading states and error handling
+
+### Before/After Transformation Feature
+- [x] Create before_after_photos database table
+- [x] Build before/after upload screen with dual image picker
+- [x] Add project title and description fields
+- [x] Upload before and after photos to Supabase storage
+- [x] Create side-by-side comparison viewer component
+- [x] Add swipe gesture to toggle between before/after
+- [x] Display before/after gallery on artisan profile
+- [x] Add "Manage Before/After" button to portfolio manager
+- [x] Implement delete functionality for photo pairs
+- [x] Write unit tests for before/after feature

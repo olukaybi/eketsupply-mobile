@@ -246,7 +246,7 @@ export default function PortfolioManagerScreen() {
           <TouchableOpacity
             onPress={pickImage}
             disabled={uploading || photos.length >= MAX_PHOTOS}
-            className="bg-primary rounded-xl p-4 mb-6 items-center"
+            className="bg-primary rounded-xl p-4 mb-4 items-center"
             style={{
               opacity: uploading || photos.length >= MAX_PHOTOS ? 0.5 : 1,
             }}
@@ -264,6 +264,22 @@ export default function PortfolioManagerScreen() {
                 </Text>
               </>
             )}
+          </TouchableOpacity>
+
+          {/* Before/After Manager Button */}
+          <TouchableOpacity
+            onPress={() => router.push('/before-after-manager')}
+            className="bg-success rounded-xl p-4 mb-6 items-center flex-row justify-center gap-2"
+          >
+            <Text className="text-white text-2xl">🔄</Text>
+            <View>
+              <Text className="text-white font-semibold">
+                Manage Before/After Projects
+              </Text>
+              <Text className="text-white text-xs opacity-80">
+                Showcase transformations
+              </Text>
+            </View>
           </TouchableOpacity>
 
           {/* Info Card */}

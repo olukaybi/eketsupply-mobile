@@ -4,6 +4,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { PhotoGalleryViewer } from "@/components/photo-gallery-viewer";
 import { AvailabilityCalendar } from "@/components/availability-calendar";
+import { BeforeAfterViewer } from "@/components/before-after-viewer";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -39,6 +40,14 @@ type ArtisanProfile = {
   availability: string;
 };
 
+type BeforeAfterProject = {
+  id: string;
+  project_title: string;
+  project_description: string | null;
+  before_photo_url: string;
+  after_photo_url: string;
+};
+
 export default function ArtisanProfileScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
@@ -52,6 +61,9 @@ export default function ArtisanProfileScreen() {
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([]);
+  const [beforeAfterProjects, setBeforeAfterProjects] = useState<BeforeAfterProject[]>([]);
+  const [beforeAfterViewerVisible, setBeforeAfterViewerVisible] = useState(false);
+  const [beforeAfterInitialIndex, setBeforeAfterInitialIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -159,6 +171,19 @@ export default function ArtisanProfileScreen() {
           console.error('Error fetching portfolio:', portfolioError);
         } else if (portfolioData) {
           setPortfolioPhotos(portfolioData.map(p => p.photo_url));
+        }
+
+        // Fetch before/after projects
+        const { data: beforeAfterData, error: beforeAfterError } = await supabase
+          .from('before_after_photos')
+          .select('id, project_title, project_description, before_photo_url, after_photo_url')
+          .eq('artisan_id', id)
+          .order('display_order', { ascending: true });
+
+        if (beforeAfterError) {
+          console.error('Error fetching before/after:', beforeAfterError);
+        } else if (beforeAfterData) {
+          setBeforeAfterProjects(beforeAfterData);
         }
       } catch (err) {
         console.error('Error in fetchArtisanData:', err);
@@ -533,6 +558,70 @@ export default function ArtisanProfileScreen() {
           )}
         </View>
 
+        {/* Before/After Transformations */}
+        <View className="px-6 mb-6">
+          <Text className="text-lg font-bold text-foreground mb-3">Before/After Transformations</Text>
+          {beforeAfterProjects.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
+              {beforeAfterProjects.map((project, index) => (
+                <TouchableOpacity
+                  key={project.id}
+                  onPress={() => {
+                    setBeforeAfterInitialIndex(index);
+                    setBeforeAfterViewerVisible(true);
+                  }}
+                  className="mx-1"
+                  style={{ width: 280 }}
+                >
+                  <View className="bg-surface rounded-xl overflow-hidden border border-border">
+                    {/* Title */}
+                    <View className="p-3 border-b border-border">
+                      <Text className="text-foreground font-semibold text-sm" numberOfLines={1}>
+                        {project.project_title}
+                      </Text>
+                      {project.project_description && (
+                        <Text className="text-muted text-xs mt-1" numberOfLines={2}>
+                          {project.project_description}
+                        </Text>
+                      )}
+                    </View>
+                    
+                    {/* Side-by-side preview */}
+                    <View className="flex-row">
+                      <View className="flex-1 p-2">
+                        <Text className="text-xs text-muted font-semibold mb-1 text-center">BEFORE</Text>
+                        <Image
+                          source={{ uri: project.before_photo_url }}
+                          className="w-full aspect-[4/3] rounded-lg"
+                          resizeMode="cover"
+                        />
+                      </View>
+                      <View className="flex-1 p-2">
+                        <Text className="text-xs text-success font-semibold mb-1 text-center">AFTER</Text>
+                        <Image
+                          source={{ uri: project.after_photo_url }}
+                          className="w-full aspect-[4/3] rounded-lg"
+                          resizeMode="cover"
+                        />
+                      </View>
+                    </View>
+                    
+                    {/* Tap hint */}
+                    <View className="p-2 bg-primary/10 items-center">
+                      <Text className="text-primary text-xs font-medium">Tap to view fullscreen</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View className="bg-surface rounded-xl p-8 items-center justify-center border border-border">
+              <Text className="text-4xl mb-2">🔄</Text>
+              <Text className="text-muted text-sm">No before/after projects yet</Text>
+            </View>
+          )}
+        </View>
+
         {/* Reviews */}
         <View className="px-6 mb-6">
           <View className="flex-row justify-between items-center mb-3">
@@ -804,6 +893,14 @@ export default function ArtisanProfileScreen() {
         onClose={() => setGalleryVisible(false)}
         photos={galleryPhotos}
         initialIndex={galleryInitialIndex}
+      />
+
+      {/* Before/After Viewer */}
+      <BeforeAfterViewer
+        visible={beforeAfterViewerVisible}
+        onClose={() => setBeforeAfterViewerVisible(false)}
+        projects={beforeAfterProjects}
+        initialIndex={beforeAfterInitialIndex}
       />
     </ScreenContainer>
   );
