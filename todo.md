@@ -488,3 +488,35 @@
 - [x] Create onboarding screen 3: Secure Booking & Payment
 - [x] Add onboarding navigation and skip functionality
 - [x] Store onboarding completion status
+
+
+### Location-Based Artisan Discovery
+- [x] Add latitude/longitude columns to artisans table
+- [x] Request location permissions from users
+- [x] Create map view screen with expo-maps
+- [x] Display artisan markers on map
+- [x] Implement distance calculation and filtering
+- [x] Add radius slider (1km, 5km, 10km, 25km)
+- [x] Show artisan cards with distance on map
+- [x] Add "Near Me" tab to home screen
+
+### Response Time Tracking
+- [x] Create response_times table for tracking
+- [x] Track time between booking request and artisan response
+- [x] Calculate average response time per artisan
+- [x] Create response time badge component
+- [x] Display badges on artisan profiles (< 1hr, < 24hrs, < 48hrs)
+- [x] Add response time to artisan search results
+- [x] Create analytics for artisans to see their response time
+- [x] Send notifications to artisans for pending responses
+
+### Emergency Booking Flow
+- [x] Create emergency_bookings table
+- [x] Add "Need Help Now" button to home screen
+- [x] Build emergency booking form (simplified)
+- [x] Filter artisans available within 2 hours
+- [x] Send urgent notifications to nearby available artisans
+- [x] Display emergency booking badge for artisans
+- [x] Add emergency booking premium pricing option
+- [x] Track emergency booking completion rates
+- [x] Create emergency booking history view

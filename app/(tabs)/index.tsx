@@ -237,6 +237,33 @@ export default function HomeScreen() {
             />
           </View>
 
+          {/* Quick Actions */}
+          <View className="flex-row gap-3 mb-4">
+            <TouchableOpacity
+              onPress={() => router.push('/emergency-booking')}
+              className="flex-1 rounded-xl p-4 flex-row items-center justify-center"
+              style={{ backgroundColor: '#EF4444' }}
+            >
+              <Text className="text-2xl mr-2">🚨</Text>
+              <View>
+                <Text className="text-white font-bold text-sm">Emergency</Text>
+                <Text className="text-white text-xs opacity-90">Within 2hrs</Text>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => router.push('/map-view')}
+              className="flex-1 rounded-xl p-4 flex-row items-center justify-center"
+              style={{ backgroundColor: '#2D5F3F' }}
+            >
+              <Text className="text-2xl mr-2">🗺️</Text>
+              <View>
+                <Text className="text-white font-bold text-sm">Map View</Text>
+                <Text className="text-white text-xs opacity-90">Find nearby</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
           {/* Location Filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2 mb-4">
             <TouchableOpacity

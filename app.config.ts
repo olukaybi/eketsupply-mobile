@@ -87,6 +87,14 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission: "Allow $(PRODUCT_NAME) to use your location to find nearby artisans.",
+        locationAlwaysPermission: "Allow $(PRODUCT_NAME) to use your location to find nearby artisans.",
+        locationWhenInUsePermission: "Allow $(PRODUCT_NAME) to use your location to find nearby artisans.",
+      },
+    ],
+    [
       "expo-camera",
       {
         cameraPermission: "Allow $(PRODUCT_NAME) to access your camera for video testimonials.",
