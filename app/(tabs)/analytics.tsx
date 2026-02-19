@@ -219,14 +219,21 @@ export default function AnalyticsScreen() {
               className="flex-1 bg-primary/10 rounded-xl p-4 items-center border border-primary/20"
             >
               <Text className="text-primary text-2xl mb-2">🖼️</Text>
-              <Text className="text-primary font-semibold text-sm">Manage Portfolio</Text>
+              <Text className="text-primary font-semibold text-sm">Portfolio</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/package-manager')}
               className="flex-1 bg-success/10 rounded-xl p-4 items-center border border-success/20"
             >
               <Text className="text-success text-2xl mb-2">📦</Text>
-              <Text className="text-success font-semibold text-sm">Service Packages</Text>
+              <Text className="text-success font-semibold text-sm">Packages</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/package-analytics')}
+              className="flex-1 bg-warning/10 rounded-xl p-4 items-center border border-warning/20"
+            >
+              <Text className="text-warning text-2xl mb-2">📊</Text>
+              <Text className="text-warning font-semibold text-sm">Analytics</Text>
             </TouchableOpacity>
           </View>
         </View>
