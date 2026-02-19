@@ -468,3 +468,11 @@
 - [x] Track booking success rate by suggestion
 - [x] Improve algorithm based on acceptance data
 - [x] Write unit tests for scheduling logic
+
+
+### App Icon Issue
+- [x] Investigate why EketSupply icon is not displaying correctly
+- [x] Generate new app icon with proper dimensions
+- [x] Update all icon locations (icon.png, splash-icon.png, favicon.png, android icons)
+- [x] Update app.config.ts with logo URL
+- [x] Test icon display on all platforms
