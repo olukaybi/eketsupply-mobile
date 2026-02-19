@@ -429,3 +429,42 @@
 - [x] Display package revenue metrics
 - [x] Add package recommendations based on data
 - [x] Write unit tests for analytics calculations
+
+
+### Artisan Verification Workflow
+- [x] Create verification_documents table
+- [x] Create verification_requests table for admin review
+- [x] Build document upload screen (ID, certifications)
+- [x] Add document picker for multiple file types
+- [x] Upload documents to Supabase storage
+- [x] Create admin review panel interface
+- [x] Add approve/reject verification actions
+- [x] Award verified badge upon approval
+- [x] Send notification on verification status change
+- [x] Display verified badge on artisan profiles
+- [x] Write unit tests for verification workflow
+
+### Referral Program
+- [x] Create referral_codes table
+- [x] Create referral_rewards table for tracking
+- [x] Generate unique referral codes for artisans
+- [x] Build referral invite screen with code sharing
+- [x] Add referral code input during sign-up
+- [x] Track successful referrals
+- [x] Award bonus rewards to both parties
+- [x] Create referral dashboard showing stats
+- [x] Display referral earnings in wallet
+- [x] Send notifications for referral milestones
+- [x] Write unit tests for referral system
+
+### Smart Scheduling
+- [x] Analyze artisan availability patterns
+- [x] Build time suggestion algorithm
+- [x] Consider customer preferences in suggestions
+- [x] Create smart scheduling UI component
+- [x] Display top 3 recommended time slots
+- [x] Show reasoning for each suggestion
+- [x] Allow manual time selection as fallback
+- [x] Track booking success rate by suggestion
+- [x] Improve algorithm based on acceptance data
+- [x] Write unit tests for scheduling logic

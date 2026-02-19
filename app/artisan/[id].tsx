@@ -7,6 +7,7 @@ import { AvailabilityCalendar } from "@/components/availability-calendar";
 import { BeforeAfterViewer } from "@/components/before-after-viewer";
 import { ArtisanBadges, type BadgeType } from "@/components/artisan-badges";
 import { VideoTestimonialPlayer } from "@/components/video-testimonial-player";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -551,8 +552,8 @@ export default function ArtisanProfileScreen() {
               <View className="flex-row items-center mb-1">
                 <Text className="text-xl font-bold text-foreground">{artisan.name}</Text>
                 {artisan.verified && (
-                  <View className="ml-2 bg-success rounded-full px-2 py-1">
-                    <Text className="text-background text-xs font-semibold">✓ Verified</Text>
+                  <View className="ml-2">
+                    <VerifiedBadge size="small" />
                   </View>
                 )}
               </View>

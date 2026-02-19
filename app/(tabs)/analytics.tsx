@@ -236,6 +236,22 @@ export default function AnalyticsScreen() {
               <Text className="text-warning font-semibold text-sm">Analytics</Text>
             </TouchableOpacity>
           </View>
+          <View className="flex-row gap-3 mt-3">
+            <TouchableOpacity
+              onPress={() => router.push('/verification-upload')}
+              className="flex-1 bg-primary/10 rounded-xl p-4 items-center border border-primary/20"
+            >
+              <Text className="text-primary text-2xl mb-2">✓</Text>
+              <Text className="text-primary font-semibold text-sm">Get Verified</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/referral-program')}
+              className="flex-1 bg-success/10 rounded-xl p-4 items-center border border-success/20"
+            >
+              <Text className="text-success text-2xl mb-2">🎁</Text>
+              <Text className="text-success font-semibold text-sm">Referrals</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Key Metrics */}
