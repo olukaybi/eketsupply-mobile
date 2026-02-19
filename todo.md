@@ -312,3 +312,31 @@
 - [x] Filter artisans by location
 - [x] Show filter results count
 - [x] Add clear filters button
+
+## Advanced Features (Current Sprint)
+
+### Artisan Availability Calendar
+- [x] Create availability database schema
+- [x] Build calendar component with time slots
+- [ ] Add availability management for artisans
+- [x] Show available slots on artisan profiles
+- [x] Integrate calendar with booking flow
+- [x] Add recurring availability patterns
+
+### Payment Integration (Paystack)
+- [x] Install Paystack React Native SDK
+- [x] Configure Paystack API keys
+- [x] Create payment initialization flow
+- [x] Implement payment verification
+- [x] Add escrow management system
+- [ ] Handle payment webhooks
+- [ ] Add payment history screen
+
+### Analytics Dashboard
+- [ ] Create analytics tab for artisans
+- [ ] Show rating trends chart
+- [ ] Display popular services breakdown
+- [ ] Show revenue statistics
+- [ ] Add customer feedback insights
+- [ ] Show booking completion rate
+- [ ] Add monthly performance comparison

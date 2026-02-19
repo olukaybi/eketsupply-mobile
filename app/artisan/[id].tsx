@@ -3,6 +3,7 @@ import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, Activ
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { PhotoGalleryViewer } from "@/components/photo-gallery-viewer";
+import { AvailabilityCalendar } from "@/components/availability-calendar";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -673,25 +674,28 @@ export default function ArtisanProfileScreen() {
                 ))}
               </View>
 
-              {/* Date & Time */}
+              {/* Date & Time with Availability Calendar */}
               <View className="mb-4">
-                <Text className="text-sm font-medium text-foreground mb-2">Preferred Date & Time *</Text>
-                <View className="flex-row gap-2">
-                  <TextInput
-                    className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
-                    placeholder="Date (e.g., 2026-02-20)"
-                    placeholderTextColor="#9BA1A6"
-                    value={bookingForm.preferredDate}
-                    onChangeText={(text) => setBookingForm({...bookingForm, preferredDate: text})}
-                  />
-                  <TextInput
-                    className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
-                    placeholder="Time (e.g., 10:00 AM)"
-                    placeholderTextColor="#9BA1A6"
-                    value={bookingForm.preferredTime}
-                    onChangeText={(text) => setBookingForm({...bookingForm, preferredTime: text})}
-                  />
-                </View>
+                <Text className="text-sm font-medium text-foreground mb-3">Select Date & Time *</Text>
+                <AvailabilityCalendar
+                  artisanId={id as string}
+                  selectedDate={bookingForm.preferredDate}
+                  selectedTime={bookingForm.preferredTime}
+                  onSelectSlot={(date, time) => {
+                    setBookingForm({
+                      ...bookingForm,
+                      preferredDate: date,
+                      preferredTime: time,
+                    });
+                  }}
+                />
+                {bookingForm.preferredDate && bookingForm.preferredTime && (
+                  <View className="mt-3 bg-primary/10 rounded-xl p-3">
+                    <Text className="text-sm text-primary font-medium">
+                      Selected: {bookingForm.preferredDate} at {bookingForm.preferredTime}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               {/* Location */}
