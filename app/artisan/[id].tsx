@@ -51,6 +51,7 @@ export default function ArtisanProfileScreen() {
   const [artisan, setArtisan] = useState<ArtisanProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -145,6 +146,19 @@ export default function ArtisanProfileScreen() {
             date: new Date(r.created_at).toLocaleDateString(),
             text: r.comment,
           })));
+        }
+
+        // Fetch portfolio photos
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('portfolio_photos')
+          .select('photo_url')
+          .eq('artisan_id', id)
+          .order('display_order', { ascending: true });
+
+        if (portfolioError) {
+          console.error('Error fetching portfolio:', portfolioError);
+        } else if (portfolioData) {
+          setPortfolioPhotos(portfolioData.map(p => p.photo_url));
         }
       } catch (err) {
         console.error('Error in fetchArtisanData:', err);
@@ -489,17 +503,34 @@ export default function ArtisanProfileScreen() {
         {/* Portfolio */}
         <View className="px-6 mb-6">
           <Text className="text-lg font-bold text-foreground mb-3">Portfolio</Text>
-          <View className="flex-row flex-wrap">
-            {[1, 2, 3, 4].map((index) => (
-              <View key={index} className="w-1/2 p-1">
-                <View className="bg-surface rounded-xl overflow-hidden border border-border" style={{ height: 150 }}>
-                  <View className="flex-1 bg-muted/20 items-center justify-center">
-                    <Text className="text-4xl">🖼️</Text>
+          {portfolioPhotos.length > 0 ? (
+            <View className="flex-row flex-wrap">
+              {portfolioPhotos.map((photoUrl, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="w-1/2 p-1"
+                  onPress={() => {
+                    setGalleryPhotos(portfolioPhotos);
+                    setGalleryInitialIndex(index);
+                    setGalleryVisible(true);
+                  }}
+                >
+                  <View className="bg-surface rounded-xl overflow-hidden border border-border" style={{ height: 150 }}>
+                    <Image
+                      source={{ uri: photoUrl }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
                   </View>
-                </View>
-              </View>
-            ))}
-          </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View className="bg-surface rounded-xl p-8 items-center justify-center border border-border">
+              <Text className="text-4xl mb-2">🖼️</Text>
+              <Text className="text-muted text-sm">No portfolio photos yet</Text>
+            </View>
+          )}
         </View>
 
         {/* Reviews */}

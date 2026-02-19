@@ -333,10 +333,21 @@
 - [ ] Add payment history screen
 
 ### Analytics Dashboard
-- [ ] Create analytics tab for artisans
-- [ ] Show rating trends chart
-- [ ] Display popular services breakdown
-- [ ] Show revenue statistics
-- [ ] Add customer feedback insights
-- [ ] Show booking completion rate
-- [ ] Add monthly performance comparison
+- [x] Create analytics tab for artisans
+- [x] Show rating trends chart
+- [x] Display popular services breakdown
+- [x] Show revenue statistics
+- [x] Add customer feedback insights
+- [x] Show booking completion rate
+- [x] Add monthly performance comparison
+
+### Portfolio Gallery Management
+- [x] Create portfolio_photos database table
+- [x] Build portfolio management screen for artisans
+- [x] Add photo upload functionality with image picker
+- [x] Upload photos to Supabase storage
+- [x] Display portfolio photos in grid layout
+- [x] Add delete photo functionality
+- [x] Set photo limit (e.g., max 12 photos)
+- [x] Update artisan profile to show portfolio gallery
+- [x] Add loading states and error handling

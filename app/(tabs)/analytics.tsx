@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ScrollView, Text, View, ActivityIndicator, Dimensions } from 'react-native';
+import { ScrollView, Text, View, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+import { router } from 'expo-router';
+import { useColors } from '@/hooks/use-colors';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 type AnalyticsData = {
   totalBookings: number;
@@ -202,8 +205,21 @@ export default function AnalyticsScreen() {
       <ScrollView className="flex-1">
         {/* Header */}
         <View className="px-6 pt-4 pb-6">
-          <Text className="text-2xl font-bold text-foreground">Analytics Dashboard</Text>
-          <Text className="text-muted mt-1">Track your performance and insights</Text>
+          <View className="flex-row justify-between items-center mb-2">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-foreground">Analytics Dashboard</Text>
+              <Text className="text-muted mt-1">Track your performance and insights</Text>
+            </View>
+          </View>
+          
+          {/* Portfolio Management Button */}
+          <TouchableOpacity
+            onPress={() => router.push('/portfolio-manager')}
+            className="bg-primary rounded-xl p-4 mt-4 flex-row items-center justify-center"
+          >
+            <IconSymbol name="photo" size={20} color="#fff" />
+            <Text className="text-white font-semibold ml-2">Manage Portfolio</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Key Metrics */}
