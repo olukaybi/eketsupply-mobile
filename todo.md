@@ -476,3 +476,15 @@
 - [x] Update all icon locations (icon.png, splash-icon.png, favicon.png, android icons)
 - [x] Update app.config.ts with logo URL
 - [x] Test icon display on all platforms
+
+
+### Branding Consistency
+- [x] Add tagline to splash screen ("Fix it Right, The First Time")
+- [x] Update primary color from teal to brand green (#2D5F3F)
+- [x] Update accent color to brand orange (#F5A623)
+- [x] Update theme.config.js with new color palette
+- [x] Create onboarding screen 1: Find Skilled Artisans
+- [x] Create onboarding screen 2: Verified Professionals
+- [x] Create onboarding screen 3: Secure Booking & Payment
+- [x] Add onboarding navigation and skip functionality
+- [x] Store onboarding completion status
