@@ -212,14 +212,23 @@ export default function AnalyticsScreen() {
             </View>
           </View>
           
-          {/* Portfolio Management Button */}
-          <TouchableOpacity
-            onPress={() => router.push('/portfolio-manager')}
-            className="bg-primary rounded-xl p-4 mt-4 flex-row items-center justify-center"
-          >
-            <IconSymbol name="photo" size={20} color="#fff" />
-            <Text className="text-white font-semibold ml-2">Manage Portfolio</Text>
-          </TouchableOpacity>
+          {/* Quick Actions */}
+          <View className="flex-row gap-3 mt-4">
+            <TouchableOpacity
+              onPress={() => router.push('/portfolio-manager')}
+              className="flex-1 bg-primary/10 rounded-xl p-4 items-center border border-primary/20"
+            >
+              <Text className="text-primary text-2xl mb-2">🖼️</Text>
+              <Text className="text-primary font-semibold text-sm">Manage Portfolio</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/package-manager')}
+              className="flex-1 bg-success/10 rounded-xl p-4 items-center border border-success/20"
+            >
+              <Text className="text-success text-2xl mb-2">📦</Text>
+              <Text className="text-success font-semibold text-sm">Service Packages</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Key Metrics */}

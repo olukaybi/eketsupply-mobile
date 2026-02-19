@@ -363,3 +363,36 @@
 - [x] Add "Manage Before/After" button to portfolio manager
 - [x] Implement delete functionality for photo pairs
 - [x] Write unit tests for before/after feature
+
+### Video Testimonials
+- [x] Create video_testimonials database table
+- [x] Build video recording screen with camera integration
+- [x] Add video upload to Supabase storage
+- [x] Create video player component for testimonials
+- [x] Integrate video testimonials into review submission
+- [x] Display video testimonials on artisan profiles
+- [x] Add video thumbnail generation
+- [x] Implement video duration limit (30 seconds)
+- [x] Write unit tests for video testimonials
+
+### Artisan Achievement Badges
+- [x] Create artisan_badges database table
+- [x] Define badge types and criteria (100 jobs, 5-star, fast responder)
+- [x] Build badge calculation system
+- [x] Create badge display component
+- [x] Add badge icons and designs
+- [x] Integrate badges into artisan profiles
+- [x] Add badge progress tracking
+- [x] Create badge notification system
+- [x] Write unit tests for badge system
+
+### Service Packages
+- [x] Create service_packages database table
+- [x] Build package creation screen for artisans
+- [x] Add multi-service selection with pricing
+- [x] Implement package discount calculation
+- [x] Create package display component
+- [x] Integrate packages into booking flow
+- [x] Add package management (edit/delete)
+- [x] Display packages on artisan profiles
+- [x] Write unit tests for service packages

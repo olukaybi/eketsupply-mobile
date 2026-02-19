@@ -5,6 +5,8 @@ import { ScreenContainer } from "@/components/screen-container";
 import { PhotoGalleryViewer } from "@/components/photo-gallery-viewer";
 import { AvailabilityCalendar } from "@/components/availability-calendar";
 import { BeforeAfterViewer } from "@/components/before-after-viewer";
+import { ArtisanBadges, type BadgeType } from "@/components/artisan-badges";
+import { VideoTestimonialPlayer } from "@/components/video-testimonial-player";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -48,6 +50,24 @@ type BeforeAfterProject = {
   after_photo_url: string;
 };
 
+type VideoTestimonial = {
+  id: string;
+  customer_name: string;
+  rating: number;
+  video_url: string;
+  duration_seconds: number;
+};
+
+type ServicePackage = {
+  id: string;
+  package_name: string;
+  description: string | null;
+  original_price: number;
+  discounted_price: number;
+  discount_percentage: number;
+  services: Service[];
+};
+
 export default function ArtisanProfileScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
@@ -64,6 +84,9 @@ export default function ArtisanProfileScreen() {
   const [beforeAfterProjects, setBeforeAfterProjects] = useState<BeforeAfterProject[]>([]);
   const [beforeAfterViewerVisible, setBeforeAfterViewerVisible] = useState(false);
   const [beforeAfterInitialIndex, setBeforeAfterInitialIndex] = useState(0);
+  const [badges, setBadges] = useState<BadgeType[]>([]);
+  const [videoTestimonials, setVideoTestimonials] = useState<VideoTestimonial[]>([]);
+  const [servicePackages, setServicePackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -184,6 +207,81 @@ export default function ArtisanProfileScreen() {
           console.error('Error fetching before/after:', beforeAfterError);
         } else if (beforeAfterData) {
           setBeforeAfterProjects(beforeAfterData);
+        }
+
+        // Fetch artisan badges
+        const { data: badgesData, error: badgesError } = await supabase
+          .from('artisan_badges')
+          .select('badge_type')
+          .eq('artisan_id', id);
+
+        if (badgesError) {
+          console.error('Error fetching badges:', badgesError);
+        } else if (badgesData) {
+          setBadges(badgesData.map(b => b.badge_type));
+        }
+
+        // Fetch video testimonials
+        const { data: videoData, error: videoError } = await supabase
+          .from('video_testimonials')
+          .select(`
+            id,
+            video_url,
+            duration_seconds,
+            rating,
+            customer_id,
+            profiles!video_testimonials_customer_id_fkey(full_name)
+          `)
+          .eq('artisan_id', id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (videoError) {
+          console.error('Error fetching video testimonials:', videoError);
+        } else if (videoData) {
+          setVideoTestimonials(videoData.map((v: any) => ({
+            id: v.id,
+            customer_name: v.profiles?.full_name || 'Customer',
+            rating: v.rating,
+            video_url: v.video_url,
+            duration_seconds: v.duration_seconds,
+          })));
+        }
+
+        // Fetch service packages
+        const { data: packagesData, error: packagesError } = await supabase
+          .from('service_packages')
+          .select(`
+            id,
+            package_name,
+            description,
+            original_price,
+            discounted_price,
+            discount_percentage
+          `)
+          .eq('artisan_id', id)
+          .eq('is_active', true);
+
+        if (packagesError) {
+          console.error('Error fetching packages:', packagesError);
+        } else if (packagesData) {
+          // Fetch services for each package
+          const packagesWithServices = await Promise.all(
+            packagesData.map(async (pkg) => {
+              const { data: pkgServices } = await supabase
+                .from('package_services')
+                .select(`
+                  services(id, name, price, duration)
+                `)
+                .eq('package_id', pkg.id);
+
+              return {
+                ...pkg,
+                services: pkgServices?.map((ps: any) => ps.services) || [],
+              };
+            })
+          );
+          setServicePackages(packagesWithServices);
         }
       } catch (err) {
         console.error('Error in fetchArtisanData:', err);
@@ -501,6 +599,14 @@ export default function ArtisanProfileScreen() {
             </View>
           </View>
 
+          {/* Achievement Badges */}
+          {badges.length > 0 && (
+            <View className="bg-surface rounded-xl p-4 border border-border mb-4">
+              <Text className="text-sm font-semibold text-foreground mb-3">Achievement Badges</Text>
+              <ArtisanBadges badges={badges} size="medium" />
+            </View>
+          )}
+
           {/* Bio */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-foreground mb-2">About</Text>
@@ -524,6 +630,68 @@ export default function ArtisanProfileScreen() {
             </View>
           )}
         </View>
+
+        {/* Service Packages */}
+        {servicePackages.length > 0 && (
+          <View className="px-6 mb-6">
+            <Text className="text-lg font-bold text-foreground mb-3">Service Packages</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
+              {servicePackages.map((pkg) => (
+                <View key={pkg.id} className="mx-1" style={{ width: 300 }}>
+                  <View className="bg-surface rounded-xl overflow-hidden border border-border">
+                    {/* Package Header */}
+                    <View className="p-4 border-b border-border">
+                      <Text className="text-foreground font-bold text-lg mb-1">
+                        {pkg.package_name}
+                      </Text>
+                      {pkg.description && (
+                        <Text className="text-muted text-sm" numberOfLines={2}>
+                          {pkg.description}
+                        </Text>
+                      )}
+                    </View>
+
+                    {/* Pricing */}
+                    <View className="p-4 bg-primary/5">
+                      <View className="flex-row items-center gap-2 mb-2">
+                        <Text className="text-muted text-sm line-through">
+                          ₦{pkg.original_price.toLocaleString()}
+                        </Text>
+                        <View className="bg-error/20 px-2 py-1 rounded">
+                          <Text className="text-error text-xs font-bold">
+                            {pkg.discount_percentage}% OFF
+                          </Text>
+                        </View>
+                      </View>
+                      <Text className="text-primary text-2xl font-bold">
+                        ₦{pkg.discounted_price.toLocaleString()}
+                      </Text>
+                    </View>
+
+                    {/* Services List */}
+                    <View className="p-4">
+                      <Text className="text-xs font-semibold text-muted mb-2">INCLUDES:</Text>
+                      {pkg.services.map((service) => (
+                        <View key={service.id} className="flex-row items-center gap-2 mb-1">
+                          <Text className="text-success">✓</Text>
+                          <Text className="text-foreground text-sm">{service.name}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    {/* Book Button */}
+                    <TouchableOpacity
+                      onPress={() => setShowBookingModal(true)}
+                      className="bg-primary p-3 items-center"
+                    >
+                      <Text className="text-white font-semibold">Book Package</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Portfolio */}
         <View className="px-6 mb-6">
@@ -621,6 +789,25 @@ export default function ArtisanProfileScreen() {
             </View>
           )}
         </View>
+
+        {/* Video Testimonials */}
+        {videoTestimonials.length > 0 && (
+          <View className="px-6 mb-6">
+            <Text className="text-lg font-bold text-foreground mb-3">Video Testimonials</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
+              {videoTestimonials.map((video) => (
+                <View key={video.id} className="mx-1" style={{ width: 300 }}>
+                  <VideoTestimonialPlayer
+                    videoUrl={video.video_url}
+                    customerName={video.customer_name}
+                    rating={video.rating}
+                    duration={video.duration_seconds}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Reviews */}
         <View className="px-6 mb-6">

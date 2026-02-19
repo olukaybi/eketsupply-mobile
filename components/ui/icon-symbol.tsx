@@ -24,6 +24,10 @@ const MAPPING = {
   "plus": "add",
   "photo": "photo",
   "trash": "delete",
+  "xmark": "close",
+  "arrow.triangle.2.circlepath.camera": "flip-camera-ios",
+  "play.fill": "play-arrow",
+  "pause.fill": "pause",
 } as IconMapping;
 
 /**
