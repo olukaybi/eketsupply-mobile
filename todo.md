@@ -548,7 +548,7 @@
 - [ ] Wire artisan bank details to Paystack subaccount API via backend
 - [ ] Backend webhook handler for Paystack events (charge.success, transfer.success)
 - [ ] Automatic subaccount creation on artisan signup
-- [ ] Connect bookings screen to real Supabase data
+- [x] Connect bookings screen to real Supabase data (live queries + real-time subscription)
 - [ ] Connect messages screen to real Supabase Realtime
 - [ ] Artisan dashboard: wire to real job data from Supabase
 - [ ] Customer booking confirmation flow (after payment)
