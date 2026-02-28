@@ -54,8 +54,9 @@ export default function SignUpScreen() {
         <View className="flex-1 p-6">
           {/* Logo/Header */}
           <View className="items-center mb-6 mt-4">
-            <Text className="text-3xl font-bold text-foreground mb-2">Create Account</Text>
-            <Text className="text-sm text-muted">Join EketSupply today</Text>
+            <Text className="text-4xl font-bold mb-1" style={{ color: '#1B5E20' }}>Eket<Text style={{ color: '#E65100' }}>Supply</Text></Text>
+            <Text className="text-sm text-muted mb-2">Fix it Right, The First Time</Text>
+            <Text className="text-xl font-bold text-foreground">Create Account</Text>
           </View>
 
           {/* User Type Tabs */}
@@ -191,8 +192,8 @@ export default function SignUpScreen() {
           <TouchableOpacity
             onPress={handleSignUp}
             disabled={loading}
-            className="bg-primary rounded-full py-4 mb-4"
-            style={{ opacity: loading ? 0.6 : 1 }}
+            className="rounded-full py-4 mb-4"
+            style={{ backgroundColor: '#1B5E20', opacity: loading ? 0.6 : 1 }}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
@@ -206,7 +207,7 @@ export default function SignUpScreen() {
             <Text className="text-muted text-sm">Already have an account? </Text>
             <Link href="/auth/sign-in" asChild>
               <TouchableOpacity>
-                <Text className="text-primary text-sm font-semibold">Sign In</Text>
+                <Text className="text-sm font-semibold" style={{ color: '#1B5E20' }}>Sign In</Text>
               </TouchableOpacity>
             </Link>
           </View>

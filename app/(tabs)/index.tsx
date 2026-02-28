@@ -150,8 +150,7 @@ export default function HomeScreen() {
   };
 
   const handleArtisanPress = (artisan: Artisan) => {
-    // TODO: Navigate to artisan profile screen
-    console.log("Artisan pressed:", artisan.name);
+    router.push(`/artisan/${artisan.id}` as any);
   };
 
   const renderCategoryItem = ({ item }: { item: ServiceCategory }) => {
@@ -278,7 +277,7 @@ export default function HomeScreen() {
                 All Locations
               </Text>
             </TouchableOpacity>
-            {['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan'].map((location) => (
+            {['Eket', 'Lagos', 'Abuja', 'Port Harcourt', 'Uyo', 'Ibadan'].map((location) => (
               <TouchableOpacity
                 key={location}
                 onPress={() => setSelectedLocation(location)}
@@ -383,7 +382,7 @@ export default function HomeScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-sm font-semibold text-foreground mb-1">Secure Payment</Text>
-                <Text className="text-xs text-muted">Pay safely with escrow protection</Text>
+                <Text className="text-xs text-muted">Pay securely via Paystack split payments</Text>
               </View>
             </View>
           </View>

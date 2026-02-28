@@ -8,6 +8,8 @@ export type PaymentData = {
   amount: number; // in kobo (₦1 = 100 kobo)
   email: string;
   reference: string;
+  subaccount_code?: string; // For split payments to artisans
+  settlement_delay?: number; // Hours to delay settlement (max 168 = 7 days)
   metadata?: {
     booking_id: string;
     customer_id: string;
@@ -15,6 +17,14 @@ export type PaymentData = {
     service_name: string;
   };
 };
+
+export interface PaystackSubaccount {
+  subaccount_code: string;
+  business_name: string;
+  settlement_bank: string;
+  account_number: string;
+  percentage_charge: number;
+}
 
 export type PaymentResult = {
   success: boolean;
@@ -43,6 +53,9 @@ export async function initializePayment(data: PaymentData): Promise<{
         email: data.email,
         amount: data.amount,
         reference: data.reference,
+        subaccount: data.subaccount_code, // Split payment to artisan
+        bearer: 'account', // EketSupply pays Paystack fee
+        settlement_delay: data.settlement_delay || 24, // 24-hour dispute window
         metadata: data.metadata,
         callback_url: 'https://eketsupply.com/payment/callback',
       }),
@@ -210,4 +223,137 @@ export function calculatePaystackFees(amount: number): {
     fees,
     total,
   };
+}
+
+/**
+ * Create a Paystack subaccount for an artisan
+ * This allows automatic payment splitting (85% artisan, 15% EketSupply)
+ */
+export async function createArtisanSubaccount(params: {
+  full_name: string;
+  bank_code: string;
+  account_number: string;
+}): Promise<PaystackSubaccount> {
+  try {
+    const response = await fetch('https://api.paystack.co/subaccount', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        business_name: params.full_name,
+        settlement_bank: params.bank_code,
+        account_number: params.account_number,
+        percentage_charge: 15.0, // EketSupply takes 15%
+        description: `Artisan subaccount for ${params.full_name}`,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || 'Failed to create subaccount');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error creating Paystack subaccount:', error);
+    throw error;
+  }
+}
+
+/**
+ * Verify bank account details before creating subaccount
+ */
+export async function verifyBankAccount(params: {
+  account_number: string;
+  bank_code: string;
+}) {
+  try {
+    const response = await fetch(
+      `https://api.paystack.co/bank/resolve?account_number=${params.account_number}&bank_code=${params.bank_code}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || 'Failed to verify bank account');
+    }
+
+    return {
+      account_number: data.data.account_number,
+      account_name: data.data.account_name,
+      bank_id: data.data.bank_id,
+    };
+  } catch (error) {
+    console.error('Error verifying bank account:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get list of Nigerian banks
+ */
+export async function getBankList() {
+  try {
+    const response = await fetch('https://api.paystack.co/bank', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || 'Failed to fetch bank list');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching bank list:', error);
+    throw error;
+  }
+}
+
+/**
+ * Process a refund (for disputes, no-shows, etc.)
+ */
+export async function processRefund(params: {
+  transaction_reference: string;
+  amount?: number; // Optional: partial refund in kobo
+  customer_note?: string;
+}) {
+  try {
+    const response = await fetch('https://api.paystack.co/refund', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        transaction: params.transaction_reference,
+        amount: params.amount, // Omit for full refund
+        customer_note: params.customer_note || 'Refund processed by EketSupply',
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || 'Failed to process refund');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error processing refund:', error);
+    throw error;
+  }
 }

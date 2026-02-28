@@ -2,74 +2,59 @@ import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, Text } from "react-native";
 import { useState, useEffect } from "react";
+import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Platform } from "react-native";
 import { useColors } from "@/hooks/use-colors";
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
+
+function BadgeIcon({ name, color, count }: { name: any; color: string; count?: number }) {
+  return (
+    <View>
+      <IconSymbol size={26} name={name} color={color} />
+      {!!count && count > 0 && (
+        <View
+          style={{
+            position: "absolute",
+            top: -4,
+            right: -6,
+            backgroundColor: "#EF4444",
+            borderRadius: 8,
+            minWidth: 16,
+            height: 16,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 3,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 9, fontWeight: "bold" }}>
+            {count > 9 ? "9+" : count}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function TabLayout() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const [totalUnread, setTotalUnread] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 56 + bottomPadding;
+  const tabBarHeight = 58 + bottomPadding;
 
+  // Placeholder for unread message count — will be wired to real data once DB is set up
   useEffect(() => {
-    if (!user) return;
-
-    async function fetchUnreadCount() {
-      try {
-        // Get user profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('user_id', user?.openId)
-          .single();
-
-        if (!profile) return;
-
-        // Get all bookings for this user
-        const { data: bookings } = await supabase
-          .from('bookings')
-          .select('id')
-          .or(`customer_id.eq.${profile.id},artisan_id.eq.${profile.id}`);
-
-        if (!bookings) return;
-
-        // Count unread messages across all bookings
-        let total = 0;
-        for (const booking of bookings) {
-          const { count } = await supabase
-            .from('chat_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('booking_id', booking.id)
-            .eq('read', false)
-            .neq('sender_id', profile.id);
-
-          total += count || 0;
-        }
-
-        setTotalUnread(total);
-      } catch (err) {
-        console.error('Error fetching unread count:', err);
-      }
-    }
-
-    fetchUnreadCount();
-
-    // Poll every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+    setUnreadMessages(0);
   }, [user]);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.muted,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
@@ -80,51 +65,59 @@ export default function TabLayout() {
           borderTopColor: colors.border,
           borderTopWidth: 0.5,
         },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "500",
+          marginTop: 2,
+        },
       }}
     >
+      {/* Home / Service Discovery */}
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="house.fill" color={color} />,
         }}
       />
+
+      {/* Bookings */}
       <Tabs.Screen
         name="bookings"
         options={{
           title: "Bookings",
           tabBarIcon: ({ color }) => (
-            <View>
-              <IconSymbol size={28} name="calendar" color={color} />
-              {totalUnread > 0 && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -4,
-                    right: -4,
-                    backgroundColor: '#EF4444',
-                    borderRadius: 10,
-                    minWidth: 18,
-                    height: 18,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingHorizontal: 4,
-                  }}
-                >
-                  <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
-                    {totalUnread > 9 ? '9+' : totalUnread}
-                  </Text>
-                </View>
-              )}
-            </View>
+            <BadgeIcon name="calendar" color={color} count={unreadMessages} />
           ),
         }}
       />
+
+      {/* Messages */}
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: "Messages",
+          tabBarIcon: ({ color }) => (
+            <BadgeIcon name="message.fill" color={color} count={unreadMessages} />
+          ),
+        }}
+      />
+
+      {/* Profile */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="person.fill" color={color} />,
+        }}
+      />
+
+      {/* Analytics — hidden from tab bar (accessible via profile/admin) */}
       <Tabs.Screen
         name="analytics"
         options={{
+          href: null, // Hide from tab bar
           title: "Analytics",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name={"chart" as any} color={color} />,
         }}
       />
     </Tabs>

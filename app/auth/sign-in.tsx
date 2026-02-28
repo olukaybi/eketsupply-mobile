@@ -38,8 +38,11 @@ export default function SignInScreen() {
         <View className="flex-1 justify-center p-6">
           {/* Logo/Header */}
           <View className="items-center mb-8">
-            <Text className="text-4xl font-bold text-foreground mb-2">EketSupply</Text>
-            <Text className="text-base text-muted">Sign in to continue</Text>
+            <View className="mb-4">
+              <Text className="text-4xl font-bold" style={{ color: '#1B5E20' }}>Eket<Text style={{ color: '#E65100' }}>Supply</Text></Text>
+            </View>
+            <Text className="text-sm font-medium text-muted">Fix it Right, The First Time</Text>
+            <Text className="text-base text-muted mt-2">Sign in to continue</Text>
           </View>
 
           {/* Error Message */}
@@ -99,8 +102,8 @@ export default function SignInScreen() {
           <TouchableOpacity
             onPress={handleSignIn}
             disabled={loading}
-            className="bg-primary rounded-full py-4 mb-4"
-            style={{ opacity: loading ? 0.6 : 1 }}
+            className="rounded-full py-4 mb-4"
+            style={{ backgroundColor: '#1B5E20', opacity: loading ? 0.6 : 1 }}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
@@ -114,7 +117,7 @@ export default function SignInScreen() {
             <Text className="text-muted text-sm">Don't have an account? </Text>
             <Link href="/auth/sign-up" asChild>
               <TouchableOpacity>
-                <Text className="text-primary text-sm font-semibold">Sign Up</Text>
+                <Text className="text-sm font-semibold" style={{ color: '#1B5E20' }}>Sign Up</Text>
               </TouchableOpacity>
             </Link>
           </View>

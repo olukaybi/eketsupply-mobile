@@ -520,3 +520,39 @@
 - [x] Add emergency booking premium pricing option
 - [x] Track emergency booking completion rates
 - [x] Create emergency booking history view
+
+
+## Feb 28 2026 — Brand Kit & Compliance Sprint
+
+### Brand Kit Applied
+- [x] Extract EketSupply_Master_Accurate_Brand_Kit.zip
+- [x] Copy patterned icon to icon.png and splash-icon.png
+- [x] Copy simplified icon to favicon.png and android-icon-foreground.png
+- [x] Apply exact brand colours: Forest Green #1B5E20, Orange #E65100, Navy #1A237E
+- [x] Update theme.config.js with official brand hex values
+- [x] Update sign-in screen with EketSupply wordmark (green/orange)
+- [x] Update sign-up screen with EketSupply wordmark (green/orange)
+
+### Paystack Compliance (Escrow → Split Payments)
+- [x] Remove escrow language from payment modal
+- [x] Remove escrow language from home screen ("Paystack split payments")
+- [x] Create /artisan/bank-details screen (Paystack subaccount setup)
+- [x] Wire "Bank Details & Earnings" in profile to /artisan/bank-details
+- [x] Create artisan dashboard screen /artisan/dashboard
+- [x] Wire artisan navigation from home screen to /artisan/[id]
+- [x] Add Eket to location filter (pilot city)
+- [x] Create Payment Policy webpage (payment-policy.html)
+- [x] Configure Paystack storefront via API (products, payment page, split model)
+
+### Pending — Next Sprint
+- [ ] Wire artisan bank details to Paystack subaccount API via backend
+- [ ] Backend webhook handler for Paystack events (charge.success, transfer.success)
+- [ ] Automatic subaccount creation on artisan signup
+- [ ] Connect bookings screen to real Supabase data
+- [ ] Connect messages screen to real Supabase Realtime
+- [ ] Artisan dashboard: wire to real job data from Supabase
+- [ ] Customer booking confirmation flow (after payment)
+- [ ] Artisan job acceptance/decline flow with push notifications
+- [ ] Live API keys configuration (after Paystack approval)
+- [ ] Admin dashboard screen (artisan approval, disputes, analytics)
+- [ ] App Store / Play Store submission preparation
