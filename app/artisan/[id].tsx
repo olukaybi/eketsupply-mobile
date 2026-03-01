@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator, TextInput, Alert, Platform } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Image, FlatList, Modal, ActivityIndicator, TextInput, Alert, Platform, Share } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { PhotoGalleryViewer } from "@/components/photo-gallery-viewer";
@@ -541,9 +541,36 @@ export default function ArtisanProfileScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header with Back Button */}
         <View className="px-6 pt-4 pb-2">
-          <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <Text className="text-2xl">←</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text className="text-2xl">←</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                try {
+                  await Share.share({
+                    title: `${artisan.name} — ${artisan.service} on EketSupply`,
+                    message: `Check out ${artisan.name}, a verified ${artisan.service} on EketSupply!\n\n⭐ ${artisan.rating} rating · ${artisan.completedJobs} jobs done\n📍 ${artisan.location}\n\nBook them on EketSupply: https://www.eketsupply.com`,
+                  });
+                } catch (err) {
+                  console.error('Share error:', err);
+                }
+              }}
+              style={{
+                backgroundColor: '#F0F7F0',
+                borderRadius: 20,
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <Text style={{ fontSize: 16 }}>📤</Text>
+              <Text style={{ color: '#1B5E20', fontWeight: '600', fontSize: 13 }}>Share</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Profile Header */}

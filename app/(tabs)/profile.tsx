@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform, Share } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
@@ -260,6 +260,15 @@ export default function ProfileScreen() {
           icon="doc.fill"
           label="Terms & Privacy Policy"
           onPress={() => {}}
+        />
+        <MenuItem
+          icon="paperplane.fill"
+          label="Visit Our Website"
+          sublabel="www.eketsupply.com"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com');
+          }}
         />
 
         {/* Follow Us Section */}

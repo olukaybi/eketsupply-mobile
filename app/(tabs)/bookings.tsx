@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import * as StoreReview from 'expo-store-review';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   FlatList,
   Text,
@@ -122,6 +124,21 @@ export default function BookingsScreen() {
     })();
   }, [user]);
 
+  // ─── App-store review prompt (customers only, after 3rd completed booking) ─
+  const maybeRequestReview = useCallback(async (completedCount: number) => {
+    if (completedCount < 3) return;
+    try {
+      const alreadyPrompted = await AsyncStorage.getItem('eketsupply_review_prompted');
+      if (alreadyPrompted) return;
+      const isAvailable = await StoreReview.isAvailableAsync();
+      if (!isAvailable) return;
+      await StoreReview.requestReview();
+      await AsyncStorage.setItem('eketsupply_review_prompted', 'true');
+    } catch (err) {
+      console.error('StoreReview error:', err);
+    }
+  }, []);
+
   // ─── Fetch bookings ───────────────────────────────────────────────────────
   const fetchBookings = useCallback(async () => {
     if (!user || !profileId) return;
@@ -173,14 +190,21 @@ export default function BookingsScreen() {
         return;
       }
 
-      setBookings((data as Booking[]) || []);
+      const fetchedBookings = (data as Booking[]) || [];
+      setBookings(fetchedBookings);
+
+      // Trigger app-store review prompt for customers on the completed tab
+      if (userType === 'customer' && activeTab === 'completed') {
+        const completedCount = fetchedBookings.filter(b => b.status === 'completed').length;
+        maybeRequestReview(completedCount);
+      }
     } catch (err) {
       console.error("fetchBookings error:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, profileId, userType, artisanRowId, activeTab]);
+  }, [user, profileId, userType, artisanRowId, activeTab, maybeRequestReview]);
 
   useEffect(() => {
     fetchBookings();
