@@ -7,23 +7,26 @@ const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-proje
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
 
 // Custom storage implementation for React Native
+// Guard localStorage access for SSR/CI environments where window is not defined
+const webStorage = typeof window !== 'undefined' && typeof localStorage !== 'undefined' ? localStorage : null;
+
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string) => {
     if (Platform.OS === 'web') {
-      return localStorage.getItem(key);
+      return webStorage?.getItem(key) ?? null;
     }
     return await SecureStore.getItemAsync(key);
   },
   setItem: async (key: string, value: string) => {
     if (Platform.OS === 'web') {
-      localStorage.setItem(key, value);
+      webStorage?.setItem(key, value);
       return;
     }
     await SecureStore.setItemAsync(key, value);
   },
   removeItem: async (key: string) => {
     if (Platform.OS === 'web') {
-      localStorage.removeItem(key);
+      webStorage?.removeItem(key);
       return;
     }
     await SecureStore.deleteItemAsync(key);

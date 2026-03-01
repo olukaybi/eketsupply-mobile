@@ -5,6 +5,13 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    // Pass EXPO_PUBLIC_* env vars into the test environment
+    // In CI, these are injected by GitHub Actions secrets
+    // Locally, they come from the .env file
+    env: {
+      EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL ?? '',
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
+    },
   },
   resolve: {
     alias: {
