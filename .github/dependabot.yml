@@ -1,0 +1,117 @@
+version: 2
+
+updates:
+  # ── npm packages ─────────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Africa/Lagos
+    # Open at most 10 PRs at a time to avoid overwhelming the review queue
+    open-pull-requests-limit: 10
+    # Target branch for all dependency update PRs
+    target-branch: main
+    # Group related packages into a single PR to reduce noise
+    groups:
+      expo-sdk:
+        patterns:
+          - "expo"
+          - "expo-*"
+        update-types:
+          - minor
+          - patch
+      react-native:
+        patterns:
+          - "react-native"
+          - "react-native-*"
+          - "@react-navigation/*"
+        update-types:
+          - minor
+          - patch
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+        update-types:
+          - minor
+          - patch
+      trpc:
+        patterns:
+          - "@trpc/*"
+        update-types:
+          - minor
+          - patch
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+        update-types:
+          - minor
+          - patch
+      nativewind-tailwind:
+        patterns:
+          - "nativewind"
+          - "tailwindcss"
+          - "tailwind-merge"
+        update-types:
+          - minor
+          - patch
+      drizzle:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
+        update-types:
+          - minor
+          - patch
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+        update-types:
+          - minor
+          - patch
+      typescript-tooling:
+        patterns:
+          - "typescript"
+          - "tsx"
+          - "esbuild"
+          - "prettier"
+          - "eslint*"
+          - "@types/*"
+        update-types:
+          - minor
+          - patch
+    # Prefix commit messages for easy filtering in git log
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(dev-deps)"
+      include: scope
+    labels:
+      - dependencies
+      - npm
+
+  # ── GitHub Actions ────────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Africa/Lagos
+    open-pull-requests-limit: 5
+    target-branch: main
+    # Group all Actions updates into a single weekly PR
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "chore(ci)"
+      include: scope
+    labels:
+      - dependencies
+      - github-actions
