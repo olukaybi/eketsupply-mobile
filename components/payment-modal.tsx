@@ -198,7 +198,7 @@ export function PaymentModal({
             </View>
             <Text className="text-foreground font-bold text-xl mb-2">Payment Failed</Text>
             <Text className="text-muted text-sm text-center mb-4">
-              We couldn't process your payment. Please try again.
+              {"We couldn't process your payment. Please try again."}
             </Text>
             <TouchableOpacity
               onPress={() => {

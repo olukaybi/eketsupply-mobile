@@ -261,7 +261,7 @@ export default function PackageAnalyticsScreen() {
               <Text className="text-primary font-semibold mb-2">💡 Recommendations</Text>
               {analytics[0] && (
                 <Text className="text-foreground text-sm mb-2">
-                  • Your most popular package is "{analytics[0].package_name}" with{' '}
+                  • Your most popular package is {'"'}{analytics[0].package_name}{'"'}  with{' '}
                   {analytics[0].total_bookings} bookings
                 </Text>
               )}
@@ -272,7 +272,7 @@ export default function PackageAnalyticsScreen() {
               )}
               {analytics.some(p => p.total_bookings === 0) && (
                 <Text className="text-foreground text-sm">
-                  • Some packages haven't been booked yet. Try adjusting pricing or promotion
+                  {"• Some packages haven't been booked yet. Try adjusting pricing or promotion"}
                 </Text>
               )}
             </View>

@@ -472,7 +472,7 @@ export default function ArtisanProfileScreen() {
       <ScreenContainer>
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-foreground text-lg font-semibold mb-2">Artisan Not Found</Text>
-          <Text className="text-muted text-sm text-center mb-4">The artisan profile you're looking for doesn't exist.</Text>
+          <Text className="text-muted text-sm text-center mb-4">{"The artisan profile you're looking for doesn't exist."}</Text>
           <TouchableOpacity onPress={() => router.back()} className="bg-primary px-6 py-3 rounded-full">
             <Text className="text-background font-semibold">Go Back</Text>
           </TouchableOpacity>

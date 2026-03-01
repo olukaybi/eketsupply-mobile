@@ -114,7 +114,7 @@ export default function SignInScreen() {
 
           {/* Sign Up Link */}
           <View className="flex-row justify-center items-center">
-            <Text className="text-muted text-sm">Don't have an account? </Text>
+            <Text className="text-muted text-sm">{"Don't have an account? "}</Text>
             <Link href="/auth/sign-up" asChild>
               <TouchableOpacity>
                 <Text className="text-sm font-semibold" style={{ color: '#1B5E20' }}>Sign Up</Text>

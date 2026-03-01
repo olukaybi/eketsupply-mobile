@@ -276,7 +276,7 @@ export function SmartScheduling({
       {!showManual && (
         <View className="mt-3 bg-surface rounded-lg p-3">
           <Text className="text-muted text-xs text-center">
-            Times suggested based on artisan's availability patterns
+            {"Times suggested based on artisan's availability patterns"}
           </Text>
         </View>
       )}
