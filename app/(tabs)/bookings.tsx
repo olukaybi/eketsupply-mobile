@@ -508,10 +508,7 @@ export default function BookingsScreen() {
           <TouchableOpacity
             className="py-3 rounded-xl mt-2"
             style={{ backgroundColor: "#1B5E20" }}
-            onPress={() => {
-              setSelectedBooking(booking);
-              setReviewModalVisible(true);
-            }}
+            onPress={() => router.push(`/booking/review?bookingId=${booking.id}` as never)}
           >
             <Text className="text-center font-semibold text-white">⭐ Leave a Review</Text>
           </TouchableOpacity>

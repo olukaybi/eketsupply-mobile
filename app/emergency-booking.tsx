@@ -1,60 +1,71 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Platform, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Platform, ActivityIndicator, Image } from 'react-native';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import * as Haptics from 'expo-haptics';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/use-auth';
 
 const SERVICE_CATEGORIES = [
-  { id: 'plumber', name: 'Plumber', icon: '🔧' },
-  { id: 'electrician', name: 'Electrician', icon: '⚡' },
-  { id: 'carpenter', name: 'Carpenter', icon: '🪚' },
-  { id: 'mechanic', name: 'Mechanic', icon: '🔩' },
-  { id: 'painter', name: 'Painter', icon: '🎨' },
-  { id: 'welder', name: 'Welder', icon: '🔥' },
+  { id: 'plumber', name: 'Plumber', icon: '🔧', description: 'Burst pipe, leak, blocked drain' },
+  { id: 'electrician', name: 'Electrician', icon: '⚡', description: 'Power outage, faulty wiring' },
+  { id: 'carpenter', name: 'Carpenter', icon: '🪚', description: 'Broken door, furniture damage' },
+  { id: 'mechanic', name: 'Mechanic', icon: '🔩', description: 'Vehicle breakdown, engine fault' },
+  { id: 'painter', name: 'Painter', icon: '🎨', description: 'Urgent touch-up or damage repair' },
+  { id: 'welder', name: 'Welder', icon: '🔥', description: 'Gate, fence, metal structure' },
 ];
+
+const PREMIUM_MULTIPLIER = 1.5;
 
 interface EmergencyArtisan {
   id: string;
   name: string;
-  business_name: string;
-  rating: number;
-  distance_km: number;
-  avg_response_minutes: number | null;
-  phone: string;
+  avatar_url: string | null;
+  category: string;
+  rating: number | null;
+  review_count: number | null;
+  hourly_rate: number | null;
+  response_time_minutes: number | null;
+  is_available: boolean;
 }
 
 export default function EmergencyBookingScreen() {
   const colors = useColors();
-  
+  const { user } = useAuth();
+
+  const [step, setStep] = useState<'form' | 'artisans' | 'done'>('form');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [description, setDescription] = useState('');
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [locationText, setLocationText] = useState('');
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [searching, setSearching] = useState(false);
   const [availableArtisans, setAvailableArtisans] = useState<EmergencyArtisan[]>([]);
+  const [selectedArtisan, setSelectedArtisan] = useState<EmergencyArtisan | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    getLocation();
-  }, []);
-
-  const getLocation = async () => {
+  const detectLocation = async () => {
     try {
+      setDetectingLocation(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
       if (status !== 'granted') {
-        Alert.alert('Location Required', 'Please enable location to find nearby artisans.');
+        Alert.alert('Permission Denied', 'Please enter your location manually.');
         return;
       }
-
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
       });
-      
-      setLocation(currentLocation);
-    } catch (error) {
-      console.error('Error getting location:', error);
+      if (address) {
+        const parts = [address.street, address.district, address.city].filter(Boolean);
+        setLocationText(parts.join(', '));
+      }
+    } catch {
+      Alert.alert('Location Error', 'Could not detect location. Please enter manually.');
+    } finally {
+      setDetectingLocation(false);
     }
   };
 
@@ -70,108 +81,113 @@ export default function EmergencyBookingScreen() {
       Alert.alert('Select Service', 'Please select the type of service you need.');
       return;
     }
-
     if (!description.trim()) {
       Alert.alert('Describe Issue', 'Please describe your emergency briefly.');
       return;
     }
-
-    if (!location) {
-      Alert.alert('Location Required', 'Getting your location...');
-      await getLocation();
+    if (!locationText.trim()) {
+      Alert.alert('Location Required', 'Please enter or detect your location.');
       return;
     }
 
-    if (Platform.OS !== 'web') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-
     setSearching(true);
-
     try {
-      // Call API to find emergency artisans
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/emergency/find-artisans`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: selectedCategory,
-          description,
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        }),
-      });
+      const { data, error } = await supabase
+        .from('artisans')
+        .select('id, name, avatar_url, category, rating, review_count, hourly_rate, response_time_minutes, is_available')
+        .ilike('category', `%${selectedCategory}%`)
+        .eq('is_available', true)
+        .order('rating', { ascending: false })
+        .limit(10);
 
-      if (response.ok) {
-        const data = await response.json();
-        setAvailableArtisans(data.artisans || []);
-        
-        if (data.artisans && data.artisans.length > 0) {
-          Alert.alert(
-            'Artisans Found!',
-            `Found ${data.artisans.length} available artisan${data.artisans.length > 1 ? 's' : ''} nearby. They will be notified of your emergency request.`,
-            [{ text: 'OK' }]
-          );
-        } else {
-          Alert.alert(
-            'No Artisans Available',
-            'No artisans are currently available for emergency service in your area. Try expanding your search radius or try again later.',
-            [{ text: 'OK' }]
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error finding emergency artisans:', error);
+      if (error) throw error;
+      setAvailableArtisans(data ?? []);
+      setStep('artisans');
+    } catch (err) {
+      console.error('Error finding artisans:', err);
       Alert.alert('Error', 'Could not find available artisans. Please try again.');
     } finally {
       setSearching(false);
     }
   };
 
-  const handleBookArtisan = async (artisan: EmergencyArtisan) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const handleSelectArtisan = (artisan: EmergencyArtisan) => {
+    setSelectedArtisan(artisan);
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!selectedArtisan) {
+      Alert.alert('Select Artisan', 'Please select an artisan to continue.');
+      return;
+    }
+    if (!user) {
+      Alert.alert('Sign In Required', 'Please sign in to book a service.');
+      router.push('/auth/sign-in');
+      return;
     }
 
     Alert.alert(
       'Confirm Emergency Booking',
-      `Book ${artisan.business_name || artisan.name} for emergency service?\n\n⚠️ Emergency bookings have a 50% premium fee.\n\nThe artisan will arrive within 2 hours.`,
+      `Book ${selectedArtisan.name} for emergency service?\n\n⚠️ Emergency bookings carry a 50% premium fee.\n\nThe artisan will aim to arrive within 2 hours.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm Booking',
           onPress: async () => {
-            setLoading(true);
+            setSubmitting(true);
             try {
-              // Create emergency booking
-              const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/emergency/create-booking`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  artisan_id: artisan.id,
-                  category: selectedCategory,
-                  description,
-                  latitude: location?.coords.latitude,
-                  longitude: location?.coords.longitude,
-                }),
-              });
+              if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-              if (response.ok) {
-                Alert.alert(
-                  'Emergency Booking Confirmed!',
-                  `${artisan.business_name || artisan.name} has been notified and will arrive within 2 hours.\n\nYou can track their arrival in your bookings.`,
-                  [
-                    {
-                      text: 'View Bookings',
-                      onPress: () => router.replace('/(tabs)'),
-                    },
-                  ]
-                );
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('user_id', user.openId)
+                .single();
+
+              if (!profile) throw new Error('Profile not found');
+
+              const emergencyRate = selectedArtisan.hourly_rate
+                ? Math.round(selectedArtisan.hourly_rate * PREMIUM_MULTIPLIER)
+                : null;
+
+              const { data: booking, error } = await supabase
+                .from('bookings')
+                .insert({
+                  customer_id: profile.id,
+                  artisan_id: selectedArtisan.id,
+                  booking_type: 'instant',
+                  service_description: `🚨 EMERGENCY: ${description}`,
+                  preferred_date: new Date().toISOString(),
+                  location: locationText,
+                  payment_method: 'paystack_split',
+                  estimated_price: emergencyRate,
+                  customer_notes: `Emergency booking — Category: ${selectedCategory}. Premium rate applies (${PREMIUM_MULTIPLIER}×).`,
+                  status: 'pending',
+                })
+                .select('id')
+                .single();
+
+              if (error) throw error;
+
+              if (Platform.OS !== 'web') {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               }
-            } catch (error) {
-              console.error('Error creating emergency booking:', error);
-              Alert.alert('Error', 'Could not create booking. Please try again.');
+
+              setStep('done');
+
+              setTimeout(() => {
+                if (booking?.id) {
+                  router.replace(`/booking/confirmation?bookingId=${booking.id}` as never);
+                } else {
+                  router.replace('/(tabs)/bookings');
+                }
+              }, 3000);
+            } catch (err) {
+              console.error('Emergency booking error:', err);
+              Alert.alert('Error', 'Failed to submit emergency booking. Please try again.');
             } finally {
-              setLoading(false);
+              setSubmitting(false);
             }
           },
         },
@@ -179,169 +195,315 @@ export default function EmergencyBookingScreen() {
     );
   };
 
+  // handleBookArtisan replaced by handleConfirmBooking above
+
+  // ─── Done ──────────────────────────────────────────────────────────────────
+  if (step === 'done') {
+    return (
+      <ScreenContainer className="p-6 justify-center items-center">
+        <View style={{ alignItems: 'center', gap: 16 }}>
+          <Text style={{ fontSize: 72 }}>🚨</Text>
+          <Text className="text-2xl font-bold text-foreground text-center">Request Sent!</Text>
+          <Text className="text-base text-muted text-center">
+            Your emergency request has been sent to {selectedArtisan?.name}.{' '}
+            They have been notified and should respond within 30 minutes.
+          </Text>
+          <View style={{ backgroundColor: '#FFF3E0', borderRadius: 16, padding: 16, width: '100%' }}>
+            <Text style={{ color: '#E65100', fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
+              ⏱ Expected Response: Within 30 minutes
+            </Text>
+            <Text style={{ color: '#E65100', textAlign: 'center', fontSize: 13 }}>
+              Premium rate applies: 1.5× standard pricing
+            </Text>
+          </View>
+          <ActivityIndicator color="#1B5E20" style={{ marginTop: 16 }} />
+          <Text className="text-sm text-muted">Redirecting to booking details...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  // ─── Artisan selection ─────────────────────────────────────────────────────
+  if (step === 'artisans') {
+    return (
+      <ScreenContainer>
+        <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 48 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+            <TouchableOpacity onPress={() => setStep('form')} style={{ marginRight: 12, padding: 4 }}>
+              <Text style={{ fontSize: 22 }}>←</Text>
+            </TouchableOpacity>
+            <View>
+              <Text className="text-xl font-bold text-foreground">Available Now</Text>
+              <Text className="text-sm text-muted">Select an artisan for immediate help</Text>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#FFF3E0', borderRadius: 12, padding: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ fontSize: 18 }}>⚡</Text>
+            <Text style={{ color: '#E65100', fontSize: 13, fontWeight: '600', flex: 1 }}>
+              Emergency rate: 1.5× standard pricing applies. Artisans are notified instantly.
+            </Text>
+          </View>
+
+          {availableArtisans.length === 0 ? (
+            <View style={{ alignItems: 'center', paddingVertical: 64 }}>
+              <Text style={{ fontSize: 48 }}>😔</Text>
+              <Text className="text-lg font-semibold text-foreground mt-3 mb-2">No Artisans Available</Text>
+              <Text className="text-muted text-center mb-6">
+                No specialists are currently available. Try a different category or check back shortly.
+              </Text>
+              <TouchableOpacity
+                style={{ backgroundColor: '#1B5E20', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+                onPress={() => setStep('form')}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' }}>Try Another Category</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <Text className="text-sm text-muted mb-3">
+                {availableArtisans.length} artisan{availableArtisans.length !== 1 ? 's' : ''} available
+              </Text>
+
+              {availableArtisans.map(artisan => {
+                const isSelected = selectedArtisan?.id === artisan.id;
+                const emergencyRate = artisan.hourly_rate
+                  ? Math.round(artisan.hourly_rate * PREMIUM_MULTIPLIER)
+                  : null;
+
+                return (
+                  <TouchableOpacity
+                    key={artisan.id}
+                    onPress={() => handleSelectArtisan(artisan)}
+                    style={{
+                      borderRadius: 16,
+                      padding: 16,
+                      marginBottom: 12,
+                      borderWidth: 2,
+                      borderColor: isSelected ? '#1B5E20' : colors.border,
+                      backgroundColor: isSelected ? '#F0F7F0' : colors.surface,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      {artisan.avatar_url ? (
+                        <Image
+                          source={{ uri: artisan.avatar_url }}
+                          style={{ width: 52, height: 52, borderRadius: 26, marginRight: 12 }}
+                        />
+                      ) : (
+                        <View
+                          style={{
+                            width: 52, height: 52, borderRadius: 26, marginRight: 12,
+                            backgroundColor: '#1B5E20', alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >
+                          <Text style={{ color: '#fff', fontSize: 20, fontWeight: 'bold' }}>
+                            {artisan.name?.[0] ?? '?'}
+                          </Text>
+                        </View>
+                      )}
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Text className="font-bold text-foreground text-base">{artisan.name}</Text>
+                          {isSelected && (
+                            <View style={{ backgroundColor: '#1B5E20', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 }}>
+                              <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>SELECTED</Text>
+                            </View>
+                          )}
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 8 }}>
+                          <Text style={{ color: '#E65100', fontSize: 13 }}>
+                            ★ {artisan.rating?.toFixed(1) ?? 'New'} ({artisan.review_count ?? 0})
+                          </Text>
+                          <Text className="text-muted text-xs">•</Text>
+                          <Text className="text-muted text-xs">
+                            ~{artisan.response_time_minutes ?? 30} min response
+                          </Text>
+                        </View>
+                        {emergencyRate ? (
+                          <Text style={{ color: '#E65100', fontSize: 13, fontWeight: '600', marginTop: 4 }}>
+                            Emergency rate: ₦{emergencyRate.toLocaleString()}/hr
+                          </Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+
+              <TouchableOpacity
+                onPress={handleConfirmBooking}
+                disabled={!selectedArtisan || submitting}
+                style={{
+                  backgroundColor: selectedArtisan ? '#E65100' : colors.muted,
+                  paddingVertical: 16,
+                  borderRadius: 14,
+                  alignItems: 'center',
+                  marginTop: 8,
+                }}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
+                    🚨 Send Emergency Request
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </>
+          )}
+        </ScrollView>
+      </ScreenContainer>
+    );
+  }
+
+  // ─── Form ──────────────────────────────────────────────────────────────────
   return (
     <ScreenContainer>
-      <ScrollView className="flex-1 px-6 py-4">
+      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 48 }}>
         {/* Header */}
-        <View className="items-center mb-6">
-          <View 
-            className="w-20 h-20 rounded-full items-center justify-center mb-4"
-            style={{ backgroundColor: colors.error + '20' }}
-          >
-            <Text className="text-4xl">🚨</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12, padding: 4 }}>
+            <Text style={{ fontSize: 22 }}>←</Text>
+          </TouchableOpacity>
+          <View>
+            <Text className="text-2xl font-bold text-foreground">Emergency Booking</Text>
+            <Text className="text-sm text-muted">Get help within 2 hours</Text>
           </View>
-          <Text className="text-2xl font-bold text-foreground text-center">
-            Need Help Now?
-          </Text>
-          <Text className="text-sm text-muted text-center mt-2">
-            Get an artisan within 2 hours (+50% emergency fee)
-          </Text>
         </View>
 
-        {/* Service Category Selection */}
-        <View className="mb-6">
-          <Text className="text-base font-semibold text-foreground mb-3">
-            What do you need?
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            {SERVICE_CATEGORIES.map((category) => (
+        {/* Urgent Banner */}
+        <View style={{ backgroundColor: '#FFF3E0', borderRadius: 16, padding: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Text style={{ fontSize: 28 }}>🚨</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: '#E65100', fontWeight: '700', fontSize: 15 }}>Emergency Service</Text>
+            <Text style={{ color: '#E65100', fontSize: 12 }}>
+              Verified artisans notified instantly. Premium rate: 1.5× standard pricing.
+            </Text>
+          </View>
+        </View>
+
+        {/* Category Selection */}
+        <Text className="text-sm font-semibold text-foreground mb-3">What do you need help with?</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+          {SERVICE_CATEGORIES.map((category) => {
+            const isSelected = selectedCategory === category.id;
+            return (
               <TouchableOpacity
                 key={category.id}
                 onPress={() => handleCategorySelect(category.id)}
-                className="flex-row items-center px-4 py-3 rounded-xl"
                 style={{
-                  backgroundColor: selectedCategory === category.id 
-                    ? colors.primary 
-                    : colors.surface,
-                  borderWidth: 1,
-                  borderColor: selectedCategory === category.id 
-                    ? colors.primary 
-                    : colors.border,
+                  width: '47%',
+                  borderRadius: 14,
+                  padding: 14,
+                  borderWidth: 2,
+                  borderColor: isSelected ? '#E65100' : colors.border,
+                  backgroundColor: isSelected ? '#FFF3E0' : colors.surface,
                 }}
               >
-                <Text className="text-xl mr-2">{category.icon}</Text>
-                <Text
-                  className="font-semibold"
-                  style={{
-                    color: selectedCategory === category.id 
-                      ? 'white' 
-                      : colors.foreground,
-                  }}
-                >
+                <Text style={{ fontSize: 28, marginBottom: 6 }}>{category.icon}</Text>
+                <Text style={{ fontWeight: '700', color: isSelected ? '#E65100' : colors.foreground, fontSize: 14 }}>
                   {category.name}
                 </Text>
+                <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>
+                  {category.description}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            );
+          })}
         </View>
 
-        {/* Description */}
-        <View className="mb-6">
-          <Text className="text-base font-semibold text-foreground mb-3">
-            Describe the emergency
-          </Text>
+        {/* Problem Description */}
+        <Text className="text-sm font-semibold text-foreground mb-2">Briefly describe the problem</Text>
+        <TextInput
+          value={description}
+          onChangeText={setDescription}
+          placeholder="e.g. Burst pipe under kitchen sink, water flooding floor..."
+          placeholderTextColor={colors.muted}
+          multiline
+          numberOfLines={3}
+          maxLength={200}
+          style={{
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 12,
+            padding: 14,
+            fontSize: 14,
+            color: colors.foreground,
+            minHeight: 80,
+            textAlignVertical: 'top',
+            backgroundColor: colors.surface,
+            marginBottom: 20,
+          }}
+        />
+
+        {/* Location */}
+        <Text className="text-sm font-semibold text-foreground mb-2">Your location</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24 }}>
           <TextInput
-            className="rounded-xl p-4 text-base"
+            value={locationText}
+            onChangeText={setLocationText}
+            placeholder="Enter your address or area"
+            placeholderTextColor={colors.muted}
             style={{
-              backgroundColor: colors.surface,
-              color: colors.foreground,
+              flex: 1,
               borderWidth: 1,
               borderColor: colors.border,
-              minHeight: 100,
-              textAlignVertical: 'top',
+              borderRadius: 12,
+              padding: 14,
+              fontSize: 14,
+              color: colors.foreground,
+              backgroundColor: colors.surface,
             }}
-            placeholder="E.g., Burst pipe flooding kitchen, need immediate help"
-            placeholderTextColor={colors.muted}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
           />
+          <TouchableOpacity
+            onPress={detectLocation}
+            disabled={detectingLocation}
+            style={{
+              backgroundColor: '#1B5E20',
+              borderRadius: 12,
+              paddingHorizontal: 14,
+              justifyContent: 'center',
+            }}
+          >
+            {detectingLocation ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={{ fontSize: 18 }}>📍</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Find Artisans Button */}
         <TouchableOpacity
           onPress={handleFindArtisans}
-          disabled={searching || loading}
-          className="rounded-full py-4 items-center mb-6"
+          disabled={searching || !selectedCategory || !description.trim() || !locationText.trim()}
           style={{
-            backgroundColor: searching || loading ? colors.muted : colors.error,
-            opacity: searching || loading ? 0.6 : 1,
+            backgroundColor:
+              !searching && selectedCategory && description.trim() && locationText.trim()
+                ? '#E65100'
+                : colors.muted,
+            paddingVertical: 16,
+            borderRadius: 14,
+            alignItems: 'center',
           }}
         >
           {searching ? (
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <ActivityIndicator color="white" size="small" />
-              <Text className="text-white font-semibold ml-2">Finding Available Artisans...</Text>
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Finding Available Artisans...</Text>
             </View>
           ) : (
-            <Text className="text-white text-lg font-semibold">
-              Find Available Artisans
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
+              🔍 Find Available Artisans
             </Text>
           )}
         </TouchableOpacity>
 
-        {/* Available Artisans */}
-        {availableArtisans.length > 0 && (
-          <View className="mb-6">
-            <Text className="text-base font-semibold text-foreground mb-3">
-              Available Now ({availableArtisans.length})
-            </Text>
-            {availableArtisans.map((artisan) => (
-              <View
-                key={artisan.id}
-                className="rounded-xl p-4 mb-3"
-                style={{ backgroundColor: colors.surface }}
-              >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1">
-                    <Text className="text-lg font-bold text-foreground">
-                      {artisan.business_name || artisan.name}
-                    </Text>
-                    <View className="flex-row items-center mt-1 gap-3">
-                      <View className="flex-row items-center">
-                        <Text className="text-base mr-1">⭐</Text>
-                        <Text className="text-sm font-semibold text-foreground">
-                          {artisan.rating.toFixed(1)}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center">
-                        <Text className="text-base mr-1">📍</Text>
-                        <Text className="text-sm font-semibold text-foreground">
-                          {artisan.distance_km.toFixed(1)}km
-                        </Text>
-                      </View>
-                      {artisan.avg_response_minutes && artisan.avg_response_minutes <= 60 && (
-                        <View 
-                          className="px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: colors.success + '20' }}
-                        >
-                          <Text className="text-xs font-semibold" style={{ color: colors.success }}>
-                            Fast Response
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => handleBookArtisan(artisan)}
-                  disabled={loading}
-                  className="rounded-full py-3 items-center"
-                  style={{
-                    backgroundColor: loading ? colors.muted : colors.primary,
-                    opacity: loading ? 0.6 : 1,
-                  }}
-                >
-                  <Text className="text-white font-semibold">
-                    Book for Emergency
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        )}
+        {/* Disclaimer */}
+        <Text className="text-xs text-muted text-center mt-4">
+          Emergency bookings carry a 1.5× premium rate. Standard EketSupply 85/15 payment split applies.
+        </Text>
       </ScrollView>
     </ScreenContainer>
   );

@@ -575,3 +575,10 @@
 - [ ] Push notifications for booking events (artisan alerts + customer updates)
 - [ ] Admin approval dashboard for artisan applications
 - [ ] Customer booking confirmation screen (reference, artisan contact, ETA)
+
+
+## Sprint: Ratings, Emergency Booking, Admin Role (Mar 1 2026)
+- [ ] Build ratings and review screen (post-job completion)
+- [ ] Wire review prompt from bookings tab after job marked complete
+- [ ] Build emergency booking flow with premium pricing
+- [ ] Write admin role SQL and reviews table migration
