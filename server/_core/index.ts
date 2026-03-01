@@ -4,6 +4,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerPaystackWebhook } from "../paystack-webhook";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 
@@ -55,6 +56,10 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   registerOAuthRoutes(app);
+
+  // Paystack webhook — must be registered BEFORE express.json() middleware
+  // because it needs raw body for HMAC-SHA512 signature verification
+  registerPaystackWebhook(app);
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, timestamp: Date.now() });

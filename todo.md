@@ -556,3 +556,16 @@
 - [ ] Live API keys configuration (after Paystack approval)
 - [ ] Admin dashboard screen (artisan approval, disputes, analytics)
 - [ ] App Store / Play Store submission preparation
+
+
+## Sprint: Paystack Webhook + Live Data Connections (Feb 28 2026)
+- [x] Build Paystack webhook handler (HMAC-SHA512 signature verification, charge.success, refund, dispute events)
+- [x] Register webhook route in Express server before JSON middleware
+- [x] Create supabase_webhook_tables.sql (processed_webhook_events, payment columns, push_token columns)
+- [x] Wire Messages tab to live Supabase data (conversations list, unread counts, real-time refresh)
+- [x] Wire Chat screen to live Supabase Realtime (already built — confirmed working)
+- [x] Connect Artisan Dashboard to real Supabase data (jobs, earnings, rating, accept/decline/complete actions)
+- [x] Remove all escrow language from payment modal and replace with split payment terminology
+- [ ] Run supabase_webhook_tables.sql in Supabase SQL Editor
+- [ ] Set PAYSTACK_WEBHOOK_SECRET env var in server (use Paystack dashboard → Settings → API → Webhook)
+- [ ] Add mark_messages_as_read RPC function in Supabase

@@ -1,9 +1,10 @@
 -- ============================================================
--- EketSupply: Final Migration
+-- EketSupply: Final Migration (v3 — auth.uid()::text cast fix)
 -- Run this in Supabase Dashboard → SQL Editor
 -- ============================================================
+-- NOTE: profiles.user_id is TEXT (not UUID), so we cast auth.uid() to text.
 
--- 1. Create chat_messages table (currently missing)
+-- 1. Create chat_messages table
 CREATE TABLE IF NOT EXISTS public.chat_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   booking_id UUID REFERENCES public.bookings(id) ON DELETE CASCADE NOT NULL,
@@ -19,26 +20,41 @@ CREATE POLICY "Booking participants can view messages"
   ON public.chat_messages FOR SELECT
   USING (
     booking_id IN (
-      SELECT id FROM public.bookings
-      WHERE customer_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         OR artisan_id IN (
-           SELECT id FROM public.artisans
-           WHERE profile_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         )
+      SELECT b.id FROM public.bookings b
+      WHERE b.customer_id IN (
+          SELECT p.id FROM public.profiles p
+          WHERE p.user_id = auth.uid()::text
+        )
+        OR b.artisan_id IN (
+          SELECT a.id FROM public.artisans a
+          WHERE a.profile_id IN (
+            SELECT p.id FROM public.profiles p
+            WHERE p.user_id = auth.uid()::text
+          )
+        )
     )
   );
 
 CREATE POLICY "Booking participants can send messages"
   ON public.chat_messages FOR INSERT
   WITH CHECK (
-    sender_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
+    sender_id IN (
+      SELECT p.id FROM public.profiles p
+      WHERE p.user_id = auth.uid()::text
+    )
     AND booking_id IN (
-      SELECT id FROM public.bookings
-      WHERE customer_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         OR artisan_id IN (
-           SELECT id FROM public.artisans
-           WHERE profile_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         )
+      SELECT b.id FROM public.bookings b
+      WHERE b.customer_id IN (
+          SELECT p.id FROM public.profiles p
+          WHERE p.user_id = auth.uid()::text
+        )
+        OR b.artisan_id IN (
+          SELECT a.id FROM public.artisans a
+          WHERE a.profile_id IN (
+            SELECT p.id FROM public.profiles p
+            WHERE p.user_id = auth.uid()::text
+          )
+        )
     )
   );
 
@@ -46,27 +62,32 @@ CREATE POLICY "Recipients can mark messages as read"
   ON public.chat_messages FOR UPDATE
   USING (
     booking_id IN (
-      SELECT id FROM public.bookings
-      WHERE customer_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         OR artisan_id IN (
-           SELECT id FROM public.artisans
-           WHERE profile_id IN (SELECT id FROM public.profiles WHERE user_id = auth.uid())
-         )
+      SELECT b.id FROM public.bookings b
+      WHERE b.customer_id IN (
+          SELECT p.id FROM public.profiles p
+          WHERE p.user_id = auth.uid()::text
+        )
+        OR b.artisan_id IN (
+          SELECT a.id FROM public.artisans a
+          WHERE a.profile_id IN (
+            SELECT p.id FROM public.profiles p
+            WHERE p.user_id = auth.uid()::text
+          )
+        )
     )
   );
 
 -- Enable Realtime for live chat
 ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
 
--- Indexes
+-- Performance indexes
 CREATE INDEX IF NOT EXISTS idx_chat_messages_booking ON public.chat_messages(booking_id);
-CREATE INDEX IF NOT EXISTS idx_chat_messages_sender ON public.chat_messages(sender_id);
-CREATE INDEX IF NOT EXISTS idx_chat_messages_read ON public.chat_messages(read);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_sender  ON public.chat_messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_read    ON public.chat_messages(read);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_created ON public.chat_messages(created_at);
 
 
 -- 2. Fix bookings.payment_method — remove 'escrow', add 'paystack_split'
---    (Paystack compliance: we no longer hold funds as escrow)
 ALTER TABLE public.bookings
   DROP CONSTRAINT IF EXISTS bookings_payment_method_check;
 
@@ -74,5 +95,5 @@ ALTER TABLE public.bookings
   ADD CONSTRAINT bookings_payment_method_check
   CHECK (payment_method IN ('cash', 'transfer', 'card', 'paystack_split'));
 
--- Enable Realtime for bookings (so status changes push to app instantly)
+-- Enable Realtime for bookings
 ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
