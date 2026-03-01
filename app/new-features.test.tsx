@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { MockSupabase } from '@/tests/mock-supabase.types';
 
 // Mock Supabase
 const createMockChain = () => {
@@ -12,7 +13,7 @@ const createMockChain = () => {
   return chain;
 };
 
-const mockSupabase: any = {
+const mockSupabase: MockSupabase = {
   from: vi.fn(() => ({
     select: vi.fn(() => createMockChain()),
     insert: vi.fn(() => ({
@@ -27,6 +28,7 @@ const mockSupabase: any = {
       eq: vi.fn(() => Promise.resolve({ error: null })),
     })),
   })),
+  rpc: vi.fn(() => Promise.resolve({ data: null, error: null })),
   storage: {
     from: vi.fn(() => ({
       upload: vi.fn(() => Promise.resolve({ data: { path: 'test-path' }, error: null })),

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { MockSupabase } from '@/tests/mock-supabase.types';
 
 /**
  * Integration tests for Artisan Verification Workflow
@@ -49,7 +50,7 @@ const createMockChain = () => {
   return chain;
 };
 
-const mockSupabase: any = {
+const mockSupabase: MockSupabase = {
   from: vi.fn((table: string) => {
     if (table === 'verification_documents') {
       return {
