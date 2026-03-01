@@ -125,6 +125,7 @@ export default function BookingConfirmation() {
 
   useEffect(() => {
     if (bookingId) loadBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId]);
 
   async function loadBooking() {

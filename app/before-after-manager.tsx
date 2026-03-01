@@ -49,6 +49,7 @@ export default function BeforeAfterManagerScreen() {
 
   useEffect(() => {
     loadArtisanData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function loadArtisanData() {
@@ -145,7 +146,7 @@ export default function BeforeAfterManagerScreen() {
       const beforeBlob = await beforeResponse.blob();
       const beforeFileName = `${artisanId}/before_${Date.now()}.jpg`;
 
-      const { data: beforeUpload, error: beforeError } = await supabase.storage
+      const { data: _beforeUpload, error: beforeError } = await supabase.storage
         .from("before-after-photos")
         .upload(beforeFileName, beforeBlob, {
           contentType: "image/jpeg",
@@ -163,7 +164,7 @@ export default function BeforeAfterManagerScreen() {
       const afterBlob = await afterResponse.blob();
       const afterFileName = `${artisanId}/after_${Date.now()}.jpg`;
 
-      const { data: afterUpload, error: afterError } = await supabase.storage
+      const { data: _afterUpload, error: afterError } = await supabase.storage
         .from("before-after-photos")
         .upload(afterFileName, afterBlob, {
           contentType: "image/jpeg",

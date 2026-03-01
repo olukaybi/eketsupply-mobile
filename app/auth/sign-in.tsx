@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator 
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");

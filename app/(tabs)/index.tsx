@@ -50,9 +50,9 @@ type ArtisanData = {
     full_name: string;
     email: string;
   };
-  services: Array<{
+  services: {
     price: string;
-  }>;
+  }[];
 };
 
 export default function HomeScreen() {

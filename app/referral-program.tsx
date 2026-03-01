@@ -33,6 +33,7 @@ export default function ReferralProgramScreen() {
     if (user?.id) {
       fetchReferralData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function fetchReferralData() {

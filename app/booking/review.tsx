@@ -26,7 +26,7 @@ export default function ReviewScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [rating, setRating] = useState(0);
-  const [hoveredStar, setHoveredStar] = useState(0);
+  const [hoveredStar, _setHoveredStar] = useState(0);
   const [comment, setComment] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -34,6 +34,7 @@ export default function ReviewScreen() {
 
   useEffect(() => {
     if (bookingId) fetchBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId]);
 
   const fetchBooking = async () => {

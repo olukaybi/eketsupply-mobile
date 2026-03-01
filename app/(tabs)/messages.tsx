@@ -41,6 +41,7 @@ export default function MessagesScreen() {
   useFocusEffect(
     useCallback(() => {
       if (profileId) fetchConversations(profileId);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profileId]),
   );
 
@@ -58,6 +59,7 @@ export default function MessagesScreen() {
       .subscribe();
 
     return () => { channel.unsubscribe(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileId]);
 
   async function fetchConversations(pid: string) {

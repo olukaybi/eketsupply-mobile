@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/use-colors';
 
-const { width } = Dimensions.get('window');
+const { width: _width } = Dimensions.get('window');
 
 const onboardingData = [
   {

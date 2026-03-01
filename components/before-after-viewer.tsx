@@ -39,7 +39,7 @@ export function BeforeAfterViewer({
   initialIndex,
   onClose,
 }: BeforeAfterViewerProps) {
-  const colors = useColors();
+  const _colors = useColors();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showBefore, setShowBefore] = useState(true);
   const screenWidth = Dimensions.get("window").width;

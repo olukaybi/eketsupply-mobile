@@ -62,7 +62,7 @@ export function ReviewModal({
         const blob = await response.blob();
         const fileName = `review_${bookingId}_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
 
-        const { data, error } = await supabase.storage
+        const { data: _data, error } = await supabase.storage
           .from('review-photos')
           .upload(fileName, blob, {
             contentType: 'image/jpeg',

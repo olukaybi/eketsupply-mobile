@@ -27,6 +27,7 @@ export function SmartScheduling({
 
   useEffect(() => {
     generateSuggestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artisanId]);
 
   async function generateSuggestions() {

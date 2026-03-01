@@ -30,6 +30,7 @@ export default function ChatScreen() {
       fetchBookingDetails();
       subscribeToMessages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, bookingId]);
 
   async function fetchBookingDetails() {

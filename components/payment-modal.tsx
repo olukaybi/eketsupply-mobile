@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { 
   initializePayment, 
-  verifyPayment, 
   createPaymentRecord, 
   updatePaymentStatus,
   generatePaymentReference,
@@ -66,7 +65,7 @@ export function PaymentModal({
         },
       };
 
-      const paymentInit = await initializePayment(paymentData);
+      const _paymentInit = await initializePayment(paymentData);
 
       // In a real app, you would open the Paystack payment page here
       // For this demo, we'll simulate a successful payment

@@ -257,6 +257,7 @@ export default function AdminDashboard() {
   // ─── Auth guard ─────────────────────────────────────────────────────────────
   useEffect(() => {
     checkAdminAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function checkAdminAccess() {

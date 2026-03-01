@@ -4,8 +4,6 @@ import { ScreenContainer } from '@/components/screen-container';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
-import { useColors } from '@/hooks/use-colors';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 type AnalyticsData = {
   totalBookings: number;
@@ -28,6 +26,7 @@ export default function AnalyticsScreen() {
     if (user?.id) {
       fetchAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function fetchAnalytics() {
@@ -198,7 +197,7 @@ export default function AnalyticsScreen() {
   }
 
   const screenWidth = Dimensions.get('window').width;
-  const chartWidth = screenWidth - 48;
+  const _chartWidth = screenWidth - 48;
 
   return (
     <ScreenContainer>

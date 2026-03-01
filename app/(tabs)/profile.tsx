@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform, Share } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";

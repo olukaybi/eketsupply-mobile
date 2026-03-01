@@ -7,4 +7,18 @@ export default defineConfig([
   {
     ignores: ["dist/*"],
   },
+  {
+    rules: {
+      // Allow underscore-prefixed variables/args to be unused (intentional no-ops)
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);

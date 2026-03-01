@@ -147,7 +147,7 @@ export default function RecordVideoTestimonialScreen() {
       const blob = await response.blob();
       const fileName = `${artisanId}/${Date.now()}.mp4`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from("video-testimonials")
         .upload(fileName, blob, {
           contentType: "video/mp4",

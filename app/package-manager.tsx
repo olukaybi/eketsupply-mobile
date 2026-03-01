@@ -52,6 +52,7 @@ export default function PackageManagerScreen() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function loadData() {
@@ -414,7 +415,7 @@ export default function PackageManagerScreen() {
                     <Text className="text-xs font-semibold text-muted mb-2">
                       INCLUDED SERVICES
                     </Text>
-                    {pkg.services.map((service, index) => (
+                    {pkg.services.map((service, _index) => (
                       <View
                         key={service.id}
                         className="flex-row items-center justify-between py-2"

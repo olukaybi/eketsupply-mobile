@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ScrollView, Text, View, TouchableOpacity, TextInput, ActivityIndicator, Alert } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -66,7 +66,7 @@ export default function BankDetailsScreen() {
           { text: "Confirm", onPress: () => {} },
         ]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert("Verification Failed", "Could not verify account. Please check the details and try again.");
     } finally {
       setVerifying(false);
@@ -89,7 +89,7 @@ export default function BankDetailsScreen() {
         "Your bank account has been linked. You will receive payments automatically after each completed job.",
         [{ text: "OK", onPress: () => router.back() }]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert("Error", "Failed to save bank details. Please try again.");
     } finally {
       setSaving(false);

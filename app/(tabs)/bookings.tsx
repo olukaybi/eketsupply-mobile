@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Platform,
 } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";

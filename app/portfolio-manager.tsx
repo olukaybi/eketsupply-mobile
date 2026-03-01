@@ -38,6 +38,7 @@ export default function PortfolioManagerScreen() {
 
   useEffect(() => {
     loadArtisanData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function loadArtisanData() {
@@ -134,7 +135,7 @@ export default function PortfolioManagerScreen() {
       const fileName = `${artisanId}/${Date.now()}.${fileExt}`;
 
       // Upload to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from("portfolio-photos")
         .upload(fileName, blob, {
           contentType: "image/jpeg",

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import * as Haptics from 'expo-haptics';
-import { trpc } from '@/lib/trpc';
+import { trpc as _trpc } from '@/lib/trpc';
 
 interface ArtisanMarker {
   id: string;
@@ -40,6 +40,7 @@ export default function MapViewScreen() {
     if (location) {
       fetchNearbyArtisans();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, selectedRadius]);
 
   const requestLocationPermission = async () => {

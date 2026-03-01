@@ -34,6 +34,7 @@ export default function PackageAnalyticsScreen() {
     if (user?.id) {
       fetchPackageAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function fetchPackageAnalytics() {

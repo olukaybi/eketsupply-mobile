@@ -400,7 +400,7 @@ export default function ArtisanProfileScreen() {
       }
 
       // Get selected service details
-      const selectedService = services.find(s => s.id === bookingForm.selectedService);
+      const _selectedService = services.find(s => s.id === bookingForm.selectedService);
 
       // Insert booking
       const { data: newBooking, error } = await supabase.from('bookings').insert({
