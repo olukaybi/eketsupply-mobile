@@ -5,35 +5,34 @@
 # Rules are matched from bottom to top; the last matching rule wins.
 # Syntax: <pattern> <@github-username or @org/team>
 #
-# Replace placeholder usernames with real GitHub handles before committing.
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ── Default owner (catches everything not matched below) ──────────────────────
-*                               @eketsupply/core-team
+*                               @Olukaybi
 
 # ── Mobile app screens & components ──────────────────────────────────────────
-/app/**                         @eketsupply/mobile-team
-/components/**                  @eketsupply/mobile-team
-/hooks/**                       @eketsupply/mobile-team
+/app/**                         @Olukaybi
+/components/**                  @Olukaybi
+/hooks/**                       @Olukaybi
 
 # ── Server / API layer ────────────────────────────────────────────────────────
-/server/**                      @eketsupply/backend-team
-/drizzle/**                     @eketsupply/backend-team
-/shared/**                      @eketsupply/backend-team
+/server/**                      @Olukaybi
+/drizzle/**                     @Olukaybi
+/shared/**                      @Olukaybi
 
 # ── CI / DevOps ───────────────────────────────────────────────────────────────
-/.github/**                     @eketsupply/devops-team
+/.github/**                     @Olukaybi
 
 # ── Dependency manifests (Dependabot PRs routed here) ────────────────────────
-/package.json                   @eketsupply/devops-team
-/pnpm-lock.yaml                 @eketsupply/devops-team
+/package.json                   @Olukaybi
+/pnpm-lock.yaml                 @Olukaybi
 
 # ── Theme & design tokens ─────────────────────────────────────────────────────
-/theme.config.js                @eketsupply/mobile-team
-/tailwind.config.js             @eketsupply/mobile-team
-/global.css                     @eketsupply/mobile-team
+/theme.config.js                @Olukaybi
+/tailwind.config.js             @Olukaybi
+/global.css                     @Olukaybi
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
-/tests/**                       @eketsupply/core-team
-/app/**/*.test.tsx               @eketsupply/core-team
-/lib/**/*.test.ts                @eketsupply/core-team
+/tests/**                       @Olukaybi
+/app/**/*.test.tsx               @Olukaybi
+/lib/**/*.test.ts                @Olukaybi
