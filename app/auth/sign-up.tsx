@@ -40,7 +40,12 @@ export default function SignUpScreen() {
 
     try {
       await signUp(email, password, name, userType);
-      router.replace("/(tabs)");
+      // Artisans go to onboarding flow; customers go straight to the home tab
+      if (userType === "artisan") {
+        router.replace("/artisan/onboarding");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to sign up");
     } finally {

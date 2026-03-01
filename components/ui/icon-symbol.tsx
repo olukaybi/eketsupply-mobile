@@ -18,6 +18,8 @@ const MAPPING = {
   "calendar":                                "event",
   "person.fill":                             "person",
   "person.2.fill":                           "people",
+  "person.badge.plus.fill":                  "person-add",
+  "wrench.and.screwdriver.fill":             "construction",
   "chart.bar.fill":                          "bar-chart",
   "gearshape.fill":                          "settings",
   "bell.fill":                               "notifications",

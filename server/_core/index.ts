@@ -52,14 +52,14 @@ async function startServer() {
     next();
   });
 
+  // Paystack webhook MUST be registered BEFORE express.json() so it
+  // receives the raw request body needed for HMAC-SHA512 verification
+  registerPaystackWebhook(app);
+
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   registerOAuthRoutes(app);
-
-  // Paystack webhook — must be registered BEFORE express.json() middleware
-  // because it needs raw body for HMAC-SHA512 signature verification
-  registerPaystackWebhook(app);
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, timestamp: Date.now() });

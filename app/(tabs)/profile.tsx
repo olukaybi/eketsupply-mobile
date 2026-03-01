@@ -79,7 +79,7 @@ export default function ProfileScreen() {
 
         <View className="mt-10 items-center">
           <Text className="text-muted text-sm mb-2">Are you an artisan?</Text>
-          <TouchableOpacity onPress={() => router.push("/onboarding" as any)}>
+          <TouchableOpacity onPress={() => router.push("/artisan/onboarding" as any)}>
             <Text className="text-base font-semibold" style={{ color: "#E65100" }}>
               Join as an Artisan →
             </Text>
@@ -147,6 +147,12 @@ export default function ProfileScreen() {
 
         {/* Artisan Section */}
         <SectionHeader title="Artisan Tools" />
+        <MenuItem
+          icon="person.badge.plus.fill"
+          label="Artisan Registration"
+          sublabel="Complete your artisan profile"
+          onPress={() => router.push("/artisan/onboarding" as any)}
+        />
         <MenuItem
           icon="wrench.fill"
           label="Artisan Dashboard"
