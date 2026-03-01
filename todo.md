@@ -569,3 +569,9 @@
 - [ ] Run supabase_webhook_tables.sql in Supabase SQL Editor
 - [ ] Set PAYSTACK_WEBHOOK_SECRET env var in server (use Paystack dashboard → Settings → API → Webhook)
 - [ ] Add mark_messages_as_read RPC function in Supabase
+
+
+## Sprint: Push Notifications, Admin Dashboard, Booking Confirmation (Mar 1 2026)
+- [ ] Push notifications for booking events (artisan alerts + customer updates)
+- [ ] Admin approval dashboard for artisan applications
+- [ ] Customer booking confirmation screen (reference, artisan contact, ETA)

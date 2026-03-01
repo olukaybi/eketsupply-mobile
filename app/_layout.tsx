@@ -1,13 +1,16 @@
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { Platform } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
+import * as Notifications from "expo-notifications";
+import { registerForPushNotifications, setupAndroidChannel } from "@/lib/notification-service";
+import { supabase } from "@/lib/supabase";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -26,6 +29,28 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
+// ─── Notification deep-link observer ────────────────────────────────────────
+function useNotificationObserver() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Handle notification tap when app was closed
+    const lastResponse = Notifications.getLastNotificationResponse();
+    if (lastResponse?.notification?.request?.content?.data?.url) {
+      const url = lastResponse.notification.request.content.data.url as string;
+      router.push(url as never);
+    }
+
+    // Handle notification tap while app is open or in background
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = response.notification.request.content.data?.url as string | undefined;
+      if (url) router.push(url as never);
+    });
+
+    return () => subscription.remove();
+  }, [router]);
+}
+
 export default function RootLayout() {
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
@@ -37,6 +62,25 @@ export default function RootLayout() {
   useEffect(() => {
     initManusRuntime();
   }, []);
+
+  // Set up Android notification channel on mount
+  useEffect(() => {
+    setupAndroidChannel();
+  }, []);
+
+  // Register push token when user is authenticated
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user?.id) {
+        // Register push token in background — don't block UI
+        registerForPushNotifications(session.user.id).catch(console.error);
+      }
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, []);
+
+  // Wire notification deep-link observer
+  useNotificationObserver();
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
     setInsets(metrics.insets);

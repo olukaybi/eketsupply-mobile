@@ -172,6 +172,19 @@ export default function ProfileScreen() {
           onPress={() => router.push("/artisan/bank-details" as any)}
         />
 
+        {/* Admin Section — only visible to admin users */}
+        {(user as any)?.role === 'admin' && (
+          <>
+            <SectionHeader title="Admin" />
+            <MenuItem
+              icon="shield.fill"
+              label="Admin Dashboard"
+              sublabel="Manage artisans, bookings, and platform"
+              onPress={() => router.push("/admin/dashboard" as any)}
+            />
+          </>
+        )}
+
         {/* Preferences Section */}
         <SectionHeader title="Preferences" />
         <MenuItem

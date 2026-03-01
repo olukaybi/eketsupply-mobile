@@ -19,7 +19,7 @@ type PaymentModalProps = {
   artisanId: string;
   customerEmail: string;
   serviceName: string;
-  onSuccess: () => void;
+  onSuccess: (bookingId?: string) => void;
 };
 
 export function PaymentModal({
@@ -87,7 +87,7 @@ export function PaymentModal({
               setProcessing(false);
 
               setTimeout(() => {
-                onSuccess();
+                onSuccess(bookingId);
                 onClose();
               }, 2000);
             },

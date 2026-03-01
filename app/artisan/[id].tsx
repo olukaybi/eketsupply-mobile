@@ -403,7 +403,7 @@ export default function ArtisanProfileScreen() {
       const selectedService = services.find(s => s.id === bookingForm.selectedService);
 
       // Insert booking
-      const { error } = await supabase.from('bookings').insert({
+      const { data: newBooking, error } = await supabase.from('bookings').insert({
         customer_id: profile.id,
         artisan_id: id,
         service_id: bookingForm.selectedService,
@@ -413,8 +413,7 @@ export default function ArtisanProfileScreen() {
         location: bookingForm.location,
         payment_method: bookingForm.paymentMethod,
         customer_notes: bookingForm.notes || null,
-      });
-
+      }).select('id').single();
       if (error) throw error;
 
       if (Platform.OS !== 'web') {
@@ -428,11 +427,16 @@ export default function ArtisanProfileScreen() {
         { type: 'booking', artisanId: id }
       );
 
-      Alert.alert(
-        'Booking Confirmed!',
-        `Your booking with ${artisan?.name} has been confirmed. You will receive a notification once the artisan accepts.`,
-        [{ text: 'OK', onPress: () => setShowBookingModal(false) }]
-      );
+      setShowBookingModal(false);
+      // Navigate to confirmation screen
+      if (newBooking?.id) {
+        router.push(`/booking/confirmation?bookingId=${newBooking.id}` as never);
+      } else {
+        Alert.alert(
+          'Booking Confirmed!',
+          `Your booking with ${artisan?.name} has been confirmed. You will receive a notification once the artisan accepts.`
+        );
+      }
 
       // Reset form
       setBookingForm({
