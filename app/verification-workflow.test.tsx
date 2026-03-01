@@ -19,7 +19,7 @@ const mockVerificationData = {
     profile_id: 'profile-test-456',
     business_name: 'Test Carpentry Services',
     is_verified: false,
-    verified_at: null,
+    verified_at: null as string | null,
   },
   documents: [] as any[],
   requests: [] as any[],
@@ -49,7 +49,7 @@ const createMockChain = () => {
   return chain;
 };
 
-const mockSupabase = {
+const mockSupabase: any = {
   from: vi.fn((table: string) => {
     if (table === 'verification_documents') {
       return {

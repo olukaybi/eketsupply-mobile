@@ -13,7 +13,7 @@ const createMockChain = () => {
   return chain;
 };
 
-const mockSupabase = {
+const mockSupabase: any = {
   from: vi.fn(() => ({
     select: vi.fn(() => createMockChain()),
     insert: vi.fn(() => ({
