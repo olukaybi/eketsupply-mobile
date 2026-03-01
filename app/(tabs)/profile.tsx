@@ -1,9 +1,45 @@
-import { ScrollView, Text, View, TouchableOpacity, Switch } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useState } from "react";
+import * as Haptics from 'expo-haptics';
+
+const SOCIAL_LINKS = [
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    handle: '@eketsupply',
+    icon: '📸',
+    color: '#E1306C',
+    url: 'https://www.instagram.com/eketsupply',
+  },
+  {
+    id: 'facebook',
+    label: 'Facebook',
+    handle: 'EketSupply',
+    icon: '👥',
+    color: '#1877F2',
+    url: 'https://www.facebook.com/eketsupply',
+  },
+  {
+    id: 'x',
+    label: 'X (Twitter)',
+    handle: '@eketsupply',
+    icon: '🐦',
+    color: '#000000',
+    url: 'https://x.com/eketsupply',
+  },
+  {
+    id: 'tiktok',
+    label: 'TikTok',
+    handle: '@eketsupply',
+    icon: '🎵',
+    color: '#010101',
+    url: 'https://www.tiktok.com/@eketsupply',
+  },
+];
 
 type MenuItemProps = {
   icon: any;
@@ -225,6 +261,50 @@ export default function ProfileScreen() {
           label="Terms & Privacy Policy"
           onPress={() => {}}
         />
+
+        {/* Follow Us Section */}
+        <SectionHeader title="Follow Us" />
+        <View className="bg-background border-b border-border">
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 10 }}>
+            {SOCIAL_LINKS.map((social) => (
+              <TouchableOpacity
+                key={social.id}
+                onPress={async () => {
+                  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await Linking.openURL(social.url);
+                }}
+                style={{
+                  width: '47%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  borderRadius: 12,
+                  padding: 12,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  backgroundColor: '#FAFAFA',
+                  gap: 10,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: social.color + '15',
+                  }}
+                >
+                  <Text style={{ fontSize: 18 }}>{social.icon}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600', fontSize: 13, color: '#11181C' }}>{social.label}</Text>
+                  <Text style={{ fontSize: 11, color: '#687076', marginTop: 1 }}>{social.handle}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Sign Out */}
         <SectionHeader title="" />
