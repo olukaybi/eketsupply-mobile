@@ -127,6 +127,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Create NativeWind CSS interop cache
+        run: mkdir -p node_modules/react-native-css-interop/.cache && touch node_modules/react-native-css-interop/.cache/web.css
+
       - name: Export web build
         run: npx expo export --platform web
         env:
