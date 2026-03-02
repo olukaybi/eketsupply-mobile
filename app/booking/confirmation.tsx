@@ -13,6 +13,7 @@ import {
   Alert,
   Linking,
   ScrollView,
+  Share,
   Text,
   TouchableOpacity,
   View,
@@ -184,6 +185,24 @@ export default function BookingConfirmation() {
       `Hello, I'm your customer on EketSupply. My booking reference is ${booking.booking_reference}. I'm looking forward to your service!`
     );
     Linking.openURL(`https://wa.me/234${phone.slice(-10)}?text=${message}`);
+  }
+
+  async function shareBooking() {
+    if (!booking) return;
+    const ref = booking.booking_reference;
+    const service = booking.service_name;
+    const date = formatDate(booking.scheduled_date);
+    const message =
+      `🔧 EketSupply Booking Confirmed!\n\n` +
+      `Service: ${service}\n` +
+      `Reference: ${ref}\n` +
+      `Date: ${date}\n\n` +
+      `Fix it Right, The First Time. — eketsupply.com`;
+    try {
+      await Share.share({ message, title: `EketSupply Booking ${ref}` });
+    } catch {
+      // User cancelled — no-op
+    }
   }
 
   function formatDate(dateStr: string) {
@@ -464,6 +483,21 @@ export default function BookingConfirmation() {
             }}
           >
             <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>View My Bookings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={shareBooking}
+            style={{
+              backgroundColor: "#E8F5E9",
+              borderRadius: 14,
+              paddingVertical: 16,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <Text style={{ fontSize: 18 }}>📤</Text>
+            <Text style={{ color: "#1B5E20", fontWeight: "700", fontSize: 15 }}>Share Booking</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.replace("/(tabs)" as never)}

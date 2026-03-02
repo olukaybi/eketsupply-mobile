@@ -293,6 +293,8 @@ async function sendExpoPushNotification(token: string, notification: PushNotific
       data: notification.data,
       sound: "default",
       priority: "high",
+      channelId: "eketsupply",
+      icon: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663034436411/gucpjELtVeykfzUH.png",
     }),
   });
 }
