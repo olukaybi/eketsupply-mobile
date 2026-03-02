@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { ScrollView, Text, View, TouchableOpacity, FlatList, ActivityIndicator, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { ThemedLogo } from "@/components/themed-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
+import type { ArtisanBankAccount } from "@/app/artisan/bank-details";
+
+const BANK_ACCOUNT_KEY = "artisan_bank_account";
 
 type JobStatus = "pending" | "accepted" | "in_progress" | "completed" | "cancelled";
 
@@ -77,6 +81,7 @@ export default function ArtisanDashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [artisanId, setArtisanId] = useState<string | null>(null);
   const [updatingJob, setUpdatingJob] = useState<string | null>(null);
+  const [bankAccount, setBankAccount] = useState<ArtisanBankAccount | null>(null);
 
   // Resolve artisan record from auth user
   useEffect(() => {
@@ -99,6 +104,15 @@ export default function ArtisanDashboardScreen() {
           });
       });
   }, [user?.id]);
+
+  // Load bank account status on focus
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem(BANK_ACCOUNT_KEY).then((stored) => {
+        setBankAccount(stored ? JSON.parse(stored) : null);
+      }).catch(() => {});
+    }, [])
+  );
 
   // Refresh on tab focus
   useFocusEffect(
@@ -389,6 +403,41 @@ export default function ArtisanDashboardScreen() {
             <Text className="text-xs text-muted mt-2 text-center">
               Based on {stats.ratingCount} review{stats.ratingCount !== 1 ? "s" : ""}
             </Text>
+          )}
+        </View>
+
+        {/* Payout Status Banner */}
+        <View className="px-4 pt-3">
+          {bankAccount ? (
+            <TouchableOpacity
+              onPress={() => router.push("/artisan/bank-details" as any)}
+              style={{ backgroundColor: "#F0FDF4", borderColor: "#86EFAC", borderWidth: 1, borderRadius: 16, padding: 14, flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#DCFCE7", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <IconSymbol name="checkmark.circle.fill" size={20} color="#16A34A" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: "600", color: "#15803D" }}>Payouts Active</Text>
+                <Text style={{ fontSize: 11, color: "#4ADE80", marginTop: 1 }}>
+                  {bankAccount.bank_name} •••• {bankAccount.account_number.slice(-4)}
+                </Text>
+              </View>
+              <Text style={{ fontSize: 11, color: "#16A34A", fontWeight: "500" }}>85% share</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => router.push("/artisan/bank-details" as any)}
+              style={{ backgroundColor: "#FEF3C7", borderColor: "#FDE68A", borderWidth: 1, borderRadius: 16, padding: 14, flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#FEF9C3", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <IconSymbol name="exclamationmark.triangle.fill" size={20} color="#D97706" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: "600", color: "#92400E" }}>Bank Account Required</Text>
+                <Text style={{ fontSize: 11, color: "#B45309", marginTop: 1 }}>Link your account to receive payments</Text>
+              </View>
+              <Text style={{ fontSize: 12, color: "#D97706", fontWeight: "600" }}>Set up →</Text>
+            </TouchableOpacity>
           )}
         </View>
 
