@@ -4,9 +4,10 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as Haptics from 'expo-haptics';
 import { useThemeContext } from "@/lib/theme-provider";
+import { supabase } from "@/lib/supabase";
 
 const SOCIAL_LINKS = [
   {
@@ -88,10 +89,40 @@ export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { colorScheme, setColorScheme } = useThemeContext();
   const isDarkMode = colorScheme === "dark";
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [completedBookings, setCompletedBookings] = useState(0);
+
   const toggleDarkMode = (value: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setColorScheme(value ? "dark" : "light");
   };
+
+  useEffect(() => {
+    if (!user) return;
+    // Fetch completed bookings count to calculate loyalty points
+    // Each completed booking earns 50 points
+    const fetchLoyaltyData = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.openId)
+          .single();
+        if (!profile) return;
+        const { count } = await supabase
+          .from('bookings')
+          .select('*', { count: 'exact', head: true })
+          .eq('customer_id', profile.id)
+          .eq('status', 'completed');
+        const bookingCount = count ?? 0;
+        setCompletedBookings(bookingCount);
+        setLoyaltyPoints(bookingCount * 50);
+      } catch (e) {
+        // Silently fail — loyalty is non-critical
+      }
+    };
+    fetchLoyaltyData();
+  }, [user]);
 
   if (!user) {
     return (
@@ -160,6 +191,30 @@ export default function ProfileScreen() {
           >
             <Text className="text-white text-sm font-medium">Edit Profile</Text>
           </TouchableOpacity>
+
+          {/* Loyalty Points Counter */}
+          <View style={{ flexDirection: 'row', marginTop: 16, gap: 20 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#FFD700', fontSize: 20, fontWeight: '800' }}>
+                {loyaltyPoints.toLocaleString()}
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>🏆 Points</Text>
+            </View>
+            <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#fff', fontSize: 20, fontWeight: '800' }}>
+                {completedBookings}
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>✅ Bookings</Text>
+            </View>
+            <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+            <View style={{ alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => router.push('/referral-dashboard' as never)}>
+                <Text style={{ color: '#FFD700', fontSize: 20, fontWeight: '800' }}>🎁</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>Refer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
 
         {/* Account Section */}
