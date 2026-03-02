@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
+import { ThemedLogo } from "@/components/themed-logo";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -37,11 +38,7 @@ export default function SignInScreen() {
         <View className="flex-1 justify-center p-6">
           {/* Logo/Header */}
           <View className="items-center mb-8">
-            <Image
-              source={require('@/assets/images/eketsupply-logo.png')}
-              style={{ width: 240, height: 60, marginBottom: 12 }}
-              resizeMode="contain"
-            />
+            <ThemedLogo width={240} style={{ marginBottom: 12 }} />
             <Text className="text-base text-muted mt-2">Sign in to continue</Text>
           </View>
 

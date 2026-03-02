@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Image } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { ThemedLogo } from "@/components/themed-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 
@@ -208,11 +209,7 @@ export default function HomeScreen() {
         <View className="px-6 pt-4 pb-2">
           <View className="flex-row justify-between items-center mb-4">
             <View className="flex-row items-center">
-              <Image
-                source={require('@/assets/images/eketsupply-logo.png')}
-                style={{ width: 160, height: 40 }}
-                resizeMode="contain"
-              />
+              <ThemedLogo width={160} />
             </View>
             {user ? (
               <TouchableOpacity onPress={logout} className="bg-surface rounded-full p-2">

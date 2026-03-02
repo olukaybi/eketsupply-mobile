@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ScrollView, Text, View, TouchableOpacity, FlatList, ActivityIndicator, Alert } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { ThemedLogo } from "@/components/themed-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
@@ -330,13 +331,16 @@ export default function ArtisanDashboardScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="px-4 pt-4 pb-4" style={{ backgroundColor: "#1B5E20" }}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mb-3"
-            style={{ flexDirection: "row", alignItems: "center" }}
-          >
-            <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.8)" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
+              <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.8)" />
+            </TouchableOpacity>
+            <ThemedLogo width={140} />
+            <View style={{ width: 20 }} />
+          </View>
           <Text className="text-white text-2xl font-bold">Artisan Dashboard</Text>
           <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 2 }}>
             Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}

@@ -1,4 +1,5 @@
-import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform, Image } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform } from "react-native";
+import { ThemedLogo } from "@/components/themed-logo";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
@@ -89,11 +90,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <ScreenContainer className="items-center justify-center px-6">
-        <Image
-          source={require('@/assets/images/eketsupply-logo.png')}
-          style={{ width: 200, height: 50, marginBottom: 16 }}
-          resizeMode="contain"
-        />
+        <ThemedLogo width={200} style={{ marginBottom: 16 }} />
         <Text className="text-xl font-bold text-foreground mb-2">Welcome to EketSupply</Text>
         <Text className="text-muted text-center mb-8 text-sm">
           Sign in to manage your bookings, messages, and profile settings.
