@@ -582,3 +582,5 @@
 - [ ] Wire review prompt from bookings tab after job marked complete
 - [ ] Build emergency booking flow with premium pricing
 - [ ] Write admin role SQL and reviews table migration
+
+- [ ] Remove escrow references from payment structure (analytics.tsx and artisan/[id].tsx)
