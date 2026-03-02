@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { ScreenContainer } from '@/components/screen-container';
+import { ThemedLogo } from '@/components/themed-logo';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -424,6 +425,23 @@ export default function ReviewScreen() {
         >
           <Text className="text-muted text-sm">Skip for now</Text>
         </TouchableOpacity>
+
+        {/* Powered by EketSupply footer */}
+        <View
+          style={{
+            alignItems: 'center',
+            paddingVertical: 24,
+            paddingHorizontal: 16,
+            borderTopWidth: 1,
+            borderTopColor: '#E5E7EB',
+            marginTop: 16,
+          }}
+        >
+          <Text style={{ fontSize: 11, color: '#9BA1A6', marginBottom: 8, letterSpacing: 0.5 }}>
+            POWERED BY
+          </Text>
+          <ThemedLogo width={140} />
+        </View>
       </ScrollView>
     </ScreenContainer>
   );
