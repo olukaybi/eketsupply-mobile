@@ -1,5 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { VideoView, useVideoPlayer } from "expo-video";
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import { IconSymbol } from "./ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { useState } from "react";
@@ -11,18 +10,47 @@ interface VideoTestimonialPlayerProps {
   duration: number;
 }
 
-export function VideoTestimonialPlayer({
-  videoUrl,
-  customerName,
-  rating,
-  duration,
-}: VideoTestimonialPlayerProps) {
+function VideoHeader({ customerName, rating, duration }: { customerName: string; rating: number; duration: number }) {
+  return (
+    <View className="p-3 border-b border-border flex-row items-center justify-between">
+      <View className="flex-1">
+        <Text className="text-foreground font-semibold">{customerName}</Text>
+        <View className="flex-row items-center gap-1 mt-1">
+          {[...Array(5)].map((_, i) => (
+            <Text key={i} className="text-xs">
+              {i < rating ? "⭐" : "☆"}
+            </Text>
+          ))}
+          <Text className="text-xs text-muted ml-1">{duration}s</Text>
+        </View>
+      </View>
+      <View className="bg-primary/10 px-2 py-1 rounded">
+        <Text className="text-primary text-xs font-semibold">VIDEO</Text>
+      </View>
+    </View>
+  );
+}
+
+function WebFallback({ customerName, rating, duration }: VideoTestimonialPlayerProps) {
+  return (
+    <View className="bg-surface rounded-xl overflow-hidden border border-border">
+      <VideoHeader customerName={customerName} rating={rating} duration={duration} />
+      <View style={{ aspectRatio: 16 / 9 }} className="items-center justify-center bg-black/10">
+        <Text className="text-muted text-sm">Video playback is only available on mobile devices</Text>
+      </View>
+    </View>
+  );
+}
+
+function NativeVideoPlayer({ videoUrl, customerName, rating, duration }: VideoTestimonialPlayerProps) {
+  // Dynamic import to avoid loading expo-video on web
+  const { VideoView, useVideoPlayer } = require("expo-video");
   const colors = useColors();
   const [showControls, setShowControls] = useState(true);
-  
-  const player = useVideoPlayer(videoUrl, (player) => {
-    player.loop = false;
-    player.volume = 1.0;
+
+  const player = useVideoPlayer(videoUrl, (p: { loop: boolean; volume: number }) => {
+    p.loop = false;
+    p.volume = 1.0;
   });
 
   function togglePlayPause() {
@@ -36,23 +64,7 @@ export function VideoTestimonialPlayer({
 
   return (
     <View className="bg-surface rounded-xl overflow-hidden border border-border">
-      {/* Video Header */}
-      <View className="p-3 border-b border-border flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text className="text-foreground font-semibold">{customerName}</Text>
-          <View className="flex-row items-center gap-1 mt-1">
-            {[...Array(5)].map((_, i) => (
-              <Text key={i} className="text-xs">
-                {i < rating ? "⭐" : "☆"}
-              </Text>
-            ))}
-            <Text className="text-xs text-muted ml-1">{duration}s</Text>
-          </View>
-        </View>
-        <View className="bg-primary/10 px-2 py-1 rounded">
-          <Text className="text-primary text-xs font-semibold">VIDEO</Text>
-        </View>
-      </View>
+      <VideoHeader customerName={customerName} rating={rating} duration={duration} />
 
       {/* Video Player */}
       <TouchableOpacity
@@ -93,4 +105,11 @@ export function VideoTestimonialPlayer({
       </View>
     </View>
   );
+}
+
+export function VideoTestimonialPlayer(props: VideoTestimonialPlayerProps) {
+  if (Platform.OS === "web") {
+    return <WebFallback {...props} />;
+  }
+  return <NativeVideoPlayer {...props} />;
 }

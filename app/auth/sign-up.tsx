@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from "react-native";
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
@@ -59,8 +59,11 @@ export default function SignUpScreen() {
         <View className="flex-1 p-6">
           {/* Logo/Header */}
           <View className="items-center mb-6 mt-4">
-            <Text className="text-4xl font-bold mb-1" style={{ color: '#1B5E20' }}>Eket<Text style={{ color: '#E65100' }}>Supply</Text></Text>
-            <Text className="text-sm text-muted mb-2">Fix it Right, The First Time</Text>
+            <Image
+              source={require('@/assets/images/eketsupply-logo.png')}
+              style={{ width: 220, height: 55, marginBottom: 8 }}
+              resizeMode="contain"
+            />
             <Text className="text-xl font-bold text-foreground">Create Account</Text>
           </View>
 
