@@ -628,3 +628,10 @@
 - [x] Build notification preferences screen (per-type toggle switches)
 - [x] Add Notification Preferences link in Profile → Settings section
 - [x] Persist notification preferences to AsyncStorage (local, no server round-trip needed)
+
+## Brand Polish (Round 6)
+- [x] Build referral dashboard screen with code display, share button, and usage stats
+- [x] Add Referral Dashboard link in Profile screen
+- [x] Build What's New changelog screen with version history
+- [x] Add What's New link in Profile → Support section
+- [x] Add emergency contact field to booking confirmation screen
