@@ -592,3 +592,8 @@
 - [x] Add logo to Profile/Settings screen
 - [x] Add logo to Sign-in screen
 - [x] Add logo to Sign-up screen
+
+## Logo Transparency Fix
+- [x] Remove white/gray background from logo PNG to make it transparent
+- [x] Replace logo file in assets/images/eketsupply-logo.png
+- [x] Verify logo looks good on both light and dark mode
