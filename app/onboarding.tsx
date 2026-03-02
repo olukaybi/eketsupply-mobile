@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { ThemedLogo } from '@/components/themed-logo';
 import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -80,11 +81,7 @@ export default function OnboardingScreen() {
         {/* Content */}
         <View className="flex-1 justify-center items-center">
           {/* Logo */}
-          <Image
-            source={require('@/assets/images/eketsupply-logo.png')}
-            style={{ width: 200, height: 50, marginBottom: 24 }}
-            resizeMode="contain"
-          />
+          <ThemedLogo width={200} style={{ marginBottom: 24 }} />
 
           {/* Icon */}
           <View 

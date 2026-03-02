@@ -597,3 +597,10 @@
 - [x] Remove white/gray background from logo PNG to make it transparent
 - [x] Replace logo file in assets/images/eketsupply-logo.png
 - [x] Verify logo looks good on both light and dark mode
+
+## Logo Improvements (All Three)
+- [x] Create dark-mode logo variant with white/light tagline text
+- [x] Add logo to Artisan Dashboard screen
+- [x] Add logo to Admin Dashboard screen
+- [x] Create ThemedLogo component that auto-switches between light/dark variants
+- [x] Replace all Image logo usages with ThemedLogo component
