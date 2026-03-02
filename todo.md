@@ -611,3 +611,8 @@
 - [x] Crop icon emblem from logo and set as app icon (icon.png, splash-icon.png, etc.)
 - [x] Make logo more prominent: increase size on Home, Auth, Onboarding screens
 - [x] Add subtle logo watermark or header bar branding to key screens
+
+## Brand Polish (Round 3)
+- [x] Add animated launch screen with scale-in animation before onboarding
+- [x] Add ThemedLogo to Artisan Dashboard header
+- [x] Add "Powered by EketSupply" footer to booking confirmation screens

@@ -338,7 +338,7 @@ export default function ArtisanDashboardScreen() {
             >
               <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.8)" />
             </TouchableOpacity>
-            <ThemedLogo width={140} />
+            <ThemedLogo width={180} />
             <View style={{ width: 20 }} />
           </View>
           <Text className="text-white text-2xl font-bold">Artisan Dashboard</Text>

@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { ThemedLogo } from "@/components/themed-logo";
 import { supabase } from "@/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -475,6 +476,26 @@ export default function BookingConfirmation() {
           >
             <Text style={{ color: "#687076", fontWeight: "600", fontSize: 15 }}>Back to Home</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Powered by EketSupply footer */}
+        <View
+          style={{
+            alignItems: "center",
+            paddingVertical: 24,
+            paddingHorizontal: 16,
+            borderTopWidth: 1,
+            borderTopColor: "#E5E7EB",
+            marginTop: 8,
+          }}
+        >
+          <Text style={{ fontSize: 11, color: "#9BA1A6", marginBottom: 8, letterSpacing: 0.5 }}>
+            POWERED BY
+          </Text>
+          <ThemedLogo width={140} />
+          <Text style={{ fontSize: 11, color: "#9BA1A6", marginTop: 8, textAlign: "center" }}>
+            Fix it Right, The First Time.
+          </Text>
         </View>
       </ScrollView>
     </ScreenContainer>
