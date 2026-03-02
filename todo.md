@@ -635,3 +635,9 @@
 - [x] Build What's New changelog screen with version history
 - [x] Add What's New link in Profile → Support section
 - [x] Add emergency contact field to booking confirmation screen
+
+## Round 7 Features & Bug Fix
+- [x] Fix "Database error saving new user" sign-up bug
+- [x] Add loyalty points counter to Profile header
+- [x] Add booking cancellation flow with reason selector and refund policy reminder
+- [x] Add Track Artisan live map screen for confirmed bookings

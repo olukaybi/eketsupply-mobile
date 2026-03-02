@@ -17,10 +17,21 @@ import { router } from "expo-router";
 import { notifyBookingAccepted, notifyBookingRejected, notifyBookingCompleted } from "@/lib/notification-service";
 import { ReviewModal } from "@/components/review-modal";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { Modal, ScrollView as RNScrollView, Platform } from "react-native";
+import * as Haptics from 'expo-haptics';
 
 type BookingStatus = "pending" | "accepted" | "rejected" | "completed" | "cancelled";
 type TabType = "pending" | "active" | "completed";
 type UserType = "customer" | "artisan";
+
+const CANCEL_REASONS = [
+  "I found another artisan",
+  "My schedule has changed",
+  "The price is too high",
+  "I no longer need this service",
+  "The artisan is taking too long to respond",
+  "Other",
+];
 
 type Booking = {
   id: string;
@@ -93,6 +104,10 @@ export default function BookingsScreen() {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   // ─── Resolve profile row id and artisan row id ───────────────────────────
@@ -269,25 +284,34 @@ export default function BookingsScreen() {
   }, [bookings, profileId]);
 
   // ─── Actions ──────────────────────────────────────────────────────────────
-  async function handleCancelBooking(bookingId: string) {
-    Alert.alert("Cancel Booking", "Are you sure you want to cancel this booking?", [
-      { text: "No", style: "cancel" },
-      {
-        text: "Yes, Cancel",
-        style: "destructive",
-        onPress: async () => {
-          const { error } = await supabase
-            .from("bookings")
-            .update({ status: "cancelled", updated_at: new Date().toISOString() })
-            .eq("id", bookingId);
-          if (error) Alert.alert("Error", "Failed to cancel booking");
-          else {
-            Alert.alert("Cancelled", "Your booking has been cancelled.");
-            fetchBookings();
-          }
-        },
-      },
-    ]);
+  function handleCancelBooking(bookingId: string) {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCancelBookingId(bookingId);
+    setCancelReason(null);
+    setCancelModalVisible(true);
+  }
+
+  async function confirmCancellation() {
+    if (!cancelBookingId || !cancelReason) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          status: "cancelled",
+          customer_notes: `Cancelled: ${cancelReason}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", cancelBookingId);
+      if (error) throw error;
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setCancelModalVisible(false);
+      fetchBookings();
+    } catch {
+      Alert.alert("Error", "Failed to cancel booking. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
   }
 
   async function handleAcceptBooking(bookingId: string) {
@@ -518,6 +542,17 @@ export default function BookingsScreen() {
           </TouchableOpacity>
         )}
 
+        {userType === "customer" && activeTab === "active" && (
+          <TouchableOpacity
+            className="py-3 rounded-xl mt-2 flex-row items-center justify-center gap-2"
+            style={{ backgroundColor: '#1B5E20' }}
+            onPress={() => router.push(`/booking/track-artisan?bookingId=${booking.id}` as any)}
+          >
+            <Text className="text-lg">🗺️</Text>
+            <Text className="text-center font-semibold text-white">Track Artisan</Text>
+          </TouchableOpacity>
+        )}
+
         {userType === "customer" && activeTab === "pending" && (
           <TouchableOpacity
             className="bg-error/10 py-3 rounded-xl mt-2"
@@ -661,6 +696,85 @@ export default function BookingsScreen() {
           serviceDescription={selectedBooking.service_description}
         />
       )}
+
+      {/* Cancellation Modal */}
+      <Modal
+        visible={cancelModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCancelModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#11181C', marginBottom: 4 }}>
+              Cancel Booking
+            </Text>
+            <Text style={{ fontSize: 13, color: '#687076', marginBottom: 16 }}>
+              Please tell us why you're cancelling.
+            </Text>
+
+            {/* Reason list */}
+            {CANCEL_REASONS.map((reason) => (
+              <TouchableOpacity
+                key={reason}
+                onPress={() => setCancelReason(reason)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: 12,
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#E5E7EB',
+                }}
+              >
+                <View style={{
+                  width: 22, height: 22, borderRadius: 11,
+                  borderWidth: 2,
+                  borderColor: cancelReason === reason ? '#1B5E20' : '#D1D5DB',
+                  backgroundColor: cancelReason === reason ? '#1B5E20' : 'transparent',
+                  marginRight: 12,
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {cancelReason === reason && (
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' }} />
+                  )}
+                </View>
+                <Text style={{ fontSize: 15, color: '#11181C' }}>{reason}</Text>
+              </TouchableOpacity>
+            ))}
+
+            {/* Refund policy reminder */}
+            <View style={{ backgroundColor: '#FFF7ED', borderRadius: 12, padding: 12, marginTop: 16, marginBottom: 16 }}>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#92400E', marginBottom: 4 }}>⚠️ Refund Policy</Text>
+              <Text style={{ fontSize: 12, color: '#92400E', lineHeight: 18 }}>
+                Cancellations made more than 24 hours before the scheduled time are eligible for a full refund.
+                Late cancellations may incur a 10% processing fee.
+              </Text>
+            </View>
+
+            {/* Action buttons */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => setCancelModalVisible(false)}
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center' }}
+              >
+                <Text style={{ fontWeight: '600', color: '#11181C' }}>Keep Booking</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={confirmCancellation}
+                disabled={!cancelReason || cancelling}
+                style={{
+                  flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+                  backgroundColor: cancelReason ? '#EF4444' : '#F3F4F6',
+                }}
+              >
+                <Text style={{ fontWeight: '600', color: cancelReason ? '#fff' : '#9CA3AF' }}>
+                  {cancelling ? 'Cancelling…' : 'Cancel Booking'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
