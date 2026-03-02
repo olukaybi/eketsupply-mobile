@@ -182,6 +182,15 @@ export default function ProfileScreen() {
           sublabel="Cards and bank accounts"
           onPress={() => {}}
         />
+        <MenuItem
+          icon="person.badge.plus.fill"
+          label="Referral Dashboard"
+          sublabel="Share your code and track rewards"
+          onPress={() => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/referral-dashboard' as never);
+          }}
+        />
 
         {/* Artisan Section */}
         <SectionHeader title="Artisan Tools" />
@@ -279,6 +288,15 @@ export default function ProfileScreen() {
           onPress={async () => {
             if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             await Linking.openURL('https://www.eketsupply.com');
+          }}
+        />
+        <MenuItem
+          icon="chevron.right"
+          label="What's New"
+          sublabel="Latest features and updates"
+          onPress={() => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/whats-new' as never);
           }}
         />
 

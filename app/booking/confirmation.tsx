@@ -16,9 +16,11 @@ import {
   ScrollView,
   Share,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -138,6 +140,23 @@ export default function BookingConfirmation() {
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [emergencySaved, setEmergencySaved] = useState(false);
+  const [showEmergencyForm, setShowEmergencyForm] = useState(false);
+
+  useEffect(() => {
+    // Load previously saved emergency contact
+    AsyncStorage.getItem("eketsupply_emergency_contact").then((raw) => {
+      if (raw) {
+        try {
+          const { name, phone } = JSON.parse(raw);
+          setEmergencyName(name ?? "");
+          setEmergencyPhone(phone ?? "");
+        } catch {}
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (bookingId) loadBooking();
@@ -199,6 +218,21 @@ export default function BookingConfirmation() {
       `Hello, I'm your customer on EketSupply. My booking reference is ${booking.booking_reference}. I'm looking forward to your service!`
     );
     Linking.openURL(`https://wa.me/234${phone.slice(-10)}?text=${message}`);
+  }
+
+  async function saveEmergencyContact() {
+    if (!emergencyName.trim() || !emergencyPhone.trim()) {
+      Alert.alert("Missing Info", "Please enter both a name and phone number.");
+      return;
+    }
+    await AsyncStorage.setItem(
+      "eketsupply_emergency_contact",
+      JSON.stringify({ name: emergencyName.trim(), phone: emergencyPhone.trim() })
+    );
+    if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setEmergencySaved(true);
+    setShowEmergencyForm(false);
+    setTimeout(() => setEmergencySaved(false), 3000);
   }
 
   async function copyRef() {
@@ -511,6 +545,137 @@ export default function BookingConfirmation() {
             title="Leave a Review"
             description="Help other customers by rating your experience with the artisan."
           />
+        </View>
+
+        {/* Emergency Contact */}
+        <View
+          style={{
+            marginHorizontal: 16,
+            backgroundColor: "#fff",
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.06,
+            shadowRadius: 6,
+            elevation: 2,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 13, color: "#687076", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Emergency Contact
+              </Text>
+              <Text style={{ fontSize: 12, color: "#9BA1A6", marginTop: 2 }}>
+                Notify someone when the artisan arrives
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => setShowEmergencyForm(!showEmergencyForm)}
+              style={{
+                backgroundColor: showEmergencyForm ? "#F5F5F5" : "#E8F5E9",
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+              }}
+            >
+              <Text style={{ color: showEmergencyForm ? "#687076" : "#1B5E20", fontWeight: "700", fontSize: 13 }}>
+                {showEmergencyForm ? "Cancel" : (emergencyName ? "Edit" : "Add")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Saved contact display */}
+          {!showEmergencyForm && emergencyName ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#F0F7F0",
+                borderRadius: 10,
+                padding: 12,
+                gap: 10,
+              }}
+            >
+              <Text style={{ fontSize: 22 }}>👤</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "#11181C" }}>{emergencyName}</Text>
+                <Text style={{ fontSize: 13, color: "#687076" }}>{emergencyPhone}</Text>
+              </View>
+              {emergencySaved && (
+                <Text style={{ fontSize: 12, color: "#1B5E20", fontWeight: "700" }}>✓ Saved</Text>
+              )}
+            </View>
+          ) : !showEmergencyForm ? (
+            <TouchableOpacity
+              onPress={() => setShowEmergencyForm(true)}
+              style={{
+                borderWidth: 1.5,
+                borderColor: "#E5E7EB",
+                borderStyle: "dashed",
+                borderRadius: 10,
+                padding: 14,
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20, marginBottom: 4 }}>👤</Text>
+              <Text style={{ fontSize: 13, color: "#687076" }}>Tap to add an emergency contact</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {/* Form */}
+          {showEmergencyForm && (
+            <View style={{ gap: 10 }}>
+              <TextInput
+                value={emergencyName}
+                onChangeText={setEmergencyName}
+                placeholder="Contact name (e.g. Mum)"
+                placeholderTextColor="#9BA1A6"
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#E5E7EB",
+                  borderRadius: 10,
+                  paddingHorizontal: 14,
+                  paddingVertical: 12,
+                  fontSize: 15,
+                  color: "#11181C",
+                  backgroundColor: "#FAFAFA",
+                }}
+                returnKeyType="next"
+              />
+              <TextInput
+                value={emergencyPhone}
+                onChangeText={setEmergencyPhone}
+                placeholder="Phone number (e.g. 08012345678)"
+                placeholderTextColor="#9BA1A6"
+                keyboardType="phone-pad"
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#E5E7EB",
+                  borderRadius: 10,
+                  paddingHorizontal: 14,
+                  paddingVertical: 12,
+                  fontSize: 15,
+                  color: "#11181C",
+                  backgroundColor: "#FAFAFA",
+                }}
+                returnKeyType="done"
+                onSubmitEditing={saveEmergencyContact}
+              />
+              <TouchableOpacity
+                onPress={saveEmergencyContact}
+                style={{
+                  backgroundColor: "#1B5E20",
+                  borderRadius: 10,
+                  paddingVertical: 13,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>Save Contact</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Actions */}
