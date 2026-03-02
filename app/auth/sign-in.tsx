@@ -38,7 +38,7 @@ export default function SignInScreen() {
         <View className="flex-1 justify-center p-6">
           {/* Logo/Header */}
           <View className="items-center mb-8">
-            <ThemedLogo width={240} style={{ marginBottom: 12 }} />
+            <ThemedLogo width={280} style={{ marginBottom: 8 }} />
             <Text className="text-base text-muted mt-2">Sign in to continue</Text>
           </View>
 

@@ -81,7 +81,7 @@ export default function OnboardingScreen() {
         {/* Content */}
         <View className="flex-1 justify-center items-center">
           {/* Logo */}
-          <ThemedLogo width={200} style={{ marginBottom: 24 }} />
+          <ThemedLogo width={260} style={{ marginBottom: 20 }} />
 
           {/* Icon */}
           <View 

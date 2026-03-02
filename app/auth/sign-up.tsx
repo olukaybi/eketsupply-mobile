@@ -60,7 +60,7 @@ export default function SignUpScreen() {
         <View className="flex-1 p-6">
           {/* Logo/Header */}
           <View className="items-center mb-6 mt-4">
-            <ThemedLogo width={220} style={{ marginBottom: 8 }} />
+            <ThemedLogo width={280} style={{ marginBottom: 8 }} />
             <Text className="text-xl font-bold text-foreground">Create Account</Text>
           </View>
 

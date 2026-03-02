@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useState } from "react";
 import * as Haptics from 'expo-haptics';
+import { useThemeContext } from "@/lib/theme-provider";
 
 const SOCIAL_LINKS = [
   {
@@ -86,11 +87,17 @@ function SectionHeader({ title }: { title: string }) {
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { colorScheme, setColorScheme } = useThemeContext();
+  const isDarkMode = colorScheme === "dark";
+  const toggleDarkMode = (value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setColorScheme(value ? "dark" : "light");
+  };
 
   if (!user) {
     return (
       <ScreenContainer className="items-center justify-center px-6">
-        <ThemedLogo width={200} style={{ marginBottom: 16 }} />
+        <ThemedLogo width={260} style={{ marginBottom: 16 }} />
         <Text className="text-xl font-bold text-foreground mb-2">Welcome to EketSupply</Text>
         <Text className="text-muted text-center mb-8 text-sm">
           Sign in to manage your bookings, messages, and profile settings.
@@ -228,6 +235,20 @@ export default function ProfileScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
+              trackColor={{ false: "#D4E0D4", true: "#1B5E20" }}
+              thumbColor="#fff"
+            />
+          }
+        />
+        <MenuItem
+          icon="moon.fill"
+          label="Dark Mode"
+          sublabel={isDarkMode ? "On" : "Off"}
+          onPress={() => toggleDarkMode(!isDarkMode)}
+          rightElement={
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleDarkMode}
               trackColor={{ false: "#D4E0D4", true: "#1B5E20" }}
               thumbColor="#fff"
             />

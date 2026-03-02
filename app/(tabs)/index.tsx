@@ -209,7 +209,7 @@ export default function HomeScreen() {
         <View className="px-6 pt-4 pb-2">
           <View className="flex-row justify-between items-center mb-4">
             <View className="flex-row items-center">
-              <ThemedLogo width={160} />
+              <ThemedLogo width={200} />
             </View>
             {user ? (
               <TouchableOpacity onPress={logout} className="bg-surface rounded-full p-2">

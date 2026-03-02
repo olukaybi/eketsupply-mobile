@@ -604,3 +604,10 @@
 - [x] Add logo to Admin Dashboard screen
 - [x] Create ThemedLogo component that auto-switches between light/dark variants
 - [x] Replace all Image logo usages with ThemedLogo component
+
+## Further Logo & Branding Improvements
+- [x] Add dark mode toggle to Profile/Settings screen
+- [x] Add ThemedLogo to Artisan Onboarding flow
+- [x] Crop icon emblem from logo and set as app icon (icon.png, splash-icon.png, etc.)
+- [x] Make logo more prominent: increase size on Home, Auth, Onboarding screens
+- [x] Add subtle logo watermark or header bar branding to key screens
