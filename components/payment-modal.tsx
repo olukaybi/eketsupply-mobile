@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { 
-  initializePayment, 
-  createPaymentRecord, 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  initializePayment,
+  createPaymentRecord,
   updatePaymentStatus,
   generatePaymentReference,
   calculatePaystackFees,
-  type PaymentData 
+  type PaymentData,
 } from '@/lib/paystack-service';
+import type { ArtisanBankAccount } from '@/app/artisan/bank-details';
+
+// AsyncStorage key used by bank-details.tsx
+const ARTISAN_BANK_KEY = 'artisan_bank_account';
 
 type PaymentModalProps = {
   visible: boolean;
@@ -34,8 +39,39 @@ export function PaymentModal({
 }: PaymentModalProps) {
   const [processing, setProcessing] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'confirm' | 'processing' | 'success' | 'failed'>('confirm');
+  const [artisanSubaccountCode, setArtisanSubaccountCode] = useState<string | undefined>(undefined);
+  const [splitReady, setSplitReady] = useState(false);
 
   const { amount: baseAmount, fees, total } = calculatePaystackFees(amount);
+
+  // Load artisan's Paystack subaccount code for split payments
+  useEffect(() => {
+    if (!visible) return;
+    (async () => {
+      try {
+        // Try artisan-specific key first (for when customer looks up artisan's subaccount)
+        const artisanSpecific = await AsyncStorage.getItem(`${ARTISAN_BANK_KEY}_${artisanId}`);
+        if (artisanSpecific) {
+          const account: ArtisanBankAccount = JSON.parse(artisanSpecific);
+          setArtisanSubaccountCode(account.paystack_subaccount_code);
+          setSplitReady(true);
+          return;
+        }
+        // Fallback: generic key (artisan's own device)
+        const generic = await AsyncStorage.getItem(ARTISAN_BANK_KEY);
+        if (generic) {
+          const account: ArtisanBankAccount = JSON.parse(generic);
+          setArtisanSubaccountCode(account.paystack_subaccount_code);
+          setSplitReady(true);
+        } else {
+          // No subaccount — payment goes to EketSupply main account
+          setSplitReady(false);
+        }
+      } catch (_) {
+        setSplitReady(false);
+      }
+    })();
+  }, [artisanId, visible]);
 
   const handlePayment = async () => {
     try {
@@ -52,11 +88,14 @@ export function PaymentModal({
         status: 'pending',
       });
 
-      // Initialize payment with Paystack
+      // Initialize payment with Paystack — include subaccount for split payment
       const paymentData: PaymentData = {
         amount: total * 100, // Convert to kobo
         email: customerEmail,
         reference,
+        // Split payment: artisan gets 85%, EketSupply gets 15%
+        subaccount_code: artisanSubaccountCode,
+        settlement_delay: 24, // 24-hour dispute window before artisan is paid
         metadata: {
           booking_id: bookingId,
           customer_id: customerId,
@@ -67,24 +106,19 @@ export function PaymentModal({
 
       const _paymentInit = await initializePayment(paymentData);
 
-      // In a real app, you would open the Paystack payment page here
-      // For this demo, we'll simulate a successful payment
+      // In production, open the Paystack payment page via WebBrowser
+      // For this demo, we simulate a successful payment
       Alert.alert(
         'Payment Gateway',
-        `In production, this would open Paystack payment page.\n\nReference: ${reference}\n\nFor demo purposes, simulating successful payment...`,
+        `In production, this would open the Paystack payment page.\n\nReference: ${reference}${artisanSubaccountCode ? `\nSplit: 85% → Artisan, 15% → EketSupply` : '\nNote: Artisan has not linked a bank account yet'}\n\nSimulate outcome:`,
         [
           {
             text: 'Simulate Success',
             onPress: async () => {
-              // Simulate payment verification
-              await new Promise(resolve => setTimeout(resolve, 2000));
-
-              // Update payment status
-              await updatePaymentStatus(reference, 'success', 'demo_transaction_' + Date.now());
-
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              await updatePaymentStatus(reference, 'success', 'demo_txn_' + Date.now());
               setPaymentStep('success');
               setProcessing(false);
-
               setTimeout(() => {
                 onSuccess(bookingId);
                 onClose();
@@ -102,7 +136,6 @@ export function PaymentModal({
           },
         ]
       );
-
     } catch (error) {
       console.error('Payment error:', error);
       Alert.alert('Payment Failed', 'An error occurred while processing your payment. Please try again.');
@@ -137,6 +170,21 @@ export function PaymentModal({
                 <Text className="text-primary font-bold text-lg">₦{total.toLocaleString()}</Text>
               </View>
             </View>
+
+            {/* Split payment indicator */}
+            {splitReady && artisanSubaccountCode ? (
+              <View className="bg-success/10 border border-success/20 rounded-xl p-3 mb-4">
+                <Text className="text-xs text-center" style={{ color: '#16a34a' }}>
+                  ✓ Split payment active — artisan receives 85% automatically
+                </Text>
+              </View>
+            ) : (
+              <View className="bg-warning/10 border border-warning/20 rounded-xl p-3 mb-4">
+                <Text className="text-xs text-center text-warning">
+                  ⚠ Artisan has not linked a bank account yet
+                </Text>
+              </View>
+            )}
 
             <View className="bg-surface rounded-xl p-3 mb-4 border border-border">
               <Text className="text-muted text-xs">
@@ -184,7 +232,8 @@ export function PaymentModal({
             <Text className="text-foreground font-bold text-xl mb-2">Payment Successful!</Text>
             <Text className="text-muted text-sm text-center">
               Your payment has been processed securely.{'\n'}
-              The artisan will be notified of your booking.
+              The artisan will be notified of your booking.{'\n'}
+              {artisanSubaccountCode ? 'Artisan payout scheduled in 24 hours.' : ''}
             </Text>
           </View>
         );
