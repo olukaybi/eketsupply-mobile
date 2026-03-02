@@ -340,7 +340,7 @@ export function registerPaystackWebhook(app: Express) {
     express.raw({ type: "application/json" }),
     async (req: Request, res: Response) => {
       const signature = req.headers["x-paystack-signature"] as string;
-      const secret = process.env.PAYSTACK_SECRET_KEY || "";
+      const secret = process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_WEBHOOK_SECRET || "";
 
       if (!secret) {
         console.error("[webhook] PAYSTACK_SECRET_KEY not set");

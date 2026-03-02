@@ -319,22 +319,51 @@ export default function ProfileScreen() {
         />
 
         {/* Support Section */}
-        <SectionHeader title="Support" />
+        <SectionHeader title="Support & Legal" />
         <MenuItem
           icon="info.circle.fill"
           label="Help Centre"
-          onPress={() => {}}
+          sublabel="FAQs and support"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com/contact');
+          }}
+        />
+        <MenuItem
+          icon="doc.text.fill"
+          label="Terms of Service"
+          sublabel="Our terms and conditions"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com/terms');
+          }}
+        />
+        <MenuItem
+          icon="lock.shield.fill"
+          label="Privacy Policy"
+          sublabel="How we protect your data (NDPA 2023)"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com/privacy');
+          }}
         />
         <MenuItem
           icon="doc.text.fill"
           label="Payment Policy"
-          sublabel="How payments work"
-          onPress={() => {}}
+          sublabel="How payments and disputes work"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com/payment-policy');
+          }}
         />
         <MenuItem
-          icon="doc.fill"
-          label="Terms & Privacy Policy"
-          onPress={() => {}}
+          icon="arrow.counterclockwise"
+          label="Refund Policy"
+          sublabel="Cancellations and refunds"
+          onPress={async () => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            await Linking.openURL('https://www.eketsupply.com/refund-policy');
+          }}
         />
         <MenuItem
           icon="paperplane.fill"
