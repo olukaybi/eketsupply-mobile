@@ -584,3 +584,11 @@
 - [ ] Write admin role SQL and reviews table migration
 
 - [ ] Remove escrow references from payment structure (analytics.tsx and artisan/[id].tsx)
+
+## Logo Display (Current)
+- [x] Copy uploaded logo to assets directory
+- [x] Add logo to Home screen header
+- [x] Add logo to Onboarding screens
+- [x] Add logo to Profile/Settings screen
+- [x] Add logo to Sign-in screen
+- [x] Add logo to Sign-up screen

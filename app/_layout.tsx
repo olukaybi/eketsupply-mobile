@@ -34,6 +34,9 @@ function useNotificationObserver() {
   const router = useRouter();
 
   useEffect(() => {
+    // Notifications deep-link handling is native-only
+    if (Platform.OS === "web") return;
+
     // Handle notification tap when app was closed
     const lastResponse = Notifications.getLastNotificationResponse();
     if (lastResponse?.notification?.request?.content?.data?.url) {

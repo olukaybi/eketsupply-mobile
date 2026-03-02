@@ -8,21 +8,53 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 
+// Lazy-load expo-camera only on native platforms
+let CameraViewComponent: any = null;
+let useCameraPermissionsHook: any = null;
+if (Platform.OS !== "web") {
+  const Camera = require("expo-camera");
+  CameraViewComponent = Camera.CameraView;
+  useCameraPermissionsHook = Camera.useCameraPermissions;
+}
+
 const MAX_DURATION = 30; // 30 seconds
 
-export default function RecordVideoTestimonialScreen() {
+function WebFallback() {
+  const colors = useColors();
+  return (
+    <ScreenContainer className="p-6">
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-6xl mb-4">📹</Text>
+        <Text className="text-2xl font-bold text-foreground mb-4 text-center">
+          Video Recording
+        </Text>
+        <Text className="text-center text-muted mb-8">
+          Video testimonial recording is only available on the mobile app. Please use your phone to record a video review.
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="rounded-full py-4 px-8"
+          style={{ backgroundColor: colors.primary }}
+        >
+          <Text className="text-white font-semibold">Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    </ScreenContainer>
+  );
+}
+
+function NativeRecordScreen() {
   const { bookingId, artisanId, rating } = useLocalSearchParams();
   const { user } = useAuth();
   const colors = useColors();
-  const cameraRef = useRef<CameraView>(null);
-  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<any>(null);
+  const [permission, requestPermission] = useCameraPermissionsHook();
   const [facing, setFacing] = useState<"front" | "back">("front");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -66,11 +98,6 @@ export default function RecordVideoTestimonialScreen() {
   }
 
   async function startRecording() {
-    if (Platform.OS === "web") {
-      Alert.alert("Not Supported", "Video recording is not available on web");
-      return;
-    }
-
     try {
       const camera = cameraRef.current;
       if (!camera) return;
@@ -227,7 +254,7 @@ export default function RecordVideoTestimonialScreen() {
       </View>
 
       {/* Camera Preview */}
-      <CameraView
+      <CameraViewComponent
         ref={cameraRef}
         style={{ flex: 1 }}
         facing={facing}
@@ -249,10 +276,7 @@ export default function RecordVideoTestimonialScreen() {
                 Video Testimonial Tips
               </Text>
               <Text className="text-white/80 text-sm text-center">
-                • Keep it under 30 seconds{"\n"}
-                • Share your honest experience{"\n"}
-                • Speak clearly and naturally{"\n"}
-                • Good lighting helps!
+                {"• Keep it under 30 seconds\n• Share your honest experience\n• Speak clearly and naturally\n• Good lighting helps!"}
               </Text>
             </View>
           </View>
@@ -280,7 +304,14 @@ export default function RecordVideoTestimonialScreen() {
             {isRecording ? "Tap to stop recording" : "Tap to start recording"}
           </Text>
         </View>
-      </CameraView>
+      </CameraViewComponent>
     </ScreenContainer>
   );
+}
+
+export default function RecordVideoTestimonialScreen() {
+  if (Platform.OS === "web") {
+    return <WebFallback />;
+  }
+  return <NativeRecordScreen />;
 }
