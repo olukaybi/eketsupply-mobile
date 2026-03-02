@@ -11,6 +11,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
+// EketSupply icon for Android notification large icon
+const EKETSUPPLY_ICON_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663034436411/gucpjELtVeykfzUH.png";
+
 interface ExpoPushMessage {
   to: string;
   title: string;
@@ -20,6 +23,8 @@ interface ExpoPushMessage {
   badge?: number;
   channelId?: string;
   priority?: "default" | "normal" | "high";
+  /** Android: URL of a large notification icon shown beside the notification */
+  icon?: string;
 }
 
 interface ExpoPushTicket {
@@ -91,6 +96,7 @@ export async function sendPushToUser(
     sound: "default",
     channelId: "eketsupply",
     priority: "high",
+    icon: EKETSUPPLY_ICON_URL,
   }]);
 
   const success = tickets[0]?.status === "ok";

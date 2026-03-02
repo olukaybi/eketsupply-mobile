@@ -616,3 +616,8 @@
 - [x] Add animated launch screen with scale-in animation before onboarding
 - [x] Add ThemedLogo to Artisan Dashboard header
 - [x] Add "Powered by EketSupply" footer to booking confirmation screens
+
+## Brand Polish (Round 4)
+- [x] Add share button to booking confirmation screen (WhatsApp/SMS)
+- [x] Add in-app store review prompt after 4-5 star review submission
+- [x] Set EketSupply icon as Android push notification large icon
