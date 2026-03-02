@@ -621,3 +621,10 @@
 - [x] Add share button to booking confirmation screen (WhatsApp/SMS)
 - [x] Add in-app store review prompt after 4-5 star review submission
 - [x] Set EketSupply icon as Android push notification large icon
+
+## Brand Polish (Round 5)
+- [x] Generate referral code from user profile and include it in booking share message
+- [x] Add copy-to-clipboard button next to booking reference on confirmation screen
+- [x] Build notification preferences screen (per-type toggle switches)
+- [x] Add Notification Preferences link in Profile → Settings section
+- [x] Persist notification preferences to AsyncStorage (local, no server round-trip needed)

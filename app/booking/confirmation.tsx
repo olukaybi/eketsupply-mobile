@@ -12,16 +12,20 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   ScrollView,
   Share,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { ThemedLogo } from "@/components/themed-logo";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BookingDetails {
@@ -119,11 +123,21 @@ function InfoRow({ label, value, highlight }: { label: string; value: string; hi
 }
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
+/** Generate a short alphanumeric referral code from a user ID */
+function makeReferralCode(userId: number | string): string {
+  const str = String(userId).replace(/-/g, "").toUpperCase();
+  // Pad with zeros if too short, take first 6 chars
+  const padded = str.padStart(6, "0");
+  return "EKT" + padded.slice(0, 6);
+}
+
 export default function BookingConfirmation() {
   const router = useRouter();
+  const { user } = useAuth();
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (bookingId) loadBooking();
@@ -187,17 +201,30 @@ export default function BookingConfirmation() {
     Linking.openURL(`https://wa.me/234${phone.slice(-10)}?text=${message}`);
   }
 
+  async function copyRef() {
+    if (!booking?.booking_reference) return;
+    await Clipboard.setStringAsync(booking.booking_reference);
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   async function shareBooking() {
     if (!booking) return;
     const ref = booking.booking_reference;
     const service = booking.service_name;
     const date = formatDate(booking.scheduled_date);
+    const referralCode = user?.id ? makeReferralCode(user.id) : null;
+    const referralLine = referralCode
+      ? `\nJoin EketSupply with my code ${referralCode}: eketsupply.com/ref/${referralCode}`
+      : "";
     const message =
       `🔧 EketSupply Booking Confirmed!\n\n` +
       `Service: ${service}\n` +
       `Reference: ${ref}\n` +
       `Date: ${date}\n\n` +
-      `Fix it Right, The First Time. — eketsupply.com`;
+      `Fix it Right, The First Time. — eketsupply.com` +
+      referralLine;
     try {
       await Share.share({ message, title: `EketSupply Booking ${ref}` });
     } catch {
@@ -308,9 +335,24 @@ export default function BookingConfirmation() {
             <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, textAlign: "center" }}>
               BOOKING REFERENCE
             </Text>
-            <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800", textAlign: "center", letterSpacing: 2 }}>
-              {ref}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 4 }}>
+              <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800", letterSpacing: 2 }}>
+                {ref}
+              </Text>
+              <TouchableOpacity
+                onPress={copyRef}
+                style={{
+                  backgroundColor: copied ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.2)",
+                  borderRadius: 8,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+                  {copied ? "✓ Copied" : "Copy"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 

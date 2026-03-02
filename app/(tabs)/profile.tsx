@@ -86,7 +86,6 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const { colorScheme, setColorScheme } = useThemeContext();
   const isDarkMode = colorScheme === "dark";
   const toggleDarkMode = (value: boolean) => {
@@ -229,16 +228,11 @@ export default function ProfileScreen() {
         <MenuItem
           icon="bell.fill"
           label="Notifications"
-          sublabel="Booking alerts and updates"
-          onPress={() => {}}
-          rightElement={
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: "#D4E0D4", true: "#1B5E20" }}
-              thumbColor="#fff"
-            />
-          }
+          sublabel="Manage notification types"
+          onPress={() => {
+            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/notification-preferences' as never);
+          }}
         />
         <MenuItem
           icon="moon.fill"
