@@ -27,7 +27,6 @@ import {
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
-import { ThemedLogo } from "@/components/themed-logo";
 // Push notifications are sent server-side via the webhook handler
 // No direct push-sender import needed in the mobile client
 
@@ -446,9 +445,6 @@ export default function AdminDashboard() {
           paddingBottom: 20,
         }}
       >
-        <View style={{ alignItems: "center", marginBottom: 8 }}>
-          <ThemedLogo width={160} />
-        </View>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <View>
             <Text style={{ fontSize: 22, fontWeight: "800", color: "#fff" }}>Admin Dashboard</Text>

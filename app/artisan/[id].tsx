@@ -1053,7 +1053,7 @@ export default function ArtisanProfileScreen() {
               <View className="mb-4">
                 <Text className="text-sm font-medium text-foreground mb-2">Payment Method *</Text>
                 <View className="flex-row flex-wrap gap-2">
-                  {['cash', 'transfer', 'card'].map((method) => (
+                  {['cash', 'transfer', 'card', 'escrow'].map((method) => (
                     <TouchableOpacity
                       key={method}
                       onPress={() => setBookingForm({...bookingForm, paymentMethod: method})}

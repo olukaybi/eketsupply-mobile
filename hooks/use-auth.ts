@@ -145,25 +145,16 @@ export function useAuth(options?: UseAuthOptions) {
       if (authError) throw authError;
       if (!authData.user) throw new Error("No user returned from sign up");
 
-      // Upsert profile — handles both cases:
-      // 1. Trigger already created the profile (ON CONFLICT → update)
-      // 2. Trigger didn't run / failed (INSERT new row)
-      const { error: upsertError } = await supabase
+      // Update profile with additional info
+      const { error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: authData.user.id,
-          full_name: name || email.split('@')[0],
-          email: email,
+        .update({
+          full_name: name,
           user_type: userType,
-        }, { onConflict: 'user_id' });
+        })
+        .eq('user_id', authData.user.id);
 
-      if (upsertError) {
-        console.warn("Profile upsert warning:", upsertError);
-        // Don't throw — the user was created in auth, proceed with best-effort profile
-      }
-
-      // Small delay to allow trigger to settle if it ran concurrently
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (updateError) console.warn("Profile update warning:", updateError);
 
       // Fetch the profile
       const { data: profile } = await supabase

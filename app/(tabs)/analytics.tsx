@@ -59,10 +59,10 @@ export default function AnalyticsScreen() {
 
       // Fetch payments
       const { data: payments } = await supabase
-        .from('payments')
-        .select('amount, paid_at')
+        .from('escrow')
+        .select('amount, released_at')
         .eq('artisan_id', artisan.id)
-        .eq('status', 'completed');
+        .eq('status', 'released');
 
       // Calculate metrics
       const totalBookings = bookings?.length || 0;

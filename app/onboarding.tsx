@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import { ThemedLogo } from '@/components/themed-logo';
 import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -80,9 +79,6 @@ export default function OnboardingScreen() {
 
         {/* Content */}
         <View className="flex-1 justify-center items-center">
-          {/* Logo */}
-          <ThemedLogo width={260} style={{ marginBottom: 20 }} />
-
           {/* Icon */}
           <View 
             className="w-32 h-32 rounded-full items-center justify-center mb-8"

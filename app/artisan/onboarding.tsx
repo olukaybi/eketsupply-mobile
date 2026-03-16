@@ -17,7 +17,6 @@ import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
-import { ThemedLogo } from "@/components/themed-logo";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -1052,11 +1051,12 @@ export default function ArtisanOnboardingScreen() {
           <TouchableOpacity onPress={goBack} style={{ padding: 8, marginRight: 8 }}>
             <IconSymbol name="chevron.left" size={22} color={BRAND_GREEN} />
           </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: "center" }}>
-            <ThemedLogo width={150} />
-            <Text style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>Artisan Registration</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: BRAND_GREEN }}>
+              Eket<Text style={{ color: BRAND_ORANGE }}>Supply</Text>
+            </Text>
+            <Text style={{ fontSize: 11, color: "#6B7280" }}>Artisan Registration</Text>
           </View>
-          <View style={{ width: 38 }} />
         </View>
 
         <ProgressBar />

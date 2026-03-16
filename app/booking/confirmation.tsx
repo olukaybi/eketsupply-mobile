@@ -12,22 +12,14 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Platform,
   ScrollView,
-  Share,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
-import { ThemedLogo } from "@/components/themed-logo";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/hooks/use-auth";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BookingDetails {
@@ -125,38 +117,11 @@ function InfoRow({ label, value, highlight }: { label: string; value: string; hi
 }
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
-/** Generate a short alphanumeric referral code from a user ID */
-function makeReferralCode(userId: number | string): string {
-  const str = String(userId).replace(/-/g, "").toUpperCase();
-  // Pad with zeros if too short, take first 6 chars
-  const padded = str.padStart(6, "0");
-  return "EKT" + padded.slice(0, 6);
-}
-
 export default function BookingConfirmation() {
   const router = useRouter();
-  const { user } = useAuth();
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [emergencyName, setEmergencyName] = useState("");
-  const [emergencyPhone, setEmergencyPhone] = useState("");
-  const [emergencySaved, setEmergencySaved] = useState(false);
-  const [showEmergencyForm, setShowEmergencyForm] = useState(false);
-
-  useEffect(() => {
-    // Load previously saved emergency contact
-    AsyncStorage.getItem("eketsupply_emergency_contact").then((raw) => {
-      if (raw) {
-        try {
-          const { name, phone } = JSON.parse(raw);
-          setEmergencyName(name ?? "");
-          setEmergencyPhone(phone ?? "");
-        } catch {}
-      }
-    });
-  }, []);
 
   useEffect(() => {
     if (bookingId) loadBooking();
@@ -218,52 +183,6 @@ export default function BookingConfirmation() {
       `Hello, I'm your customer on EketSupply. My booking reference is ${booking.booking_reference}. I'm looking forward to your service!`
     );
     Linking.openURL(`https://wa.me/234${phone.slice(-10)}?text=${message}`);
-  }
-
-  async function saveEmergencyContact() {
-    if (!emergencyName.trim() || !emergencyPhone.trim()) {
-      Alert.alert("Missing Info", "Please enter both a name and phone number.");
-      return;
-    }
-    await AsyncStorage.setItem(
-      "eketsupply_emergency_contact",
-      JSON.stringify({ name: emergencyName.trim(), phone: emergencyPhone.trim() })
-    );
-    if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setEmergencySaved(true);
-    setShowEmergencyForm(false);
-    setTimeout(() => setEmergencySaved(false), 3000);
-  }
-
-  async function copyRef() {
-    if (!booking?.booking_reference) return;
-    await Clipboard.setStringAsync(booking.booking_reference);
-    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function shareBooking() {
-    if (!booking) return;
-    const ref = booking.booking_reference;
-    const service = booking.service_name;
-    const date = formatDate(booking.scheduled_date);
-    const referralCode = user?.id ? makeReferralCode(user.id) : null;
-    const referralLine = referralCode
-      ? `\nJoin EketSupply with my code ${referralCode}: eketsupply.com/ref/${referralCode}`
-      : "";
-    const message =
-      `🔧 EketSupply Booking Confirmed!\n\n` +
-      `Service: ${service}\n` +
-      `Reference: ${ref}\n` +
-      `Date: ${date}\n\n` +
-      `Fix it Right, The First Time. — eketsupply.com` +
-      referralLine;
-    try {
-      await Share.share({ message, title: `EketSupply Booking ${ref}` });
-    } catch {
-      // User cancelled — no-op
-    }
   }
 
   function formatDate(dateStr: string) {
@@ -369,24 +288,9 @@ export default function BookingConfirmation() {
             <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, textAlign: "center" }}>
               BOOKING REFERENCE
             </Text>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 4 }}>
-              <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800", letterSpacing: 2 }}>
-                {ref}
-              </Text>
-              <TouchableOpacity
-                onPress={copyRef}
-                style={{
-                  backgroundColor: copied ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.2)",
-                  borderRadius: 8,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-                  {copied ? "✓ Copied" : "Copy"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800", textAlign: "center", letterSpacing: 2 }}>
+              {ref}
+            </Text>
           </View>
         </View>
 
@@ -547,137 +451,6 @@ export default function BookingConfirmation() {
           />
         </View>
 
-        {/* Emergency Contact */}
-        <View
-          style={{
-            marginHorizontal: 16,
-            backgroundColor: "#fff",
-            borderRadius: 16,
-            padding: 16,
-            marginBottom: 16,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.06,
-            shadowRadius: 6,
-            elevation: 2,
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 13, color: "#687076", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                Emergency Contact
-              </Text>
-              <Text style={{ fontSize: 12, color: "#9BA1A6", marginTop: 2 }}>
-                Notify someone when the artisan arrives
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setShowEmergencyForm(!showEmergencyForm)}
-              style={{
-                backgroundColor: showEmergencyForm ? "#F5F5F5" : "#E8F5E9",
-                borderRadius: 8,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-              }}
-            >
-              <Text style={{ color: showEmergencyForm ? "#687076" : "#1B5E20", fontWeight: "700", fontSize: 13 }}>
-                {showEmergencyForm ? "Cancel" : (emergencyName ? "Edit" : "Add")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Saved contact display */}
-          {!showEmergencyForm && emergencyName ? (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#F0F7F0",
-                borderRadius: 10,
-                padding: 12,
-                gap: 10,
-              }}
-            >
-              <Text style={{ fontSize: 22 }}>👤</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "700", color: "#11181C" }}>{emergencyName}</Text>
-                <Text style={{ fontSize: 13, color: "#687076" }}>{emergencyPhone}</Text>
-              </View>
-              {emergencySaved && (
-                <Text style={{ fontSize: 12, color: "#1B5E20", fontWeight: "700" }}>✓ Saved</Text>
-              )}
-            </View>
-          ) : !showEmergencyForm ? (
-            <TouchableOpacity
-              onPress={() => setShowEmergencyForm(true)}
-              style={{
-                borderWidth: 1.5,
-                borderColor: "#E5E7EB",
-                borderStyle: "dashed",
-                borderRadius: 10,
-                padding: 14,
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, marginBottom: 4 }}>👤</Text>
-              <Text style={{ fontSize: 13, color: "#687076" }}>Tap to add an emergency contact</Text>
-            </TouchableOpacity>
-          ) : null}
-
-          {/* Form */}
-          {showEmergencyForm && (
-            <View style={{ gap: 10 }}>
-              <TextInput
-                value={emergencyName}
-                onChangeText={setEmergencyName}
-                placeholder="Contact name (e.g. Mum)"
-                placeholderTextColor="#9BA1A6"
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#E5E7EB",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 15,
-                  color: "#11181C",
-                  backgroundColor: "#FAFAFA",
-                }}
-                returnKeyType="next"
-              />
-              <TextInput
-                value={emergencyPhone}
-                onChangeText={setEmergencyPhone}
-                placeholder="Phone number (e.g. 08012345678)"
-                placeholderTextColor="#9BA1A6"
-                keyboardType="phone-pad"
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#E5E7EB",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 15,
-                  color: "#11181C",
-                  backgroundColor: "#FAFAFA",
-                }}
-                returnKeyType="done"
-                onSubmitEditing={saveEmergencyContact}
-              />
-              <TouchableOpacity
-                onPress={saveEmergencyContact}
-                style={{
-                  backgroundColor: "#1B5E20",
-                  borderRadius: 10,
-                  paddingVertical: 13,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>Save Contact</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-
         {/* Actions */}
         <View style={{ marginHorizontal: 16, gap: 10 }}>
           <TouchableOpacity
@@ -692,21 +465,6 @@ export default function BookingConfirmation() {
             <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>View My Bookings</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={shareBooking}
-            style={{
-              backgroundColor: "#E8F5E9",
-              borderRadius: 14,
-              paddingVertical: 16,
-              alignItems: "center",
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 8,
-            }}
-          >
-            <Text style={{ fontSize: 18 }}>📤</Text>
-            <Text style={{ color: "#1B5E20", fontWeight: "700", fontSize: 15 }}>Share Booking</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
             onPress={() => router.replace("/(tabs)" as never)}
             style={{
               backgroundColor: "#F5F5F5",
@@ -717,26 +475,6 @@ export default function BookingConfirmation() {
           >
             <Text style={{ color: "#687076", fontWeight: "600", fontSize: 15 }}>Back to Home</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Powered by EketSupply footer */}
-        <View
-          style={{
-            alignItems: "center",
-            paddingVertical: 24,
-            paddingHorizontal: 16,
-            borderTopWidth: 1,
-            borderTopColor: "#E5E7EB",
-            marginTop: 8,
-          }}
-        >
-          <Text style={{ fontSize: 11, color: "#9BA1A6", marginBottom: 8, letterSpacing: 0.5 }}>
-            POWERED BY
-          </Text>
-          <ThemedLogo width={140} />
-          <Text style={{ fontSize: 11, color: "#9BA1A6", marginTop: 8, textAlign: "center" }}>
-            Fix it Right, The First Time.
-          </Text>
         </View>
       </ScrollView>
     </ScreenContainer>

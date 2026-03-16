@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator 
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
-import { ThemedLogo } from "@/components/themed-logo";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -38,7 +37,10 @@ export default function SignInScreen() {
         <View className="flex-1 justify-center p-6">
           {/* Logo/Header */}
           <View className="items-center mb-8">
-            <ThemedLogo width={280} style={{ marginBottom: 8 }} />
+            <View className="mb-4">
+              <Text className="text-4xl font-bold" style={{ color: '#1B5E20' }}>Eket<Text style={{ color: '#E65100' }}>Supply</Text></Text>
+            </View>
+            <Text className="text-sm font-medium text-muted">Fix it Right, The First Time</Text>
             <Text className="text-base text-muted mt-2">Sign in to continue</Text>
           </View>
 
