@@ -1,0 +1,15 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS review_replies (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  review_id UUID NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,\n  artisan_id UUID NOT NULL REFERENCES artisans(id) ON DELETE CASCADE,\n  reply_text TEXT NOT NULL,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  UNIQUE(review_id)\n);\n\nALTER TABLE review_replies ENABLE ROW LEVEL SECURITY;\n\n-- Artisans can insert/update/delete their own replies\nCREATE POLICY \"artisan_manage_replies\" ON review_replies\n  FOR ALL\n  USING (artisan_id IN (\n    SELECT a.id FROM artisans a\n    JOIN profiles p ON p.id = a.profile_id\n    WHERE p.user_id = auth.uid()\n  ))\n  WITH CHECK (artisan_id IN (\n    SELECT a.id FROM artisans a\n    JOIN profiles p ON p.id = a.profile_id\n    WHERE p.user_id = auth.uid()\n  ));\n\n-- Everyone can read replies\nCREATE POLICY \"public_read_replies\" ON review_replies\n  FOR SELECT USING (true);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 44CGVGm2icqKTys.root --database dhjXEh3xJpAVX7YUPGfJoF --execute \nCREATE TABLE IF NOT EXISTS review_replies (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  review_id UUID NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,\n  artisan_id UUID NOT NULL REFERENCES artisans(id) ON DELETE CASCADE,\n  reply_text TEXT NOT NULL,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  UNIQUE(review_id)\n);\n\nALTER TABLE review_replies ENABLE ROW LEVEL SECURITY;\n\n-- Artisans can insert/update/delete their own replies\nCREATE POLICY \"artisan_manage_replies\" ON review_replies\n  FOR ALL\n  USING (artisan_id IN (\n    SELECT a.id FROM artisans a\n    JOIN profiles p ON p.id = a.profile_id\n    WHERE p.user_id = auth.uid()\n  ))\n  WITH CHECK (artisan_id IN (\n    SELECT a.id FROM artisans a\n    JOIN profiles p ON p.id = a.profile_id\n    WHERE p.user_id = auth.uid()\n  ));\n\n-- Everyone can read replies\nCREATE POLICY \"public_read_replies\" ON review_replies\n  FOR SELECT USING (true);\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 2: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 2 column 10 near \"UUID PRIMARY KEY DEFAULT gen_random_uuid(),",
+    "  review_id UUID NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,",
+    "  artisan_id UUID NOT NULL REFERENCES artisans(id) ON DELETE CASCADE,",
+    "  reply_text TEXT NOT NULL,",
+    "  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),",
+    "  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),",
+    "  UNIQUE(review_id)",
+    ")\""
+  ]
+}

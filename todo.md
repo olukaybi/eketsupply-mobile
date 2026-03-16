@@ -594,3 +594,8 @@
 - [x] Add My Reviews quick action to artisan dashboard
 - [x] Update booking_completed notification deep-link to go directly to review screen
 - [x] Display artisan average rating on browse and profile screens
+
+## Sprint: All Three Improvements (Mar 16 2026)
+- [x] Add artisan reply-to-review on My Reviews screen
+- [x] Display review photos on artisan profile (already mapped, just not rendered)
+- [x] Build in-app review prompt bottom-sheet after job completion (covers push-disabled users)

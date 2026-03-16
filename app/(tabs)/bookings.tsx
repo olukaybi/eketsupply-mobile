@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 import { router } from "expo-router";
 import { notifyBookingAccepted, notifyBookingRejected, notifyBookingCompleted } from "@/lib/notification-service";
 import { ReviewModal } from "@/components/review-modal";
+import { ReviewPromptSheet } from "@/components/review-prompt-sheet";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 type BookingStatus = "pending" | "accepted" | "rejected" | "completed" | "cancelled";
@@ -92,6 +93,9 @@ export default function BookingsScreen() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [promptBooking, setPromptBooking] = useState<Booking | null>(null);
+  const [promptVisible, setPromptVisible] = useState(false);
+  const promptShownRef = useRef<Set<string>>(new Set());
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -196,6 +200,25 @@ export default function BookingsScreen() {
       if (userType === 'customer' && activeTab === 'completed') {
         const completedCount = fetchedBookings.filter(b => b.status === 'completed').length;
         maybeRequestReview(completedCount);
+      }
+
+      // In-app review prompt: find the most recent completed booking not yet reviewed
+      if (userType === 'customer' && activeTab === 'completed') {
+        const unreviewed = fetchedBookings.find(
+          (b) => b.status === 'completed' && !promptShownRef.current.has(b.id)
+        );
+        if (unreviewed) {
+          // Check if this booking already has a review
+          const { count } = await supabase
+            .from('reviews')
+            .select('id', { count: 'exact', head: true })
+            .eq('booking_id', unreviewed.id);
+          if (!count || count === 0) {
+            promptShownRef.current.add(unreviewed.id);
+            setPromptBooking(unreviewed);
+            setTimeout(() => setPromptVisible(true), 600);
+          }
+        }
       }
     } catch (err) {
       console.error("fetchBookings error:", err);
@@ -659,6 +682,20 @@ export default function BookingsScreen() {
           customerId={selectedBooking.customer_id}
           artisanName={(selectedBooking.artisan?.profiles as any)?.full_name || "Artisan"}
           serviceDescription={selectedBooking.service_description}
+        />
+      )}
+
+      {/* In-app review prompt bottom-sheet */}
+      {promptBooking && (
+        <ReviewPromptSheet
+          visible={promptVisible}
+          bookingId={promptBooking.id}
+          artisanName={(promptBooking.artisan?.profiles as any)?.full_name || "Your Artisan"}
+          serviceDescription={promptBooking.service_description}
+          onClose={() => {
+            setPromptVisible(false);
+            setPromptBooking(null);
+          }}
         />
       )}
     </ScreenContainer>
