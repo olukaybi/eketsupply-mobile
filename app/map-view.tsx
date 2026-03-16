@@ -1,22 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import MapView, { Marker, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import * as Haptics from 'expo-haptics';
 import { trpc as _trpc } from '@/lib/trpc';
-
-// Lazy-load react-native-maps only on native platforms
-let RNMapView: any = null;
-let RNMarker: any = null;
-let RNCircle: any = null;
-if (Platform.OS !== 'web') {
-  const Maps = require('react-native-maps');
-  RNMapView = Maps.default;
-  RNMarker = Maps.Marker;
-  RNCircle = Maps.Circle;
-}
 
 interface ArtisanMarker {
   id: string;
@@ -34,7 +24,7 @@ const RADIUS_OPTIONS = [1, 5, 10, 25]; // kilometers
 
 export default function MapViewScreen() {
   const colors = useColors();
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapView>(null);
   
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +74,8 @@ export default function MapViewScreen() {
     if (!location) return;
 
     try {
+      // This would call your tRPC endpoint or Supabase function
+      // For now, using mock data structure
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/artisans/nearby`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,6 +92,7 @@ export default function MapViewScreen() {
       }
     } catch (error) {
       console.error('Error fetching nearby artisans:', error);
+      // For demo, set empty array
       setArtisans([]);
     }
   };
@@ -114,6 +107,7 @@ export default function MapViewScreen() {
   const handleMarkerPress = (artisan: ArtisanMarker) => {
     setSelectedArtisan(artisan);
     
+    // Animate to marker
     if (mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: artisan.latitude,
@@ -169,33 +163,12 @@ export default function MapViewScreen() {
     );
   }
 
-  // Web fallback — maps are native-only
-  if (Platform.OS === 'web') {
-    return (
-      <ScreenContainer className="p-6">
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-2xl font-bold text-foreground mb-4">Map View</Text>
-          <Text className="text-center text-muted mb-8">
-            The interactive map is available on the mobile app. Use the search feature to find artisans near you.
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="rounded-full py-4 px-8"
-            style={{ backgroundColor: colors.primary }}
-          >
-            <Text className="text-white font-semibold">Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
-    );
-  }
-
   const responseBadge = selectedArtisan ? getResponseBadge(selectedArtisan.avg_response_minutes) : null;
 
   return (
     <View className="flex-1">
       {/* Map */}
-      <RNMapView
+      <MapView
         ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={{
@@ -208,19 +181,19 @@ export default function MapViewScreen() {
         showsMyLocationButton
       >
         {/* Radius circle */}
-        <RNCircle
+        <Circle
           center={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           }}
-          radius={selectedRadius * 1000}
+          radius={selectedRadius * 1000} // Convert km to meters
           strokeColor={colors.primary + '40'}
           fillColor={colors.primary + '10'}
         />
 
         {/* Artisan markers */}
         {artisans.map((artisan) => (
-          <RNMarker
+          <Marker
             key={artisan.id}
             coordinate={{
               latitude: artisan.latitude,
@@ -229,9 +202,10 @@ export default function MapViewScreen() {
             title={artisan.business_name || artisan.name}
             description={`${artisan.category} • ${artisan.distance_km.toFixed(1)}km away`}
             onPress={() => handleMarkerPress(artisan)}
+            pinColor={colors.accent}
           />
         ))}
-      </RNMapView>
+      </MapView>
 
       {/* Radius selector */}
       <View 

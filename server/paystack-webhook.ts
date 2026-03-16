@@ -293,8 +293,6 @@ async function sendExpoPushNotification(token: string, notification: PushNotific
       data: notification.data,
       sound: "default",
       priority: "high",
-      channelId: "eketsupply",
-      icon: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663034436411/gucpjELtVeykfzUH.png",
     }),
   });
 }
@@ -340,7 +338,7 @@ export function registerPaystackWebhook(app: Express) {
     express.raw({ type: "application/json" }),
     async (req: Request, res: Response) => {
       const signature = req.headers["x-paystack-signature"] as string;
-      const secret = process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_WEBHOOK_SECRET || "";
+      const secret = process.env.PAYSTACK_SECRET_KEY || "";
 
       if (!secret) {
         console.error("[webhook] PAYSTACK_SECRET_KEY not set");

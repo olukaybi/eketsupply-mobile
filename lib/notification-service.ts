@@ -175,7 +175,7 @@ export function buildNotificationUrl(
     booking_accepted: `/(tabs)/bookings`,
     booking_declined: `/(tabs)/bookings`,
     booking_started: `/(tabs)/bookings`,
-    booking_completed: `/(tabs)/bookings`,
+    booking_completed: bookingId ? `/booking/review?bookingId=${bookingId}` : `/(tabs)/bookings`,
     payment_confirmed: `/artisan/dashboard`,
     new_message: bookingId ? `/chat/${bookingId}` : `/(tabs)/messages`,
     artisan_approved: `/artisan/dashboard`,

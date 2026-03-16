@@ -583,61 +583,14 @@
 - [ ] Build emergency booking flow with premium pricing
 - [ ] Write admin role SQL and reviews table migration
 
-- [ ] Remove escrow references from payment structure (analytics.tsx and artisan/[id].tsx)
 
-## Logo Display (Current)
-- [x] Copy uploaded logo to assets directory
-- [x] Add logo to Home screen header
-- [x] Add logo to Onboarding screens
-- [x] Add logo to Profile/Settings screen
-- [x] Add logo to Sign-in screen
-- [x] Add logo to Sign-up screen
-
-## Logo Transparency Fix
-- [x] Remove white/gray background from logo PNG to make it transparent
-- [x] Replace logo file in assets/images/eketsupply-logo.png
-- [x] Verify logo looks good on both light and dark mode
-
-## Logo Improvements (All Three)
-- [x] Create dark-mode logo variant with white/light tagline text
-- [x] Add logo to Artisan Dashboard screen
-- [x] Add logo to Admin Dashboard screen
-- [x] Create ThemedLogo component that auto-switches between light/dark variants
-- [x] Replace all Image logo usages with ThemedLogo component
-
-## Further Logo & Branding Improvements
-- [x] Add dark mode toggle to Profile/Settings screen
-- [x] Add ThemedLogo to Artisan Onboarding flow
-- [x] Crop icon emblem from logo and set as app icon (icon.png, splash-icon.png, etc.)
-- [x] Make logo more prominent: increase size on Home, Auth, Onboarding screens
-- [x] Add subtle logo watermark or header bar branding to key screens
-
-## Brand Polish (Round 3)
-- [x] Add animated launch screen with scale-in animation before onboarding
-- [x] Add ThemedLogo to Artisan Dashboard header
-- [x] Add "Powered by EketSupply" footer to booking confirmation screens
-
-## Brand Polish (Round 4)
-- [x] Add share button to booking confirmation screen (WhatsApp/SMS)
-- [x] Add in-app store review prompt after 4-5 star review submission
-- [x] Set EketSupply icon as Android push notification large icon
-
-## Brand Polish (Round 5)
-- [x] Generate referral code from user profile and include it in booking share message
-- [x] Add copy-to-clipboard button next to booking reference on confirmation screen
-- [x] Build notification preferences screen (per-type toggle switches)
-- [x] Add Notification Preferences link in Profile → Settings section
-- [x] Persist notification preferences to AsyncStorage (local, no server round-trip needed)
-
-## Brand Polish (Round 6)
-- [x] Build referral dashboard screen with code display, share button, and usage stats
-- [x] Add Referral Dashboard link in Profile screen
-- [x] Build What's New changelog screen with version history
-- [x] Add What's New link in Profile → Support section
-- [x] Add emergency contact field to booking confirmation screen
-
-## Round 7 Features & Bug Fix
-- [x] Fix "Database error saving new user" sign-up bug
-- [x] Add loyalty points counter to Profile header
-- [x] Add booking cancellation flow with reason selector and refund policy reminder
-- [x] Add Track Artisan live map screen for confirmed bookings
+## Sprint: Ratings & Review Screen + Device QR Test (Mar 16 2026)
+- [ ] Generate QR code for device smoke test (post RN 0.84.1 upgrade)
+- [x] Build full-screen post-job review screen with 5-star rating
+- [x] Add written comment field and optional photo upload
+- [x] Submit review to Supabase reviews table
+- [x] Wire review prompt automatically after artisan marks job complete
+- [x] Build artisan My Reviews screen with rating breakdown and full review list
+- [x] Add My Reviews quick action to artisan dashboard
+- [x] Update booking_completed notification deep-link to go directly to review screen
+- [x] Display artisan average rating on browse and profile screens

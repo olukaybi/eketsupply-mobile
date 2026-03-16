@@ -1,13 +1,10 @@
 import { ScrollView, Text, View, TouchableOpacity, Switch, Linking, Platform } from "react-native";
-import { ThemedLogo } from "@/components/themed-logo";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import * as Haptics from 'expo-haptics';
-import { useThemeContext } from "@/lib/theme-provider";
-import { supabase } from "@/lib/supabase";
 
 const SOCIAL_LINKS = [
   {
@@ -87,47 +84,17 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const { colorScheme, setColorScheme } = useThemeContext();
-  const isDarkMode = colorScheme === "dark";
-  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
-  const [completedBookings, setCompletedBookings] = useState(0);
-
-  const toggleDarkMode = (value: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setColorScheme(value ? "dark" : "light");
-  };
-
-  useEffect(() => {
-    if (!user) return;
-    // Fetch completed bookings count to calculate loyalty points
-    // Each completed booking earns 50 points
-    const fetchLoyaltyData = async () => {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('user_id', user.openId)
-          .single();
-        if (!profile) return;
-        const { count } = await supabase
-          .from('bookings')
-          .select('*', { count: 'exact', head: true })
-          .eq('customer_id', profile.id)
-          .eq('status', 'completed');
-        const bookingCount = count ?? 0;
-        setCompletedBookings(bookingCount);
-        setLoyaltyPoints(bookingCount * 50);
-      } catch (e) {
-        // Silently fail — loyalty is non-critical
-      }
-    };
-    fetchLoyaltyData();
-  }, [user]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   if (!user) {
     return (
       <ScreenContainer className="items-center justify-center px-6">
-        <ThemedLogo width={260} style={{ marginBottom: 16 }} />
+        <View
+          className="w-20 h-20 rounded-full items-center justify-center mb-4"
+          style={{ backgroundColor: "#F0F7F0" }}
+        >
+          <IconSymbol name="person.fill" size={40} color="#1B5E20" />
+        </View>
         <Text className="text-xl font-bold text-foreground mb-2">Welcome to EketSupply</Text>
         <Text className="text-muted text-center mb-8 text-sm">
           Sign in to manage your bookings, messages, and profile settings.
@@ -191,30 +158,6 @@ export default function ProfileScreen() {
           >
             <Text className="text-white text-sm font-medium">Edit Profile</Text>
           </TouchableOpacity>
-
-          {/* Loyalty Points Counter */}
-          <View style={{ flexDirection: 'row', marginTop: 16, gap: 20 }}>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#FFD700', fontSize: 20, fontWeight: '800' }}>
-                {loyaltyPoints.toLocaleString()}
-              </Text>
-              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>🏆 Points</Text>
-            </View>
-            <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#fff', fontSize: 20, fontWeight: '800' }}>
-                {completedBookings}
-              </Text>
-              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>✅ Bookings</Text>
-            </View>
-            <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-            <View style={{ alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => router.push('/referral-dashboard' as never)}>
-                <Text style={{ color: '#FFD700', fontSize: 20, fontWeight: '800' }}>🎁</Text>
-                <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 2 }}>Refer</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
         {/* Account Section */}
@@ -236,15 +179,6 @@ export default function ProfileScreen() {
           label="Payment Methods"
           sublabel="Cards and bank accounts"
           onPress={() => {}}
-        />
-        <MenuItem
-          icon="person.badge.plus.fill"
-          label="Referral Dashboard"
-          sublabel="Share your code and track rewards"
-          onPress={() => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/referral-dashboard' as never);
-          }}
         />
 
         {/* Artisan Section */}
@@ -292,21 +226,12 @@ export default function ProfileScreen() {
         <MenuItem
           icon="bell.fill"
           label="Notifications"
-          sublabel="Manage notification types"
-          onPress={() => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/notification-preferences' as never);
-          }}
-        />
-        <MenuItem
-          icon="moon.fill"
-          label="Dark Mode"
-          sublabel={isDarkMode ? "On" : "Off"}
-          onPress={() => toggleDarkMode(!isDarkMode)}
+          sublabel="Booking alerts and updates"
+          onPress={() => {}}
           rightElement={
             <Switch
-              value={isDarkMode}
-              onValueChange={toggleDarkMode}
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
               trackColor={{ false: "#D4E0D4", true: "#1B5E20" }}
               thumbColor="#fff"
             />
@@ -319,51 +244,22 @@ export default function ProfileScreen() {
         />
 
         {/* Support Section */}
-        <SectionHeader title="Support & Legal" />
+        <SectionHeader title="Support" />
         <MenuItem
           icon="info.circle.fill"
           label="Help Centre"
-          sublabel="FAQs and support"
-          onPress={async () => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await Linking.openURL('https://www.eketsupply.com/contact');
-          }}
-        />
-        <MenuItem
-          icon="doc.text.fill"
-          label="Terms of Service"
-          sublabel="Our terms and conditions"
-          onPress={async () => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await Linking.openURL('https://www.eketsupply.com/terms');
-          }}
-        />
-        <MenuItem
-          icon="lock.shield.fill"
-          label="Privacy Policy"
-          sublabel="How we protect your data (NDPA 2023)"
-          onPress={async () => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await Linking.openURL('https://www.eketsupply.com/privacy');
-          }}
+          onPress={() => {}}
         />
         <MenuItem
           icon="doc.text.fill"
           label="Payment Policy"
-          sublabel="How payments and disputes work"
-          onPress={async () => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await Linking.openURL('https://www.eketsupply.com/payment-policy');
-          }}
+          sublabel="How payments work"
+          onPress={() => {}}
         />
         <MenuItem
-          icon="arrow.counterclockwise"
-          label="Refund Policy"
-          sublabel="Cancellations and refunds"
-          onPress={async () => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await Linking.openURL('https://www.eketsupply.com/refund-policy');
-          }}
+          icon="doc.fill"
+          label="Terms & Privacy Policy"
+          onPress={() => {}}
         />
         <MenuItem
           icon="paperplane.fill"
@@ -372,15 +268,6 @@ export default function ProfileScreen() {
           onPress={async () => {
             if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             await Linking.openURL('https://www.eketsupply.com');
-          }}
-        />
-        <MenuItem
-          icon="chevron.right"
-          label="What's New"
-          sublabel="Latest features and updates"
-          onPress={() => {
-            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/whats-new' as never);
           }}
         />
 

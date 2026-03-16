@@ -1,15 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { ScrollView, Text, View, TouchableOpacity, FlatList, ActivityIndicator, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
-import { ThemedLogo } from "@/components/themed-logo";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
-import type { ArtisanBankAccount } from "@/app/artisan/bank-details";
-
-const BANK_ACCOUNT_KEY = "artisan_bank_account";
+import { notifyBookingCompleted } from "@/lib/notification-service";
 
 type JobStatus = "pending" | "accepted" | "in_progress" | "completed" | "cancelled";
 
@@ -81,7 +77,6 @@ export default function ArtisanDashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [artisanId, setArtisanId] = useState<string | null>(null);
   const [updatingJob, setUpdatingJob] = useState<string | null>(null);
-  const [bankAccount, setBankAccount] = useState<ArtisanBankAccount | null>(null);
 
   // Resolve artisan record from auth user
   useEffect(() => {
@@ -104,15 +99,6 @@ export default function ArtisanDashboardScreen() {
           });
       });
   }, [user?.id]);
-
-  // Load bank account status on focus
-  useFocusEffect(
-    useCallback(() => {
-      AsyncStorage.getItem(BANK_ACCOUNT_KEY).then((stored) => {
-        setBankAccount(stored ? JSON.parse(stored) : null);
-      }).catch(() => {});
-    }, [])
-  );
 
   // Refresh on tab focus
   useFocusEffect(
@@ -233,6 +219,25 @@ export default function ArtisanDashboardScreen() {
 
       if (newStatus === "completed") {
         Alert.alert("Job Completed! 🎉", "Great work! Your payment will be settled within 24-48 hours.");
+        // Notify customer to leave a review
+        try {
+          const { data: booking } = await supabase
+            .from("bookings")
+            .select("customer_id, service_type, artisan:artisans!bookings_artisan_id_fkey(profile:profiles!artisans_profile_id_fkey(full_name))")
+            .eq("id", jobId)
+            .single();
+          if (booking) {
+            const b = booking as any;
+            const customerId = b.customer_id;
+            const artisanName = b.artisan?.profile?.full_name ?? "Your artisan";
+            const serviceType = b.service_type ?? "Service";
+            if (customerId) {
+              await notifyBookingCompleted(customerId, artisanName, serviceType, jobId);
+            }
+          }
+        } catch (notifyErr) {
+          console.warn("Could not send review notification:", notifyErr);
+        }
       }
     } catch (err) {
       console.error("Error updating job status:", err);
@@ -345,16 +350,13 @@ export default function ArtisanDashboardScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="px-4 pt-4 pb-4" style={{ backgroundColor: "#1B5E20" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={{ flexDirection: "row", alignItems: "center" }}
-            >
-              <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.8)" />
-            </TouchableOpacity>
-            <ThemedLogo width={180} />
-            <View style={{ width: 20 }} />
-          </View>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mb-3"
+            style={{ flexDirection: "row", alignItems: "center" }}
+          >
+            <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.8)" />
+          </TouchableOpacity>
           <Text className="text-white text-2xl font-bold">Artisan Dashboard</Text>
           <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 2 }}>
             Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
@@ -406,41 +408,6 @@ export default function ArtisanDashboardScreen() {
           )}
         </View>
 
-        {/* Payout Status Banner */}
-        <View className="px-4 pt-3">
-          {bankAccount ? (
-            <TouchableOpacity
-              onPress={() => router.push("/artisan/bank-details" as any)}
-              style={{ backgroundColor: "#F0FDF4", borderColor: "#86EFAC", borderWidth: 1, borderRadius: 16, padding: 14, flexDirection: "row", alignItems: "center", marginBottom: 4 }}
-            >
-              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#DCFCE7", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
-                <IconSymbol name="checkmark.circle.fill" size={20} color="#16A34A" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 13, fontWeight: "600", color: "#15803D" }}>Payouts Active</Text>
-                <Text style={{ fontSize: 11, color: "#4ADE80", marginTop: 1 }}>
-                  {bankAccount.bank_name} •••• {bankAccount.account_number.slice(-4)}
-                </Text>
-              </View>
-              <Text style={{ fontSize: 11, color: "#16A34A", fontWeight: "500" }}>85% share</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => router.push("/artisan/bank-details" as any)}
-              style={{ backgroundColor: "#FEF3C7", borderColor: "#FDE68A", borderWidth: 1, borderRadius: 16, padding: 14, flexDirection: "row", alignItems: "center", marginBottom: 4 }}
-            >
-              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#FEF9C3", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
-                <IconSymbol name="exclamationmark.triangle.fill" size={20} color="#D97706" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 13, fontWeight: "600", color: "#92400E" }}>Bank Account Required</Text>
-                <Text style={{ fontSize: 11, color: "#B45309", marginTop: 1 }}>Link your account to receive payments</Text>
-              </View>
-              <Text style={{ fontSize: 12, color: "#D97706", fontWeight: "600" }}>Set up →</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
         {/* Quick Actions */}
         <View className="px-4 py-3">
           <Text className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Quick Actions</Text>
@@ -465,6 +432,15 @@ export default function ArtisanDashboardScreen() {
             >
               <IconSymbol name="banknote.fill" size={24} color="#1B5E20" />
               <Text className="text-xs font-medium text-foreground mt-2 text-center">Bank Details</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
+            <TouchableOpacity
+              onPress={() => router.push("/artisan/my-reviews" as any)}
+              className="flex-1 rounded-2xl p-4 items-center border border-border bg-background"
+            >
+              <IconSymbol name="star.fill" size={24} color="#E65100" />
+              <Text className="text-xs font-medium text-foreground mt-2 text-center">My Reviews</Text>
             </TouchableOpacity>
           </View>
         </View>
