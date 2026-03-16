@@ -20,6 +20,8 @@ type Review = {
   date: string;
   text: string;
   photos?: string[] | null;
+  tags?: string[] | null;
+  artisanReply?: string | null;
 };
 
 type Service = {
@@ -164,10 +166,14 @@ export default function ArtisanProfileScreen() {
           })));
         }
 
-        // Fetch reviews
+        // Fetch reviews with photos, tags and artisan replies
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
-          .select('*')
+          .select(`
+            id, rating, comment, photo_urls, tags, created_at,
+            reviewer:profiles!reviews_reviewer_id_fkey(full_name),
+            reply:review_replies(reply_text)
+          `)
           .eq('artisan_id', id)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -175,12 +181,15 @@ export default function ArtisanProfileScreen() {
         if (reviewsError) {
           console.error('Error fetching reviews:', reviewsError);
         } else if (reviewsData) {
-          setReviews(reviewsData.map(r => ({
+          setReviews((reviewsData as any[]).map(r => ({
             id: r.id,
-            author: r.reviewer_name,
+            author: (r.reviewer as any)?.full_name ?? r.reviewer_name ?? 'Customer',
             rating: r.rating,
-            date: new Date(r.created_at).toLocaleDateString(),
-            text: r.comment,
+            date: new Date(r.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }),
+            text: r.comment ?? '',
+            photos: r.photo_urls ?? null,
+            tags: r.tags ?? null,
+            artisanReply: Array.isArray(r.reply) ? (r.reply[0]?.reply_text ?? null) : (r.reply?.reply_text ?? null),
           })));
         }
 
@@ -483,6 +492,7 @@ export default function ArtisanProfileScreen() {
 
   const renderReview = ({ item }: { item: Review }) => (
     <View className="bg-surface rounded-xl p-4 mb-3 border border-border">
+      {/* Header: avatar + name + stars */}
       <View className="flex-row justify-between items-start mb-2">
         <View className="flex-row items-center">
           <View className="w-10 h-10 rounded-full bg-primary items-center justify-center mr-3">
@@ -493,14 +503,32 @@ export default function ArtisanProfileScreen() {
             <Text className="text-xs text-muted">{item.date}</Text>
           </View>
         </View>
-        <View className="flex-row items-center">
-          <Text className="text-warning mr-1">⭐</Text>
-          <Text className="text-sm font-medium text-foreground">{item.rating}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+          {[1,2,3,4,5].map(s => (
+            <Text key={s} style={{ fontSize: 13, color: s <= item.rating ? '#E65100' : '#D1D5DB' }}>★</Text>
+          ))}
         </View>
       </View>
-      <Text className="text-sm text-muted leading-relaxed">{item.text}</Text>
+
+      {/* Review text */}
+      {!!item.text && (
+        <Text className="text-sm text-muted leading-relaxed mb-2">{item.text}</Text>
+      )}
+
+      {/* Tags */}
+      {item.tags && item.tags.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {item.tags.map(tag => (
+            <View key={tag} style={{ paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20, backgroundColor: '#E8F5E9' }}>
+              <Text style={{ fontSize: 11, color: '#1B5E20', fontWeight: '600' }}>{tag}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Photos */}
       {item.photos && item.photos.length > 0 && (
-        <View className="flex-row gap-2 mt-3">
+        <View className="flex-row gap-2 mt-1 mb-2">
           {item.photos.map((photo, index) => (
             <TouchableOpacity
               key={index}
@@ -512,10 +540,25 @@ export default function ArtisanProfileScreen() {
             >
               <Image
                 source={{ uri: photo }}
-                className="w-20 h-20 rounded-lg"
+                style={{ width: 80, height: 80, borderRadius: 10 }}
               />
             </TouchableOpacity>
           ))}
+        </View>
+      )}
+
+      {/* Artisan reply bubble */}
+      {!!item.artisanReply && (
+        <View style={{
+          backgroundColor: '#F0FDF4',
+          borderRadius: 10,
+          padding: 10,
+          borderLeftWidth: 3,
+          borderLeftColor: '#1B5E20',
+          marginTop: 4,
+        }}>
+          <Text style={{ fontSize: 11, fontWeight: '700', color: '#1B5E20', marginBottom: 3 }}>Artisan's Reply</Text>
+          <Text style={{ fontSize: 13, color: '#374151', lineHeight: 18 }}>{item.artisanReply}</Text>
         </View>
       )}
     </View>

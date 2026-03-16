@@ -1,13 +1,20 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
   ActivityIndicator, Image, RefreshControl,
+  TextInput, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+
+type ReviewReply = {
+  id: string;
+  reply_text: string;
+  created_at: string;
+};
 
 type Review = {
   id: string;
@@ -23,6 +30,7 @@ type Review = {
   booking: {
     service_type: string | null;
   } | null;
+  reply: ReviewReply | null;
 };
 
 type RatingBreakdown = {
@@ -54,7 +62,18 @@ function StarRow({ stars, count, total }: { stars: number; count: number; total:
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+type ReviewCardProps = {
+  review: Review;
+  artisanId: string;
+  onReplySubmitted: () => void;
+};
+
+function ReviewCard({ review, artisanId, onReplySubmitted }: ReviewCardProps) {
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [replyText, setReplyText] = useState(review.reply?.reply_text ?? '');
+  const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+
   const reviewerName = review.reviewer?.full_name ?? 'Anonymous';
   const initials = reviewerName
     .split(' ')
@@ -67,6 +86,58 @@ function ReviewCard({ review }: { review: Review }) {
     month: 'short',
     year: 'numeric',
   });
+
+  const hasExistingReply = !!review.reply;
+
+  async function submitReply() {
+    if (!replyText.trim()) return;
+    setSubmitting(true);
+    try {
+      if (hasExistingReply) {
+        // Update existing reply
+        const { error } = await supabase
+          .from('review_replies')
+          .update({ reply_text: replyText.trim(), updated_at: new Date().toISOString() })
+          .eq('review_id', review.id);
+        if (error) throw error;
+      } else {
+        // Insert new reply
+        const { error } = await supabase
+          .from('review_replies')
+          .insert({ review_id: review.id, artisan_id: artisanId, reply_text: replyText.trim() });
+        if (error) throw error;
+      }
+      setShowReplyInput(false);
+      onReplySubmitted();
+    } catch (err: any) {
+      Alert.alert('Error', err?.message ?? 'Could not save reply. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function deleteReply() {
+    Alert.alert('Delete Reply', 'Remove your reply to this review?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const { error } = await supabase
+            .from('review_replies')
+            .delete()
+            .eq('review_id', review.id);
+          if (error) {
+            Alert.alert('Error', 'Could not delete reply.');
+            return;
+          }
+          setReplyText('');
+          setShowReplyInput(false);
+          onReplySubmitted();
+        },
+      },
+    ]);
+  }
 
   return (
     <View
@@ -136,7 +207,7 @@ function ReviewCard({ review }: { review: Review }) {
 
       {/* Photos */}
       {review.photo_urls && review.photo_urls.length > 0 ? (
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
           {review.photo_urls.map((uri, idx) => (
             <Image
               key={idx}
@@ -145,6 +216,114 @@ function ReviewCard({ review }: { review: Review }) {
             />
           ))}
         </View>
+      ) : null}
+
+      {/* Existing reply bubble */}
+      {hasExistingReply && !showReplyInput && (
+        <View
+          style={{
+            backgroundColor: '#F0FDF4',
+            borderRadius: 12,
+            padding: 12,
+            borderLeftWidth: 3,
+            borderLeftColor: '#1B5E20',
+            marginTop: 4,
+          }}
+        >
+          <Text style={{ fontSize: 11, fontWeight: '700', color: '#1B5E20', marginBottom: 4 }}>
+            Your Reply
+          </Text>
+          <Text style={{ fontSize: 13, color: '#374151', lineHeight: 18 }}>
+            {review.reply!.reply_text}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+            <TouchableOpacity
+              onPress={() => {
+                setReplyText(review.reply!.reply_text);
+                setShowReplyInput(true);
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }}
+            >
+              <Text style={{ fontSize: 12, color: '#1B5E20', fontWeight: '600' }}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deleteReply}>
+              <Text style={{ fontSize: 12, color: '#DC2626', fontWeight: '600' }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Reply input */}
+      {showReplyInput ? (
+        <View style={{ marginTop: 8 }}>
+          <TextInput
+            ref={inputRef}
+            value={replyText}
+            onChangeText={setReplyText}
+            placeholder="Write a public reply to this review…"
+            placeholderTextColor="#9BA1A6"
+            multiline
+            numberOfLines={3}
+            style={{
+              borderWidth: 1,
+              borderColor: '#1B5E20',
+              borderRadius: 12,
+              padding: 12,
+              fontSize: 14,
+              color: '#11181C',
+              minHeight: 80,
+              textAlignVertical: 'top',
+            }}
+            returnKeyType="default"
+          />
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowReplyInput(false);
+                setReplyText(review.reply?.reply_text ?? '');
+              }}
+              style={{
+                paddingHorizontal: 16, paddingVertical: 8,
+                borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB',
+              }}
+            >
+              <Text style={{ fontSize: 13, color: '#687076', fontWeight: '600' }}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={submitReply}
+              disabled={submitting || !replyText.trim()}
+              style={{
+                paddingHorizontal: 20, paddingVertical: 8,
+                borderRadius: 20,
+                backgroundColor: replyText.trim() ? '#1B5E20' : '#D1D5DB',
+              }}
+            >
+              {submitting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={{ fontSize: 13, color: '#fff', fontWeight: '600' }}>
+                  {hasExistingReply ? 'Update' : 'Reply'}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : !hasExistingReply ? (
+        <TouchableOpacity
+          onPress={() => {
+            setShowReplyInput(true);
+            setTimeout(() => inputRef.current?.focus(), 100);
+          }}
+          style={{
+            flexDirection: 'row', alignItems: 'center', marginTop: 8,
+            paddingTop: 10, borderTopWidth: 0.5, borderTopColor: '#E5E7EB',
+          }}
+        >
+          <IconSymbol name="chevron.right" size={14} color="#1B5E20" />
+          <Text style={{ fontSize: 13, color: '#1B5E20', fontWeight: '600', marginLeft: 4 }}>
+            Reply to this review
+          </Text>
+        </TouchableOpacity>
       ) : null}
     </View>
   );
@@ -165,13 +344,21 @@ export default function MyReviewsScreen() {
         .select(`
           id, rating, comment, tags, photo_urls, created_at,
           reviewer:profiles!reviews_reviewer_id_fkey(full_name, avatar_url),
-          booking:bookings!reviews_booking_id_fkey(service_type)
+          booking:bookings!reviews_booking_id_fkey(service_type),
+          reply:review_replies(id, reply_text, created_at)
         `)
         .eq('artisan_id', aid)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setReviews((data as unknown as Review[]) ?? []);
+
+      // Supabase returns reply as array (one-to-one via unique constraint)
+      const mapped = ((data as any[]) ?? []).map((r) => ({
+        ...r,
+        reply: Array.isArray(r.reply) ? (r.reply[0] ?? null) : (r.reply ?? null),
+      })) as Review[];
+
+      setReviews(mapped);
     } catch (err) {
       console.error('Error fetching reviews:', err);
     } finally {
@@ -316,37 +503,49 @@ export default function MyReviewsScreen() {
 
   return (
     <ScreenContainer>
-      <FlatList
-        data={reviews}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={{ paddingHorizontal: 20 }}>
-            <ReviewCard review={item} />
-          </View>
-        )}
-        ListHeaderComponent={ListHeader}
-        ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 40 }}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>⭐</Text>
-            <Text style={{ fontSize: 18, fontWeight: '700', color: '#11181C', marginBottom: 8, textAlign: 'center' }}>
-              No Reviews Yet
-            </Text>
-            <Text style={{ fontSize: 14, color: '#687076', textAlign: 'center', lineHeight: 20 }}>
-              Complete jobs and deliver great service to start earning reviews from customers.
-            </Text>
-          </View>
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#1B5E20"
-            colors={['#1B5E20']}
-          />
-        }
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <FlatList
+          data={reviews}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={{ paddingHorizontal: 20 }}>
+              {artisanId && (
+                <ReviewCard
+                  review={item}
+                  artisanId={artisanId}
+                  onReplySubmitted={() => fetchReviews(artisanId)}
+                />
+              )}
+            </View>
+          )}
+          ListHeaderComponent={ListHeader}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 40 }}>
+              <Text style={{ fontSize: 48, marginBottom: 12 }}>⭐</Text>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: '#11181C', marginBottom: 8, textAlign: 'center' }}>
+                No Reviews Yet
+              </Text>
+              <Text style={{ fontSize: 14, color: '#687076', textAlign: 'center', lineHeight: 20 }}>
+                Complete jobs and deliver great service to start earning reviews from customers.
+              </Text>
+            </View>
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#1B5E20"
+              colors={['#1B5E20']}
+            />
+          }
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        />
+      </KeyboardAvoidingView>
     </ScreenContainer>
   );
 }
