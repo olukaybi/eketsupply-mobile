@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppIcon } from '@/components/ui/app-icon';
 import * as DocumentPicker from 'expo-document-picker';
 
 type DocumentType = 'id_card' | 'certification' | 'license' | 'other';
@@ -219,9 +220,10 @@ export default function VerificationUploadScreen() {
 
           {/* Info Card */}
           <View className="bg-primary/10 rounded-xl p-4 border border-primary/20 mb-4">
-            <Text className="text-primary font-semibold mb-2">
-              ✓ Why Get Verified?
-            </Text>
+            <View className="flex-row items-center gap-2 mb-2">
+              <AppIcon name="checkmark.shield.fill" size={14} color="#0a7ea4" />
+              <Text className="text-primary font-semibold">Why Get Verified?</Text>
+            </View>
             <Text className="text-foreground text-sm mb-1">
               • Build customer trust with a verified badge
             </Text>

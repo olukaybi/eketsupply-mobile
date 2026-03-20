@@ -8,6 +8,7 @@ import {
   calculatePaystackFees,
   type PaymentData 
 } from '@/lib/paystack-service';
+import { AppIcon } from '@/components/ui/app-icon';
 
 type PaymentModalProps = {
   visible: boolean;
@@ -139,9 +140,12 @@ export function PaymentModal({
             </View>
 
             <View className="bg-surface rounded-xl p-3 mb-4 border border-border">
-              <Text className="text-muted text-xs">
-                🔒 Your payment is processed securely by Paystack. The artisan receives their share automatically after a 24-hour settlement window, giving you time to raise any concerns.
-              </Text>
+              <View className="flex-row items-start gap-2">
+                <AppIcon name="lock.fill" size={14} color="#687076" style={{ marginTop: 1 }} />
+                <Text className="text-muted text-xs flex-1">
+                  Your payment is processed securely by Paystack. The artisan receives their share automatically after a 24-hour settlement window, giving you time to raise any concerns.
+                </Text>
+              </View>
             </View>
 
             <View className="flex-row gap-3">
@@ -179,7 +183,7 @@ export function PaymentModal({
         return (
           <View className="items-center py-8">
             <View className="w-16 h-16 bg-success/20 rounded-full items-center justify-center mb-4">
-              <Text className="text-3xl">✓</Text>
+              <AppIcon name="checkmark" size={28} color="#22C55E" />
             </View>
             <Text className="text-foreground font-bold text-xl mb-2">Payment Successful!</Text>
             <Text className="text-muted text-sm text-center">
@@ -193,7 +197,7 @@ export function PaymentModal({
         return (
           <View className="items-center py-8">
             <View className="w-16 h-16 bg-error/20 rounded-full items-center justify-center mb-4">
-              <Text className="text-3xl">✕</Text>
+              <AppIcon name="xmark" size={28} color="#EF4444" />
             </View>
             <Text className="text-foreground font-bold text-xl mb-2">Payment Failed</Text>
             <Text className="text-muted text-sm text-center mb-4">

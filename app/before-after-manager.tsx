@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { AppIcon } from "@/components/ui/app-icon";
 
 interface BeforeAfterPhoto {
   id: string;
@@ -321,7 +322,7 @@ export default function BeforeAfterManagerScreen() {
           {/* Projects List */}
           {projects.length === 0 ? (
             <View className="items-center justify-center py-12">
-              <Text className="text-6xl mb-4">🔄</Text>
+              <AppIcon name="arrow.2.squarepath" size={56} color="#9BA1A6" style={{ marginBottom: 16 }} />
               <Text className="text-muted text-center">
                 No before/after projects yet.{"\n"}Add your first transformation!
               </Text>

@@ -218,7 +218,7 @@ export default function ArtisanDashboardScreen() {
       );
 
       if (newStatus === "completed") {
-        Alert.alert("Job Completed! 🎉", "Great work! Your payment will be settled within 24-48 hours.");
+        Alert.alert("Job Completed!", "Great work! Your payment will be settled within 24-48 hours.");
         // Notify customer to leave a review
         try {
           const { data: booking } = await supabase
@@ -393,7 +393,7 @@ export default function ArtisanDashboardScreen() {
               label="Rating"
               value={
                 stats.rating !== null
-                  ? `${stats.rating.toFixed(1)} ★`
+                  ? `${stats.rating.toFixed(1)}`
                   : "—"
               }
               icon="star.fill"

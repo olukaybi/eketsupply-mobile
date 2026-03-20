@@ -64,7 +64,7 @@ export class BadgeNotificationService {
       const message = {
         to: profileData.push_token,
         sound: 'default',
-        title: '🎉 New Badge Earned!',
+        title: 'New Badge Earned!',
         body: `Congratulations! You've earned the "${badge.name}" badge - ${badge.description}`,
         data: {
           type: 'badge_earned',

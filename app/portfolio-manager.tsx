@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { AppIcon } from "@/components/ui/app-icon";
 
 interface PortfolioPhoto {
   id: string;
@@ -272,7 +273,7 @@ export default function PortfolioManagerScreen() {
             onPress={() => router.push('/before-after-manager')}
             className="bg-success rounded-xl p-4 mb-6 items-center flex-row justify-center gap-2"
           >
-            <Text className="text-white text-2xl">🔄</Text>
+            <AppIcon name="arrow.2.squarepath" size={22} color="#fff" />
             <View>
               <Text className="text-white font-semibold">
                 Manage Before/After Projects

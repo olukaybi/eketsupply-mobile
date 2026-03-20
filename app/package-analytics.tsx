@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppIcon } from '@/components/ui/app-icon';
 
 type PackageAnalytics = {
   package_id: string;
@@ -237,7 +238,7 @@ export default function PackageAnalyticsScreen() {
             ))
           ) : (
             <View className="bg-surface rounded-xl p-8 items-center">
-              <Text className="text-6xl mb-3">📦</Text>
+              <AppIcon name="shippingbox.fill" size={56} color="#9BA1A6" style={{ marginBottom: 12 }} />
               <Text className="text-foreground font-semibold text-base mb-2">
                 No Package Data Yet
               </Text>
@@ -259,7 +260,10 @@ export default function PackageAnalyticsScreen() {
           <View className="px-6 pb-6">
             <Text className="text-lg font-bold text-foreground mb-3">Insights</Text>
             <View className="bg-primary/10 rounded-xl p-4 border border-primary/20">
-              <Text className="text-primary font-semibold mb-2">💡 Recommendations</Text>
+              <View className="flex-row items-center gap-2 mb-2">
+                <AppIcon name="lightbulb.fill" size={14} color="#0a7ea4" />
+                <Text className="text-primary font-semibold">Recommendations</Text>
+              </View>
               {analytics[0] && (
                 <Text className="text-foreground text-sm mb-2">
                   • Your most popular package is {'"'}{analytics[0].package_name}{'"'}  with{' '}

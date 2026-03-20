@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import * as Haptics from 'expo-haptics';
+import { AppIcon } from '@/components/ui/app-icon';
 import { trpc as _trpc } from '@/lib/trpc';
 
 interface ArtisanMarker {
@@ -267,7 +268,7 @@ export default function MapViewScreen() {
             </View>
             
             <View className="flex-row items-center">
-              <Text className="text-2xl mr-1">📍</Text>
+              <AppIcon name="location.fill" size={18} color="#E65100" style={{ marginRight: 4 }} />
               <Text className="font-semibold text-foreground">{selectedArtisan.distance_km.toFixed(1)}km</Text>
             </View>
 

@@ -15,6 +15,8 @@ import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppIcon } from "@/components/ui/app-icon";
+import type { IconSymbolName } from "@/components/ui/icon-symbol";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -23,19 +25,19 @@ import { useAuth } from "@/hooks/use-auth";
 const BRAND_GREEN = "#1B5E20";
 const BRAND_ORANGE = "#E65100";
 
-const SERVICE_CATEGORIES = [
-  { id: "plumbing", label: "Plumbing", icon: "🔧" },
-  { id: "electrical", label: "Electrical", icon: "⚡" },
-  { id: "painting", label: "Painting", icon: "🎨" },
-  { id: "carpentry", label: "Carpentry", icon: "🪚" },
-  { id: "ac_hvac", label: "AC & HVAC", icon: "❄️" },
-  { id: "tiling", label: "Tiling & Flooring", icon: "🏠" },
-  { id: "masonry", label: "Masonry", icon: "🧱" },
-  { id: "welding", label: "Welding", icon: "🔩" },
-  { id: "cleaning", label: "Cleaning", icon: "🧹" },
-  { id: "landscaping", label: "Landscaping", icon: "🌿" },
-  { id: "roofing", label: "Roofing", icon: "🏗️" },
-  { id: "general", label: "General Repairs", icon: "🛠️" },
+const SERVICE_CATEGORIES: { id: string; label: string; icon: IconSymbolName }[] = [
+  { id: "plumbing", label: "Plumbing", icon: "drop.fill" },
+  { id: "electrical", label: "Electrical", icon: "bolt.fill" },
+  { id: "painting", label: "Painting", icon: "paintbrush.fill" },
+  { id: "carpentry", label: "Carpentry", icon: "hammer.fill" },
+  { id: "ac_hvac", label: "AC & HVAC", icon: "speaker.wave.2.fill" },
+  { id: "tiling", label: "Tiling & Flooring", icon: "square.grid.2x2.fill" },
+  { id: "masonry", label: "Masonry", icon: "building.2.fill" },
+  { id: "welding", label: "Welding", icon: "wrench.fill" },
+  { id: "cleaning", label: "Cleaning", icon: "sparkles" },
+  { id: "landscaping", label: "Landscaping", icon: "house.and.flag.fill" },
+  { id: "roofing", label: "Roofing", icon: "house.and.flag.fill" },
+  { id: "general", label: "General Repairs", icon: "wrench.and.screwdriver.fill" },
 ];
 
 const NIGERIAN_BANKS = [
@@ -418,7 +420,7 @@ export default function ArtisanOnboardingScreen() {
         .eq("id", profile.id);
 
       Alert.alert(
-        "🎉 Application Submitted!",
+        "Application Submitted!",
         "Your artisan profile has been created and submitted for verification. We'll review your documents within 24-48 hours and notify you by email.",
         [{ text: "Go to Dashboard", onPress: () => router.replace("/artisan/dashboard") }]
       );
@@ -450,7 +452,7 @@ export default function ArtisanOnboardingScreen() {
                 }}
               >
                 {currentStep > step.id ? (
-                  <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>✓</Text>
+                  <AppIcon name="checkmark" size={12} color="#fff" />
                 ) : (
                   <Text
                     style={{
@@ -591,7 +593,7 @@ export default function ArtisanOnboardingScreen() {
                   gap: 4,
                 }}
               >
-                <Text style={{ fontSize: 14 }}>{cat.icon}</Text>
+                <AppIcon name={cat.icon} size={14} color={selected ? BRAND_GREEN : "#374151"} />
                 <Text
                   style={{
                     color: selected ? BRAND_GREEN : "#374151",
@@ -694,7 +696,8 @@ export default function ArtisanOnboardingScreen() {
                   padding: 4,
                 }}
               >
-                <Text style={{ color: "#fff", fontSize: 12 }}>✕ Remove</Text>
+                <AppIcon name="xmark" size={12} color="#fff" style={{ marginRight: 2 }} />
+                <Text style={{ color: "#fff", fontSize: 12 }}>Remove</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -711,7 +714,7 @@ export default function ArtisanOnboardingScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 24, marginBottom: 4 }}>📷</Text>
+                <AppIcon name="camera.fill" size={24} color="#9BA1A6" style={{ marginBottom: 4 }} />
                 <Text style={{ color: BRAND_GREEN, fontWeight: "600", fontSize: 13 }}>Take Photo</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -726,7 +729,7 @@ export default function ArtisanOnboardingScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 24, marginBottom: 4 }}>🖼️</Text>
+                <AppIcon name="photo.fill" size={24} color="#9BA1A6" style={{ marginBottom: 4 }} />
                 <Text className="text-muted font-semibold text-sm">Upload File</Text>
               </TouchableOpacity>
             </View>
@@ -753,7 +756,10 @@ export default function ArtisanOnboardingScreen() {
             borderLeftColor: BRAND_GREEN,
           }}
         >
-          <Text style={{ color: BRAND_GREEN, fontWeight: "700", marginBottom: 4 }}>✓ Verified Badge Benefits</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <AppIcon name="checkmark.shield.fill" size={14} color={BRAND_GREEN} />
+            <Text style={{ color: BRAND_GREEN, fontWeight: "700" }}>Verified Badge Benefits</Text>
+          </View>
           <Text className="text-foreground text-sm">• Appear first in customer searches</Text>
           <Text className="text-foreground text-sm">• Build instant trust with new customers</Text>
           <Text className="text-foreground text-sm">• Access higher-value bookings</Text>
@@ -788,7 +794,10 @@ export default function ArtisanOnboardingScreen() {
         <IdUploadBox side="back" uri={data.idBackUri} />
 
         <View className="bg-surface rounded-xl p-4 border border-border">
-          <Text className="text-foreground font-semibold mb-2">📋 Document Guidelines</Text>
+          <View className="flex-row items-center gap-2 mb-2">
+            <AppIcon name="doc.text.fill" size={14} color="#11181C" />
+            <Text className="text-foreground font-semibold">Document Guidelines</Text>
+          </View>
           <Text className="text-muted text-sm">• Photo must be clear and fully readable</Text>
           <Text className="text-muted text-sm">• All four corners of the ID must be visible</Text>
           <Text className="text-muted text-sm">• Accepted formats: JPG, PNG</Text>
@@ -823,7 +832,10 @@ export default function ArtisanOnboardingScreen() {
             borderLeftColor: BRAND_ORANGE,
           }}
         >
-          <Text style={{ color: BRAND_ORANGE, fontWeight: "700", marginBottom: 4 }}>💰 How You Get Paid</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <AppIcon name="banknote.fill" size={14} color={BRAND_ORANGE} />
+            <Text style={{ color: BRAND_ORANGE, fontWeight: "700" }}>How You Get Paid</Text>
+          </View>
           <Text className="text-foreground text-sm">Customer pays ₦10,000 → You receive ₦8,500 (85%)</Text>
           <Text className="text-foreground text-sm">EketSupply platform fee: ₦1,500 (15%)</Text>
           <Text className="text-foreground text-sm">Settlement: within 24-48 hours of job completion</Text>
@@ -950,7 +962,7 @@ export default function ArtisanOnboardingScreen() {
               alignItems: "center",
             }}
           >
-            <Text style={{ fontSize: 20, marginRight: 10 }}>✅</Text>
+            <AppIcon name="checkmark.circle.fill" size={20} color={BRAND_GREEN} style={{ marginRight: 10 }} />
             <View>
               <Text style={{ color: BRAND_GREEN, fontWeight: "700" }}>Account Verified</Text>
               <Text style={{ color: "#111827", fontWeight: "600", marginTop: 2 }}>{data.accountName}</Text>
@@ -992,7 +1004,7 @@ export default function ArtisanOnboardingScreen() {
         <Text className="text-xl font-bold text-foreground mb-1">Review Your Application</Text>
         <Text className="text-muted text-sm mb-5">Please confirm all details before submitting.</Text>
 
-        <Section title="👤 Personal Details">
+        <Section title="Personal Details">
           <ReviewRow label="Full Name" value={data.fullName} />
           <ReviewRow label="Phone" value={data.phone} />
           <ReviewRow label="City" value={data.city} />
@@ -1000,19 +1012,19 @@ export default function ArtisanOnboardingScreen() {
           <ReviewRow label="Bio" value={data.bio.substring(0, 80) + (data.bio.length > 80 ? "..." : "")} />
         </Section>
 
-        <Section title="🛠️ Skills & Rates">
+        <Section title="Skills & Rates">
           <ReviewRow label="Skills" value={selectedSkillLabels || "None selected"} />
           <ReviewRow label="Experience" value={data.experienceLevel} />
           <ReviewRow label="Hourly Rate" value={data.hourlyRate ? `₦${Number(data.hourlyRate).toLocaleString()}/hr` : "—"} />
         </Section>
 
-        <Section title="🪪 ID Verification">
+        <Section title="ID Verification">
           <ReviewRow label="ID Type" value={data.idType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} />
-          <ReviewRow label="Front" value={data.idFrontUri ? "✅ Uploaded" : "❌ Missing"} />
-          <ReviewRow label="Back" value={data.idBackUri ? "✅ Uploaded" : "Not provided"} />
+          <ReviewRow label="Front" value={data.idFrontUri ? "Uploaded" : "Missing"} />
+          <ReviewRow label="Back" value={data.idBackUri ? "Uploaded" : "Not provided"} />
         </Section>
 
-        <Section title="🏦 Bank Details">
+        <Section title="Bank Details">
           <ReviewRow label="Bank" value={data.bankName} />
           <ReviewRow label="Account No." value={data.accountNumber} />
           <ReviewRow label="Account Name" value={data.accountName} />
@@ -1020,7 +1032,10 @@ export default function ArtisanOnboardingScreen() {
 
         {/* Terms */}
         <View style={{ backgroundColor: "#FFF3E0", borderRadius: 12, padding: 14, marginBottom: 8 }}>
-          <Text style={{ color: BRAND_ORANGE, fontWeight: "700", marginBottom: 6 }}>📋 By submitting you agree:</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <AppIcon name="doc.text.fill" size={14} color={BRAND_ORANGE} />
+            <Text style={{ color: BRAND_ORANGE, fontWeight: "700" }}>By submitting you agree:</Text>
+          </View>
           <Text className="text-foreground text-sm">• All information provided is accurate and truthful</Text>
           <Text className="text-foreground text-sm">• EketSupply may verify your identity and documents</Text>
           <Text className="text-foreground text-sm">• You will abide by the EketSupply Artisan Code of Conduct</Text>
@@ -1117,7 +1132,7 @@ export default function ArtisanOnboardingScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
-                    🚀 Submit Application
+                    Submit Application
                   </Text>
                 )}
               </TouchableOpacity>

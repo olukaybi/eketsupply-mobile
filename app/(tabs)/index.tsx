@@ -2,15 +2,9 @@ import { useState, useEffect } from "react";
 import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
-
-type ServiceCategory = {
-  id: string;
-  name: string;
-  icon: string;
-  count: number;
-};
 
 type Artisan = {
   id: string;
@@ -25,16 +19,17 @@ type Artisan = {
   responseRate?: number | null; // % of reviews with an artisan reply
 };
 
-const SERVICE_CATEGORIES: ServiceCategory[] = [
-  { id: "1", name: "Plumbing", icon: "🔧", count: 45 },
-  { id: "2", name: "Electrical", icon: "⚡", count: 38 },
-  { id: "3", name: "Carpentry", icon: "🪚", count: 52 },
-  { id: "4", name: "Painting", icon: "🎨", count: 67 },
-  { id: "5", name: "Cleaning", icon: "🧹", count: 89 },
-  { id: "6", name: "Roofing", icon: "🏠", count: 23 },
-  { id: "7", name: "Welding", icon: "🔥", count: 31 },
-  { id: "8", name: "Tiling", icon: "⬜", count: 42 },
+const SERVICE_CATEGORIES = [
+  { id: "1", name: "Plumbing",    iconName: "drop.fill" as const,       count: 45 },
+  { id: "2", name: "Electrical",  iconName: "bolt.fill" as const,       count: 38 },
+  { id: "3", name: "Carpentry",   iconName: "hammer.fill" as const,     count: 52 },
+  { id: "4", name: "Painting",    iconName: "paintbrush.fill" as const, count: 67 },
+  { id: "5", name: "Cleaning",    iconName: "sparkles" as const,        count: 89 },
+  { id: "6", name: "Roofing",     iconName: "house.and.flag.fill" as const, count: 23 },
+  { id: "7", name: "Welding",     iconName: "flame.fill" as const,      count: 31 },
+  { id: "8", name: "Tiling",      iconName: "square.grid.2x2.fill" as const, count: 42 },
 ];
+type ServiceCategory = (typeof SERVICE_CATEGORIES)[number];
 
 type ArtisanData = {
   id: string;
@@ -177,7 +172,7 @@ export default function HomeScreen() {
         <View className={`w-20 h-20 rounded-2xl items-center justify-center mb-2 border-2 ${
           isSelected ? 'bg-primary border-primary' : 'bg-surface border-border'
         }`}>
-          <Text className="text-4xl">{item.icon}</Text>
+          <AppIcon name={item.iconName} size={32} color={isSelected ? '#fff' : '#0a7ea4'} />
         </View>
         <Text className={`text-xs font-medium text-center ${
           isSelected ? 'text-primary' : 'text-foreground'
@@ -220,7 +215,7 @@ export default function HomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
           <Text style={{ fontSize: 15, fontWeight: '600', color: '#11181C' }}>{item.name}</Text>
           {item.verified && (
-            <Text style={{ marginLeft: 4, color: '#22C55E', fontSize: 13 }}>✓</Text>
+            <AppIcon name="checkmark.seal.fill" size={14} color="#22C55E" style={{ marginLeft: 4 }} />
           )}
           {item.responseRate != null && item.responseRate >= 70 && (
             <View
@@ -237,10 +232,11 @@ export default function HomeScreen() {
         </View>
         <Text style={{ fontSize: 13, color: '#687076', marginBottom: 4 }}>{item.service}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-          <Text style={{ fontSize: 12, color: '#E65100', marginRight: 3 }}>⭐</Text>
+          <AppIcon name="star.fill" size={12} color="#E65100" style={{ marginRight: 3 }} />
           <Text style={{ fontSize: 13, fontWeight: '600', color: '#11181C' }}>{item.rating}</Text>
           <Text style={{ fontSize: 12, color: '#687076', marginLeft: 3 }}>({item.reviews})</Text>
-          <Text style={{ fontSize: 12, color: '#687076', marginLeft: 8 }}>📍 {item.location}</Text>
+          <AppIcon name="location.fill" size={12} color="#687076" style={{ marginLeft: 8, marginRight: 2 }} />
+          <Text style={{ fontSize: 12, color: '#687076' }}>{item.location}</Text>
         </View>
         <Text style={{ fontSize: 13, fontWeight: '600', color: '#0a7ea4' }}>{item.price}</Text>
         {!!item.topReview && (
@@ -275,13 +271,13 @@ export default function HomeScreen() {
         <View className="flex-1">
           <View className="flex-row items-center">
             <Text className="text-base font-semibold text-foreground">{item.name}</Text>
-            {item.verified && <Text className="ml-1 text-success">✓</Text>}
+            {item.verified && <AppIcon name="checkmark.seal.fill" size={14} color="#22C55E" style={{ marginLeft: 4 }} />}
           </View>
           <Text className="text-sm text-muted">{item.service}</Text>
         </View>
       </View>
       <View className="flex-row items-center mb-2" style={{ flexWrap: 'wrap', gap: 4 }}>
-        <Text className="text-warning mr-1">⭐</Text>
+        <AppIcon name="star.fill" size={14} color="#E65100" style={{ marginRight: 2 }} />
         <Text className="text-sm font-medium text-foreground">{item.rating}</Text>
         <Text className="text-sm text-muted ml-1">({item.reviews} reviews)</Text>
         {item.responseRate != null && item.responseRate >= 70 && (
@@ -297,7 +293,10 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
-      <Text className="text-sm text-muted mb-1">📍 {item.location}</Text>
+      <View className="flex-row items-center mb-1">
+        <AppIcon name="location.fill" size={14} color="#687076" style={{ marginRight: 3 }} />
+        <Text className="text-sm text-muted">{item.location}</Text>
+      </View>
       <Text className="text-sm font-medium text-primary">{item.price}</Text>
       {!!item.topReview && (
         <View
@@ -331,7 +330,7 @@ export default function HomeScreen() {
             </View>
             {user ? (
               <TouchableOpacity onPress={logout} className="bg-surface rounded-full p-2">
-                <Text className="text-muted">👤</Text>
+                <AppIcon name="person.fill" size={20} color="#687076" />
               </TouchableOpacity>
             ) : (
               <Link href="/auth/sign-in" asChild>
@@ -344,7 +343,7 @@ export default function HomeScreen() {
 
           {/* Search Bar */}
           <View className="bg-surface rounded-full px-4 py-3 flex-row items-center border border-border mb-4">
-            <Text className="text-muted mr-2">🔍</Text>
+            <AppIcon name="magnifyingglass" size={18} color="#687076" style={{ marginRight: 8 }} />
             <TextInput
               className="flex-1 text-foreground"
               placeholder="Search for services..."
@@ -361,7 +360,7 @@ export default function HomeScreen() {
               className="flex-1 rounded-xl p-4 flex-row items-center justify-center"
               style={{ backgroundColor: '#EF4444' }}
             >
-              <Text className="text-2xl mr-2">🚨</Text>
+              <AppIcon name="exclamationmark.octagon.fill" size={24} color="#fff" style={{ marginRight: 8 }} />
               <View>
                 <Text className="text-white font-bold text-sm">Emergency</Text>
                 <Text className="text-white text-xs opacity-90">Within 2hrs</Text>
@@ -373,7 +372,7 @@ export default function HomeScreen() {
               className="flex-1 rounded-xl p-4 flex-row items-center justify-center"
               style={{ backgroundColor: '#2D5F3F' }}
             >
-              <Text className="text-2xl mr-2">🗺️</Text>
+              <AppIcon name="map.fill" size={24} color="#fff" style={{ marginRight: 8 }} />
               <View>
                 <Text className="text-white font-bold text-sm">Map View</Text>
                 <Text className="text-white text-xs opacity-90">Find nearby</Text>

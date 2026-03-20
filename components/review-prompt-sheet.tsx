@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { AppIcon } from '@/components/ui/app-icon';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = 320;
@@ -138,7 +139,7 @@ export function ReviewPromptSheet({
               alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 32 }}>⭐</Text>
+            <AppIcon name="star.fill" size={32} color="#E65100" />
           </View>
         </View>
 

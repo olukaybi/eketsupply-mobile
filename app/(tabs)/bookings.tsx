@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { router } from "expo-router";
@@ -75,11 +76,11 @@ const STATUS_TEXT_COLORS: Record<BookingStatus, string> = {
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
-  pending: "⏳ Pending",
-  accepted: "✅ Accepted",
-  completed: "✅ Completed",
-  rejected: "❌ Rejected",
-  cancelled: "🚫 Cancelled",
+  pending: "Pending",
+  accepted: "Accepted",
+  completed: "Completed",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
 };
 
 export default function BookingsScreen() {
@@ -415,16 +416,15 @@ export default function BookingsScreen() {
         {/* Header row */}
         <View className="flex-row items-center justify-between mb-3">
           <View
-            className={`px-3 py-1 rounded-full ${
+            className={`px-3 py-1 rounded-full flex-row items-center gap-1 ${
               booking.booking_type === "instant" ? "bg-primary/20" : "bg-warning/20"
             }`}
           >
-            <Text
-              className={`text-xs font-semibold ${
-                booking.booking_type === "instant" ? "text-primary" : "text-warning"
-              }`}
-            >
-              {booking.booking_type === "instant" ? "⚡ Instant" : "💬 Quote"}
+            <AppIcon name={booking.booking_type === "instant" ? "bolt.fill" : "bubble.left.fill"} size={12} color={booking.booking_type === "instant" ? "#0a7ea4" : "#F59E0B"} />
+            <Text className={`text-xs font-semibold ${
+              booking.booking_type === "instant" ? "text-primary" : "text-warning"
+            }`}>
+              {booking.booking_type === "instant" ? "Instant" : "Quote"}
             </Text>
           </View>
           <View className={`px-2 py-1 rounded-full ${STATUS_COLORS[booking.status]}`}>
@@ -444,7 +444,10 @@ export default function BookingsScreen() {
             {userType === "customer" && booking.artisan && (
               <View className="flex-row items-center mt-0.5">
                 <Text className="text-sm text-muted mr-2">{booking.artisan.service_category}</Text>
-                <Text className="text-sm text-warning">⭐ {booking.artisan.rating?.toFixed(1)}</Text>
+                <View className="flex-row items-center">
+                  <AppIcon name="star.fill" size={12} color="#F59E0B" style={{ marginRight: 3 }} />
+                  <Text className="text-sm text-warning">{booking.artisan.rating?.toFixed(1)}</Text>
+                </View>
               </View>
             )}
             {userType === "artisan" && (booking.customer as any)?.phone && (
@@ -460,20 +463,20 @@ export default function BookingsScreen() {
           <Text className="text-sm text-foreground mb-2">{booking.service_description}</Text>
 
           <View className="flex-row items-center mb-1">
-            <Text className="text-sm mr-2">📅</Text>
+            <AppIcon name="calendar" size={14} color="#687076" style={{ marginRight: 8 }} />
             <Text className="text-sm text-muted">
               {formatDate(booking.preferred_date)} at {booking.preferred_time}
             </Text>
           </View>
 
           <View className="flex-row items-center mb-1">
-            <Text className="text-sm mr-2">📍</Text>
+            <AppIcon name="location.fill" size={14} color="#687076" style={{ marginRight: 8 }} />
             <Text className="text-sm text-muted">{booking.location}</Text>
           </View>
 
           {booking.estimated_price ? (
             <View className="flex-row items-center">
-              <Text className="text-sm mr-2">💰</Text>
+              <AppIcon name="banknote" size={14} color="#687076" style={{ marginRight: 8 }} />
               <Text className="text-sm font-semibold text-foreground">
                 ₦{booking.estimated_price.toLocaleString()}
               </Text>
@@ -499,7 +502,7 @@ export default function BookingsScreen() {
             className="py-3 rounded-xl flex-row items-center justify-center gap-2"
             onPress={() => router.push(`/chat/${booking.id}` as any)}
           >
-            <Text className="text-lg">💬</Text>
+            <AppIcon name="bubble.left.and.bubble.right.fill" size={18} color="#1B5E20" />
             <Text className="font-semibold" style={{ color: "#1B5E20" }}>
               Chat
             </Text>
@@ -537,7 +540,10 @@ export default function BookingsScreen() {
             className="bg-success py-3 rounded-xl mt-2"
             onPress={() => handleCompleteBooking(booking.id)}
           >
-            <Text className="text-center font-semibold text-white">✅ Mark as Completed</Text>
+            <View className="flex-row items-center justify-center gap-2">
+              <AppIcon name="checkmark.circle.fill" size={18} color="#fff" />
+              <Text className="font-semibold text-white">Mark as Completed</Text>
+            </View>
           </TouchableOpacity>
         )}
 
@@ -556,7 +562,10 @@ export default function BookingsScreen() {
             style={{ backgroundColor: "#1B5E20" }}
             onPress={() => router.push(`/booking/review?bookingId=${booking.id}` as never)}
           >
-            <Text className="text-center font-semibold text-white">⭐ Leave a Review</Text>
+            <View className="flex-row items-center justify-center gap-2">
+              <AppIcon name="star.fill" size={16} color="#fff" />
+              <Text className="font-semibold text-white">Leave a Review</Text>
+            </View>
           </TouchableOpacity>
         )}
       </View>
@@ -567,7 +576,7 @@ export default function BookingsScreen() {
   if (!user) {
     return (
       <ScreenContainer className="p-6 justify-center items-center">
-        <Text className="text-4xl mb-4">📋</Text>
+        <AppIcon name="list.bullet.clipboard.fill" size={48} color="#9BA1A6" />
         <Text className="text-lg font-semibold text-foreground mb-2">Sign in to view bookings</Text>
         <Text className="text-sm text-muted text-center mb-6">
           Track your booking requests and manage your jobs
@@ -641,7 +650,7 @@ export default function BookingsScreen() {
           }
           ListEmptyComponent={
             <View className="items-center py-16">
-              <Text className="text-5xl mb-4">📭</Text>
+              <AppIcon name="tray.fill" size={48} color="#9BA1A6" />
               <Text className="text-lg font-semibold text-foreground mb-2">No bookings yet</Text>
               <Text className="text-sm text-muted text-center px-8">
                 {activeTab === "pending" &&

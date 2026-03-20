@@ -609,3 +609,14 @@
 - [x] Review snippet persists on filtered search/category results on home screen
 - [x] Most-helpful review sort (by rating, recency, photo count) on artisan profile
 - [x] Artisan response rate badge on profile and browse cards
+
+## Sprint: Replace Emojis with SVG Icons (Mar 20 2026)
+- [x] Audit all files for emoji usage
+- [x] Expand icon-symbol mappings and create shared AppIcon component
+- [x] Replace emojis in home screen and browse cards
+- [x] Replace emojis in artisan profile screen
+- [x] Replace emojis in bookings, artisan dashboard, and profile tabs
+- [x] Replace emojis in review screens and modals
+- [x] Replace emojis in emergency booking, admin dashboard, artisan onboarding, smart-scheduling, badge service
+- [x] Replace emojis in auth screens (sign-in, sign-up), chat, portfolio/before-after, map, package manager/analytics
+- [x] Replace emojis in referral program, verification upload, review prompt sheet, video testimonial player

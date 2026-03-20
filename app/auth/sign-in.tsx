@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator 
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
+import { AppIcon } from "@/components/ui/app-icon";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -87,7 +88,7 @@ export default function SignInScreen() {
                 className="absolute right-3 top-3"
                 disabled={loading}
               >
-                <Text className="text-muted text-xl">{showPassword ? "👁️" : "👁️‍🗨️"}</Text>
+                <AppIcon name={showPassword ? "eye.slash.fill" : "eye.fill"} size={20} color="#687076" />
               </TouchableOpacity>
             </View>
           </View>

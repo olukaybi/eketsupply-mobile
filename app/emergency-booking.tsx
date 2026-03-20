@@ -7,14 +7,16 @@ import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+import { AppIcon } from '@/components/ui/app-icon';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 
-const SERVICE_CATEGORIES = [
-  { id: 'plumber', name: 'Plumber', icon: '🔧', description: 'Burst pipe, leak, blocked drain' },
-  { id: 'electrician', name: 'Electrician', icon: '⚡', description: 'Power outage, faulty wiring' },
-  { id: 'carpenter', name: 'Carpenter', icon: '🪚', description: 'Broken door, furniture damage' },
-  { id: 'mechanic', name: 'Mechanic', icon: '🔩', description: 'Vehicle breakdown, engine fault' },
-  { id: 'painter', name: 'Painter', icon: '🎨', description: 'Urgent touch-up or damage repair' },
-  { id: 'welder', name: 'Welder', icon: '🔥', description: 'Gate, fence, metal structure' },
+const SERVICE_CATEGORIES: { id: string; name: string; icon: IconSymbolName; description: string }[] = [
+  { id: 'plumber', name: 'Plumber', icon: 'drop.fill', description: 'Burst pipe, leak, blocked drain' },
+  { id: 'electrician', name: 'Electrician', icon: 'bolt.fill', description: 'Power outage, faulty wiring' },
+  { id: 'carpenter', name: 'Carpenter', icon: 'hammer.fill', description: 'Broken door, furniture damage' },
+  { id: 'mechanic', name: 'Mechanic', icon: 'wrench.fill', description: 'Vehicle breakdown, engine fault' },
+  { id: 'painter', name: 'Painter', icon: 'paintbrush.fill', description: 'Urgent touch-up or damage repair' },
+  { id: 'welder', name: 'Welder', icon: 'flame.fill', description: 'Gate, fence, metal structure' },
 ];
 
 const PREMIUM_MULTIPLIER = 1.5;
@@ -129,7 +131,7 @@ export default function EmergencyBookingScreen() {
 
     Alert.alert(
       'Confirm Emergency Booking',
-      `Book ${selectedArtisan.name} for emergency service?\n\n⚠️ Emergency bookings carry a 50% premium fee.\n\nThe artisan will aim to arrive within 2 hours.`,
+      `Book ${selectedArtisan.name} for emergency service?\n\nEmergency bookings carry a 50% premium fee.\n\nThe artisan will aim to arrive within 2 hours.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -157,7 +159,7 @@ export default function EmergencyBookingScreen() {
                   customer_id: profile.id,
                   artisan_id: selectedArtisan.id,
                   booking_type: 'instant',
-                  service_description: `🚨 EMERGENCY: ${description}`,
+                  service_description: `EMERGENCY: ${description}`,
                   preferred_date: new Date().toISOString(),
                   location: locationText,
                   payment_method: 'paystack_split',
@@ -202,7 +204,7 @@ export default function EmergencyBookingScreen() {
     return (
       <ScreenContainer className="p-6 justify-center items-center">
         <View style={{ alignItems: 'center', gap: 16 }}>
-          <Text style={{ fontSize: 72 }}>🚨</Text>
+          <AppIcon name="exclamationmark.triangle.fill" size={72} color="#E65100" />
           <Text className="text-2xl font-bold text-foreground text-center">Request Sent!</Text>
           <Text className="text-base text-muted text-center">
             Your emergency request has been sent to {selectedArtisan?.name}.{' '}
@@ -210,7 +212,7 @@ export default function EmergencyBookingScreen() {
           </Text>
           <View style={{ backgroundColor: '#FFF3E0', borderRadius: 16, padding: 16, width: '100%' }}>
             <Text style={{ color: '#E65100', fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
-              ⏱ Expected Response: Within 30 minutes
+              Expected Response: Within 30 minutes
             </Text>
             <Text style={{ color: '#E65100', textAlign: 'center', fontSize: 13 }}>
               Premium rate applies: 1.5× standard pricing
@@ -239,7 +241,7 @@ export default function EmergencyBookingScreen() {
           </View>
 
           <View style={{ backgroundColor: '#FFF3E0', borderRadius: 12, padding: 12, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontSize: 18 }}>⚡</Text>
+            <AppIcon name="bolt.fill" size={18} color="#E65100" />
             <Text style={{ color: '#E65100', fontSize: 13, fontWeight: '600', flex: 1 }}>
               Emergency rate: 1.5× standard pricing applies. Artisans are notified instantly.
             </Text>
@@ -247,7 +249,7 @@ export default function EmergencyBookingScreen() {
 
           {availableArtisans.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 64 }}>
-              <Text style={{ fontSize: 48 }}>😔</Text>
+              <AppIcon name="person.slash.fill" size={48} color="#9BA1A6" style={{ marginBottom: 12 }} />
               <Text className="text-lg font-semibold text-foreground mt-3 mb-2">No Artisans Available</Text>
               <Text className="text-muted text-center mb-6">
                 No specialists are currently available. Try a different category or check back shortly.
@@ -313,7 +315,7 @@ export default function EmergencyBookingScreen() {
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 8 }}>
                           <Text style={{ color: '#E65100', fontSize: 13 }}>
-                            ★ {artisan.rating?.toFixed(1) ?? 'New'} ({artisan.review_count ?? 0})
+                            {artisan.rating?.toFixed(1) ?? 'New'} ({artisan.review_count ?? 0})
                           </Text>
                           <Text className="text-muted text-xs">•</Text>
                           <Text className="text-muted text-xs">
@@ -346,7 +348,7 @@ export default function EmergencyBookingScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
-                    🚨 Send Emergency Request
+                    Send Emergency Request
                   </Text>
                 )}
               </TouchableOpacity>
@@ -374,7 +376,7 @@ export default function EmergencyBookingScreen() {
 
         {/* Urgent Banner */}
         <View style={{ backgroundColor: '#FFF3E0', borderRadius: 16, padding: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 28 }}>🚨</Text>
+          <AppIcon name="exclamationmark.triangle.fill" size={28} color="#E65100" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#E65100', fontWeight: '700', fontSize: 15 }}>Emergency Service</Text>
             <Text style={{ color: '#E65100', fontSize: 12 }}>
@@ -401,7 +403,7 @@ export default function EmergencyBookingScreen() {
                   backgroundColor: isSelected ? '#FFF3E0' : colors.surface,
                 }}
               >
-                <Text style={{ fontSize: 28, marginBottom: 6 }}>{category.icon}</Text>
+                <AppIcon name={category.icon} size={28} color={selectedCategory === category.id ? '#fff' : '#E65100'} style={{ marginBottom: 6 }} />
                 <Text style={{ fontWeight: '700', color: isSelected ? '#E65100' : colors.foreground, fontSize: 14 }}>
                   {category.name}
                 </Text>
@@ -469,7 +471,7 @@ export default function EmergencyBookingScreen() {
             {detectingLocation ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={{ fontSize: 18 }}>📍</Text>
+              <AppIcon name="location.fill" size={18} color="#fff" />
             )}
           </TouchableOpacity>
         </View>
@@ -495,7 +497,7 @@ export default function EmergencyBookingScreen() {
             </View>
           ) : (
             <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
-              🔍 Find Available Artisans
+              Find Available Artisans
             </Text>
           )}
         </TouchableOpacity>

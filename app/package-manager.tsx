@@ -15,6 +15,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
+import { AppIcon } from "@/components/ui/app-icon";
 
 interface Service {
   id: string;
@@ -354,7 +355,7 @@ export default function PackageManagerScreen() {
           {/* Packages List */}
           {packages.length === 0 ? (
             <View className="items-center justify-center py-12">
-              <Text className="text-6xl mb-4">📦</Text>
+              <AppIcon name="shippingbox.fill" size={56} color="#9BA1A6" style={{ marginBottom: 16 }} />
               <Text className="text-muted text-center">
                 No packages yet.{"\n"}Create your first bundle!
               </Text>
@@ -421,7 +422,7 @@ export default function PackageManagerScreen() {
                         className="flex-row items-center justify-between py-2"
                       >
                         <View className="flex-row items-center gap-2">
-                          <Text className="text-primary">✓</Text>
+                          <AppIcon name="checkmark" size={14} color="#0a7ea4" />
                           <Text className="text-foreground">{service.name}</Text>
                         </View>
                         <Text className="text-muted text-sm">

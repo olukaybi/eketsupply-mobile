@@ -5,6 +5,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import * as Haptics from "expo-haptics";
+import { AppIcon } from "@/components/ui/app-icon";
 
 type Message = {
   id: string;
@@ -194,7 +195,7 @@ export default function ChatScreen() {
             </View>
           ) : messages.length === 0 ? (
             <View className="flex-1 items-center justify-center p-8">
-              <Text className="text-4xl mb-4">💬</Text>
+              <AppIcon name="bubble.left.and.bubble.right.fill" size={40} color="#9BA1A6" style={{ marginBottom: 16 }} />
               <Text className="text-lg font-semibold text-foreground mb-2">Start the conversation</Text>
               <Text className="text-muted text-center">Send a message to discuss booking details</Text>
             </View>

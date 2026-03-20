@@ -4,6 +4,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
+import { AppIcon } from '@/components/ui/app-icon';
 
 type AnalyticsData = {
   totalBookings: number;
@@ -217,21 +218,21 @@ export default function AnalyticsScreen() {
               onPress={() => router.push('/portfolio-manager')}
               className="flex-1 bg-primary/10 rounded-xl p-4 items-center border border-primary/20"
             >
-              <Text className="text-primary text-2xl mb-2">🖼️</Text>
+              <AppIcon name="photo.fill" size={22} color="#0a7ea4" style={{ marginBottom: 8 }} />
               <Text className="text-primary font-semibold text-sm">Portfolio</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/package-manager')}
               className="flex-1 bg-success/10 rounded-xl p-4 items-center border border-success/20"
             >
-              <Text className="text-success text-2xl mb-2">📦</Text>
+              <AppIcon name="shippingbox.fill" size={22} color="#22C55E" style={{ marginBottom: 8 }} />
               <Text className="text-success font-semibold text-sm">Packages</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/package-analytics')}
               className="flex-1 bg-warning/10 rounded-xl p-4 items-center border border-warning/20"
             >
-              <Text className="text-warning text-2xl mb-2">📊</Text>
+              <AppIcon name="chart.bar.fill" size={22} color="#F59E0B" style={{ marginBottom: 8 }} />
               <Text className="text-warning font-semibold text-sm">Analytics</Text>
             </TouchableOpacity>
           </View>
@@ -240,14 +241,14 @@ export default function AnalyticsScreen() {
               onPress={() => router.push('/verification-upload')}
               className="flex-1 bg-primary/10 rounded-xl p-4 items-center border border-primary/20"
             >
-              <Text className="text-primary text-2xl mb-2">✓</Text>
+              <AppIcon name="checkmark.shield.fill" size={22} color="#0a7ea4" style={{ marginBottom: 8 }} />
               <Text className="text-primary font-semibold text-sm">Get Verified</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/referral-program')}
               className="flex-1 bg-success/10 rounded-xl p-4 items-center border border-success/20"
             >
-              <Text className="text-success text-2xl mb-2">🎁</Text>
+              <AppIcon name="gift.fill" size={22} color="#22C55E" style={{ marginBottom: 8 }} />
               <Text className="text-success font-semibold text-sm">Referrals</Text>
             </TouchableOpacity>
           </View>
@@ -268,7 +269,7 @@ export default function AnalyticsScreen() {
             </View>
             <View className="flex-1 min-w-[45%] bg-warning/10 rounded-xl p-4">
               <Text className="text-warning text-3xl font-bold">
-                {analytics.averageRating.toFixed(1)}★
+                {analytics.averageRating.toFixed(1)}
               </Text>
               <Text className="text-foreground text-sm mt-1">Average Rating</Text>
             </View>
