@@ -108,7 +108,8 @@ export type NotificationEvent =
   | "new_message"        // both: new chat message
   | "artisan_approved"   // artisan: verification approved by admin
   | "artisan_rejected"   // artisan: verification rejected
-  | "badge_earned";      // artisan: new achievement badge
+  | "badge_earned"       // artisan: new achievement badge
+  | "review_reply";      // customer: artisan replied to their review
 
 // ─── Notification content templates ──────────────────────────────────────────
 export function buildNotificationContent(
@@ -158,6 +159,10 @@ export function buildNotificationContent(
       title: `Badge Earned: ${badgeName ?? "Achievement"}`,
       body: "You've earned a new achievement badge! Check your profile to see it.",
     },
+    review_reply: {
+      title: `${artisanName ?? "Your Artisan"} replied to your review`,
+      body: "They responded to your feedback. Tap to read their reply.",
+    },
   };
 
   return templates[event];
@@ -181,6 +186,7 @@ export function buildNotificationUrl(
     artisan_approved: `/artisan/dashboard`,
     artisan_rejected: `/artisan/onboarding`,
     badge_earned: `/artisan/dashboard`,
+    review_reply: `/(tabs)/bookings`,
   };
 
   return urlMap[event];
@@ -277,6 +283,25 @@ export async function notifyBookingCompleted(
     bookingId,
   });
   await sendPushNotification({ userId: customerId, type: "booking_completed", title, body, data: { bookingId } });
+}
+
+export async function notifyReviewReply({
+  customerId,
+  artisanName,
+  reviewId,
+}: {
+  customerId: string;
+  artisanName: string;
+  reviewId: string;
+}) {
+  const { title, body } = buildNotificationContent("review_reply", { artisanName });
+  await sendPushNotification({
+    userId: customerId,
+    type: "review_reply",
+    title,
+    body,
+    data: { reviewId },
+  });
 }
 
 export async function notifyNewBooking(

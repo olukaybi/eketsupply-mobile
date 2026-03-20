@@ -1,14 +1,17 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
   ActivityIndicator, Image, RefreshControl,
-  TextInput, KeyboardAvoidingView, Platform, Alert,
+  TextInput, KeyboardAvoidingView, Platform, Alert, Modal, Dimensions, ScrollView,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+import { notifyReviewReply } from '@/lib/notification-service';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type ReviewReply = {
   id: string;
@@ -23,9 +26,11 @@ type Review = {
   tags: string[] | null;
   photo_urls: string[] | null;
   created_at: string;
+  reviewer_id: string | null;
   reviewer: {
     full_name: string | null;
     avatar_url: string | null;
+    user_id: string | null;
   } | null;
   booking: {
     service_type: string | null;
@@ -65,10 +70,12 @@ function StarRow({ stars, count, total }: { stars: number; count: number; total:
 type ReviewCardProps = {
   review: Review;
   artisanId: string;
+  artisanName: string;
   onReplySubmitted: () => void;
+  onPhotoPress: (photos: string[], index: number) => void;
 };
 
-function ReviewCard({ review, artisanId, onReplySubmitted }: ReviewCardProps) {
+function ReviewCard({ review, artisanId, artisanName, onReplySubmitted, onPhotoPress }: ReviewCardProps) {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState(review.reply?.reply_text ?? '');
   const [submitting, setSubmitting] = useState(false);
@@ -101,11 +108,29 @@ function ReviewCard({ review, artisanId, onReplySubmitted }: ReviewCardProps) {
           .eq('review_id', review.id);
         if (error) throw error;
       } else {
-        // Insert new reply
+        // Insert new reply — then notify the reviewer
         const { error } = await supabase
           .from('review_replies')
           .insert({ review_id: review.id, artisan_id: artisanId, reply_text: replyText.trim() });
         if (error) throw error;
+
+        // Send push notification to the customer who wrote the review
+        const reviewerUserId = review.reviewer?.user_id ?? null;
+        if (reviewerUserId) {
+          // Look up the profile row id for this user
+          const { data: profileRow } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('user_id', reviewerUserId)
+            .single();
+          if (profileRow) {
+            notifyReviewReply({
+              customerId: (profileRow as { id: string }).id,
+              artisanName,
+              reviewId: review.id,
+            }).catch(() => {/* non-blocking */});
+          }
+        }
       }
       setShowReplyInput(false);
       onReplySubmitted();
@@ -205,16 +230,34 @@ function ReviewCard({ review, artisanId, onReplySubmitted }: ReviewCardProps) {
         </View>
       ) : null}
 
-      {/* Photos */}
+      {/* Photos — tappable to open full-screen gallery */}
       {review.photo_urls && review.photo_urls.length > 0 ? (
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
           {review.photo_urls.map((uri, idx) => (
-            <Image
+            <TouchableOpacity
               key={idx}
-              source={{ uri }}
-              style={{ width: 72, height: 72, borderRadius: 10 }}
-            />
-          ))}
+              onPress={() => onPhotoPress(review.photo_urls!, idx)}
+              activeOpacity={0.85}
+            >
+              <Image
+                source={{ uri }}
+                style={{ width: 72, height: 72, borderRadius: 10 }}
+              />
+              {review.photo_urls!.length > 3 && idx === 2 && (
+                <View
+                  style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.45)',
+                    alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+                    +{review.photo_urls!.length - 3}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )).slice(0, 3)}
         </View>
       ) : null}
 
@@ -336,14 +379,25 @@ export default function MyReviewsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [artisanId, setArtisanId] = useState<string | null>(null);
+  const [artisanName, setArtisanName] = useState<string>('Your Artisan');
+  // Photo gallery state
+  const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryVisible, setGalleryVisible] = useState(false);
+
+  function openGallery(photos: string[], index: number) {
+    setGalleryPhotos(photos);
+    setGalleryIndex(index);
+    setGalleryVisible(true);
+  }
 
   const fetchReviews = useCallback(async (aid: string) => {
     try {
       const { data, error } = await supabase
         .from('reviews')
         .select(`
-          id, rating, comment, tags, photo_urls, created_at,
-          reviewer:profiles!reviews_reviewer_id_fkey(full_name, avatar_url),
+          id, rating, comment, tags, photo_urls, created_at, reviewer_id,
+          reviewer:profiles!reviews_reviewer_id_fkey(full_name, avatar_url, user_id),
           booking:bookings!reviews_booking_id_fkey(service_type),
           reply:review_replies(id, reply_text, created_at)
         `)
@@ -372,15 +426,18 @@ export default function MyReviewsScreen() {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, full_name')
         .eq('user_id', String(user.id))
         .single();
       if (!profile) { setLoading(false); return; }
 
+      const p = profile as { id: string; full_name: string | null };
+      if (p.full_name) setArtisanName(p.full_name);
+
       const { data: artisan } = await supabase
         .from('artisans')
         .select('id')
-        .eq('profile_id', (profile as { id: string }).id)
+        .eq('profile_id', p.id)
         .single();
       if (!artisan) { setLoading(false); return; }
 
@@ -503,6 +560,43 @@ export default function MyReviewsScreen() {
 
   return (
     <ScreenContainer>
+      {/* Full-screen photo gallery modal */}
+      <Modal
+        visible={galleryVisible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setGalleryVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center' }}>
+          <TouchableOpacity
+            onPress={() => setGalleryVisible(false)}
+            style={{ position: 'absolute', top: 52, right: 20, zIndex: 10, padding: 8 }}
+          >
+            <Text style={{ color: '#fff', fontSize: 28, fontWeight: '300' }}>✕</Text>
+          </TouchableOpacity>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            contentOffset={{ x: galleryIndex * SCREEN_WIDTH, y: 0 }}
+          >
+            {galleryPhotos.map((uri, idx) => (
+              <View key={idx} style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, justifyContent: 'center', alignItems: 'center' }}>
+                <Image
+                  source={{ uri }}
+                  style={{ width: SCREEN_WIDTH - 32, height: SCREEN_HEIGHT * 0.7, borderRadius: 12 }}
+                  resizeMode="contain"
+                />
+              </View>
+            ))}
+          </ScrollView>
+          <Text style={{ color: '#fff', textAlign: 'center', marginTop: 12, fontSize: 13, opacity: 0.7 }}>
+            {galleryIndex + 1} / {galleryPhotos.length}
+          </Text>
+        </View>
+      </Modal>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -517,7 +611,9 @@ export default function MyReviewsScreen() {
                 <ReviewCard
                   review={item}
                   artisanId={artisanId}
+                  artisanName={artisanName}
                   onReplySubmitted={() => fetchReviews(artisanId)}
+                  onPhotoPress={openGallery}
                 />
               )}
             </View>

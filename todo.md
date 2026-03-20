@@ -599,3 +599,8 @@
 - [x] Add artisan reply-to-review on My Reviews screen
 - [x] Display review photos on artisan profile (already mapped, just not rendered)
 - [x] Build in-app review prompt bottom-sheet after job completion (covers push-disabled users)
+
+## Sprint: Review Enhancements Round 3 (Mar 20 2026)
+- [x] Send push notification to customer when artisan replies to their review
+- [x] Wire photo gallery viewer (full-screen tap) on My Reviews screen
+- [x] Surface top review snippet on browse/home artisan cards
