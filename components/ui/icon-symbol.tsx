@@ -6,7 +6,7 @@ import { ComponentProps } from "react";
 import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
 type IconMapping = Partial<Record<SymbolViewProps["name"], ComponentProps<typeof MaterialIcons>["name"]>>;
-type IconSymbolName = keyof typeof MAPPING;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * SF Symbols → Material Icons mapping for EketSupply.
@@ -34,12 +34,14 @@ const MAPPING = {
   "xmark.circle.fill":                       "cancel",
   "checkmark":                               "check",
   "checkmark.circle.fill":                   "check-circle",
+  "checkmark.seal.fill":                     "verified",
   "chevron.right":                           "chevron-right",
   "chevron.left":                            "chevron-left",
   "chevron.down":                            "keyboard-arrow-down",
   "arrow.left":                              "arrow-back",
   "arrow.right":                             "arrow-forward",
   "arrow.up.arrow.down":                     "swap-vert",
+  "arrow.counterclockwise":                  "refresh",
   "arrow.triangle.2.circlepath.camera":      "flip-camera-ios",
   "square.and.arrow.up":                     "share",
   "square.and.pencil":                       "edit",
@@ -47,6 +49,8 @@ const MAPPING = {
   "trash.fill":                              "delete",
   "ellipsis":                                "more-horiz",
   "ellipsis.circle":                         "more-vert",
+  "filter":                                  "filter-list",
+  "line.3.horizontal.decrease.circle":       "tune",
 
   // Media
   "photo":                                   "photo",
@@ -57,7 +61,7 @@ const MAPPING = {
   "pause.fill":                              "pause",
   "speaker.wave.2.fill":                     "volume-up",
 
-  // Content
+  // Content & Communication
   "star.fill":                               "star",
   "star":                                    "star-border",
   "heart.fill":                              "favorite",
@@ -69,23 +73,71 @@ const MAPPING = {
   "paperplane.fill":                         "send",
   "envelope.fill":                           "email",
   "phone.fill":                              "phone",
+  "bubble.left.fill":                        "chat-bubble",
+  "bubble.left.and.bubble.right.fill":       "forum",
+  "megaphone.fill":                          "campaign",
+
+  // Location & Time
   "location.fill":                           "location-on",
   "clock.fill":                              "schedule",
+  "calendar.badge.clock":                    "event-available",
+  "timer":                                   "timer",
+
+  // Status & Alerts
   "exclamationmark.triangle.fill":           "warning",
+  "exclamationmark.circle.fill":             "error",
   "info.circle.fill":                        "info",
+  "questionmark.circle.fill":               "help",
+  "checkmark.shield.fill":                   "verified-user",
+
+  // Security & Finance
   "shield.fill":                             "security",
   "lock.fill":                               "lock",
+  "lock.open.fill":                          "lock-open",
   "creditcard.fill":                         "credit-card",
   "banknote.fill":                           "account-balance-wallet",
+  "dollarsign.circle.fill":                  "monetization-on",
+  "chart.line.uptrend.xyaxis":               "trending-up",
+
+  // Business & Work
   "building.2.fill":                         "business",
+  "briefcase.fill":                          "work",
+  "person.crop.circle.badge.checkmark":      "how-to-reg",
+  "person.text.rectangle.fill":             "badge",
+  "list.bullet.clipboard.fill":             "assignment",
+  "doc.badge.plus":                          "note-add",
+  "tray.full.fill":                          "inbox",
+  "archivebox.fill":                         "archive",
+  "rectangle.3.group.fill":                  "dashboard",
+  "chart.pie.fill":                          "pie-chart",
+
+  // Tools & Services
   "wrench.fill":                             "build",
   "bolt.fill":                               "bolt",
   "drop.fill":                               "water-drop",
   "flame.fill":                              "local-fire-department",
   "paintbrush.fill":                         "brush",
   "hammer.fill":                             "hardware",
+  "screwdriver.fill":                        "handyman",
+  "house.and.flag.fill":                     "roofing",
+  "square.grid.2x2.fill":                    "grid-view",
+  "sparkles":                                "auto-awesome",
+  "trophy.fill":                             "emoji-events",
+  "gift.fill":                               "card-giftcard",
+  "person.2.wave.2.fill":                    "groups",
+  "antenna.radiowaves.left.and.right":       "wifi",
+  "wifi":                                    "wifi",
+  "exclamationmark.octagon.fill":            "report",
+  "flag.fill":                               "flag",
   "chart":                                   "bar-chart",
   "chevron.left.forwardslash.chevron.right": "code",
+  // Additional icons for artisan badges and other screens
+  "target":                                  "gps-fixed",
+  "star.circle.fill":                        "star-rate",
+  "tray.fill":                               "inbox",
+  "at":                                      "alternate-email",
+  "music.note":                              "music-note",
+  "banknote":                                "account-balance-wallet",
 } as IconMapping;
 
 /**

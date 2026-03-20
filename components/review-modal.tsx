@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Modal, Alert, Image, ScrollVie
 import { supabase } from "@/lib/supabase";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { AppIcon } from "@/components/ui/app-icon";
 
 interface ReviewModalProps {
   visible: boolean;
@@ -202,9 +203,11 @@ export function ReviewModal({
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                 >
-                  <Text className="text-4xl">
-                    {star <= rating ? '⭐' : '☆'}
-                  </Text>
+                  <AppIcon
+                    name={star <= rating ? "star.fill" : "star"}
+                    size={32}
+                    color={star <= rating ? "#E65100" : "#D1D5DB"}
+                  />
                 </TouchableOpacity>
               ))}
             </View>
@@ -248,7 +251,7 @@ export function ReviewModal({
                   className="w-24 h-24 rounded-xl border-2 border-dashed border-border items-center justify-center bg-surface"
                   onPress={pickImage}
                 >
-                  <Text className="text-4xl text-muted">📷</Text>
+                  <AppIcon name="camera.fill" size={28} color="#9BA1A6" />
                   <Text className="text-xs text-muted mt-1">Add Photo</Text>
                 </TouchableOpacity>
               )}

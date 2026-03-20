@@ -20,6 +20,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
+import { AppIcon } from "@/components/ui/app-icon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BookingDetails {
@@ -72,7 +73,7 @@ function StepItem({
         }}
       >
         {done ? (
-          <Text style={{ color: "#fff", fontSize: 16 }}>✓</Text>
+          <AppIcon name="checkmark" size={16} color="#fff" />
         ) : (
           <Text style={{ color: "#1B5E20", fontSize: 14, fontWeight: "700" }}>{number}</Text>
         )}
@@ -218,7 +219,7 @@ export default function BookingConfirmation() {
     return (
       <ScreenContainer>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <Text style={{ fontSize: 40, marginBottom: 16 }}>📋</Text>
+          <AppIcon name="list.bullet.clipboard.fill" size={40} color="#687076" style={{ marginBottom: 16 }} />
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#11181C", textAlign: "center" }}>
             Booking Not Found
           </Text>
@@ -268,7 +269,7 @@ export default function BookingConfirmation() {
               marginBottom: 16,
             }}
           >
-            <Text style={{ fontSize: 36 }}>✅</Text>
+            <AppIcon name="checkmark.circle.fill" size={36} color="#fff" />
           </View>
           <Text style={{ fontSize: 22, fontWeight: "800", color: "#fff", textAlign: "center" }}>
             Booking Confirmed!
@@ -324,7 +325,10 @@ export default function BookingConfirmation() {
                   {booking.artisan.skills?.slice(0, 2).join(" · ") ?? "Artisan"}
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                  <Text style={{ fontSize: 13, color: "#E65100" }}>★ {booking.artisan.rating?.toFixed(1) ?? "New"}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <AppIcon name="star.fill" size={12} color="#E65100" />
+                  <Text style={{ fontSize: 13, color: "#E65100" }}>{booking.artisan.rating?.toFixed(1) ?? "New"}</Text>
+                </View>
                   <Text style={{ fontSize: 12, color: "#9BA1A6", marginLeft: 6 }}>
                     {booking.artisan.location}
                   </Text>
@@ -347,7 +351,7 @@ export default function BookingConfirmation() {
                   gap: 6,
                 }}
               >
-                <Text style={{ fontSize: 16 }}>📞</Text>
+                <AppIcon name="phone.fill" size={16} color="#fff" />
                 <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>Call</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -363,7 +367,7 @@ export default function BookingConfirmation() {
                   gap: 6,
                 }}
               >
-                <Text style={{ fontSize: 16 }}>💬</Text>
+                <AppIcon name="bubble.left.fill" size={16} color="#fff" />
                 <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>WhatsApp</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -379,7 +383,7 @@ export default function BookingConfirmation() {
                   gap: 6,
                 }}
               >
-                <Text style={{ fontSize: 16 }}>✉️</Text>
+                <AppIcon name="envelope.fill" size={16} color="#1B5E20" />
                 <Text style={{ color: "#1B5E20", fontWeight: "700", fontSize: 14 }}>Chat</Text>
               </TouchableOpacity>
             </View>
@@ -411,7 +415,7 @@ export default function BookingConfirmation() {
             <Text style={{ fontSize: 13, color: "#687076" }}>Payment Status</Text>
             <View style={{ backgroundColor: "#D1FAE5", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
               <Text style={{ fontSize: 12, color: "#065F46", fontWeight: "700" }}>
-                {booking.payment_status === "paid" ? "✓ PAID" : booking.payment_status?.toUpperCase() ?? "PROCESSING"}
+                {booking.payment_status === "paid" ? "PAID" : booking.payment_status?.toUpperCase() ?? "PROCESSING"}
               </Text>
             </View>
           </View>

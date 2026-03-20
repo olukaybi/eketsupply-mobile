@@ -11,6 +11,7 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
+import { AppIcon } from "@/components/ui/app-icon";
 import * as Haptics from "expo-haptics";
 
 type Review = {
@@ -515,7 +516,7 @@ export default function ArtisanProfileScreen() {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
           {[1,2,3,4,5].map(s => (
-            <Text key={s} style={{ fontSize: 13, color: s <= item.rating ? '#E65100' : '#D1D5DB' }}>★</Text>
+            <AppIcon key={s} name={s <= item.rating ? 'star.fill' : 'star'} size={14} color={s <= item.rating ? '#E65100' : '#D1D5DB'} />
           ))}
         </View>
       </View>
@@ -580,7 +581,10 @@ export default function ArtisanProfileScreen() {
       <View className="flex-row justify-between items-center">
         <View>
           <Text className="text-sm text-primary font-medium">{item.price}</Text>
-          <Text className="text-xs text-muted mt-1">⏱️ {item.duration}</Text>
+          <View className="flex-row items-center mt-1">
+            <AppIcon name="timer" size={12} color="#687076" style={{ marginRight: 4 }} />
+            <Text className="text-xs text-muted">{item.duration}</Text>
+          </View>
         </View>
         <TouchableOpacity className="bg-primary px-4 py-2 rounded-full">
           <Text className="text-background text-xs font-semibold">Book</Text>
@@ -604,7 +608,7 @@ export default function ArtisanProfileScreen() {
                 try {
                   await Share.share({
                     title: `${artisan.name} — ${artisan.service} on EketSupply`,
-                    message: `Check out ${artisan.name}, a verified ${artisan.service} on EketSupply!\n\n⭐ ${artisan.rating} rating · ${artisan.completedJobs} jobs done\n📍 ${artisan.location}\n\nBook them on EketSupply: https://www.eketsupply.com`,
+                    message: `Check out ${artisan.name}, a verified ${artisan.service} on EketSupply!\n\n${artisan.rating} stars · ${artisan.completedJobs} jobs done\n${artisan.location}\n\nBook them on EketSupply: https://www.eketsupply.com`,
                   });
                 } catch (err) {
                   console.error('Share error:', err);
@@ -620,7 +624,7 @@ export default function ArtisanProfileScreen() {
                 gap: 6,
               }}
             >
-              <Text style={{ fontSize: 16 }}>📤</Text>
+              <AppIcon name="square.and.arrow.up" size={16} color="#1B5E20" />
               <Text style={{ color: '#1B5E20', fontWeight: '600', fontSize: 13 }}>Share</Text>
             </TouchableOpacity>
           </View>
@@ -643,7 +647,7 @@ export default function ArtisanProfileScreen() {
               </View>
               <Text className="text-sm text-muted mb-2">{artisan.service}</Text>
               <View className="flex-row items-center">
-                <Text className="text-warning mr-1">⭐</Text>
+                <AppIcon name="star.fill" size={14} color="#E65100" style={{ marginRight: 4 }} />
                 <Text className="text-sm font-medium text-foreground">{artisan.rating}</Text>
                 <Text className="text-sm text-muted ml-1">({artisan.reviews} reviews)</Text>
               </View>
@@ -682,15 +686,15 @@ export default function ArtisanProfileScreen() {
           {/* Quick Info */}
           <View className="bg-surface rounded-xl p-4 border border-border mb-4">
             <View className="flex-row items-center mb-2">
-              <Text className="text-muted mr-2">📍</Text>
+              <AppIcon name="location.fill" size={16} color="#687076" style={{ marginRight: 8 }} />
               <Text className="text-sm text-foreground">{artisan.location}</Text>
             </View>
             <View className="flex-row items-center mb-2">
-              <Text className="text-muted mr-2">⏰</Text>
+              <AppIcon name="clock.fill" size={16} color="#687076" style={{ marginRight: 8 }} />
               <Text className="text-sm text-foreground">{artisan.availability}</Text>
             </View>
             <View className="flex-row items-center">
-              <Text className="text-muted mr-2">💬</Text>
+              <AppIcon name="bubble.left.fill" size={16} color="#687076" style={{ marginRight: 8 }} />
               <Text className="text-sm text-foreground">Responds {artisan.responseTime}</Text>
             </View>
           </View>
@@ -769,7 +773,7 @@ export default function ArtisanProfileScreen() {
                       <Text className="text-xs font-semibold text-muted mb-2">INCLUDES:</Text>
                       {pkg.services.map((service) => (
                         <View key={service.id} className="flex-row items-center gap-2 mb-1">
-                          <Text className="text-success">✓</Text>
+                          <AppIcon name="checkmark" size={14} color="#22C55E" />
                           <Text className="text-foreground text-sm">{service.name}</Text>
                         </View>
                       ))}
@@ -816,8 +820,8 @@ export default function ArtisanProfileScreen() {
             </View>
           ) : (
             <View className="bg-surface rounded-xl p-8 items-center justify-center border border-border">
-              <Text className="text-4xl mb-2">🖼️</Text>
-              <Text className="text-muted text-sm">No portfolio photos yet</Text>
+              <AppIcon name="photo.fill" size={36} color="#9BA1A6" />
+              <Text className="text-muted text-sm mt-2">No portfolio photos yet</Text>
             </View>
           )}
         </View>
@@ -880,8 +884,8 @@ export default function ArtisanProfileScreen() {
             </ScrollView>
           ) : (
             <View className="bg-surface rounded-xl p-8 items-center justify-center border border-border">
-              <Text className="text-4xl mb-2">🔄</Text>
-              <Text className="text-muted text-sm">No before/after projects yet</Text>
+              <AppIcon name="arrow.counterclockwise" size={36} color="#9BA1A6" />
+              <Text className="text-muted text-sm mt-2">No before/after projects yet</Text>
             </View>
           )}
         </View>
@@ -924,7 +928,7 @@ export default function ArtisanProfileScreen() {
                     }}
                   >
                     <Text style={{ fontSize: 11, color: '#1B5E20', fontWeight: '700' }}>
-                      💬 Replies to {artisan.responseRate}% of reviews
+                      Replies to {artisan.responseRate}% of reviews
                     </Text>
                   </View>
                 </View>
@@ -957,7 +961,7 @@ export default function ArtisanProfileScreen() {
                       color: reviewSort === s ? '#fff' : '#687076',
                     }}
                   >
-                    {s === 'top' ? '⭐ Top Rated' : s === 'recent' ? '🕒 Recent' : '📷 With Photos'}
+                    {s === 'top' ? 'Top Rated' : s === 'recent' ? 'Recent' : 'With Photos'}
                   </Text>
                 </TouchableOpacity>
               ))}

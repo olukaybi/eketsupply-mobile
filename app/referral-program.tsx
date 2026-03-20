@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppIcon } from '@/components/ui/app-icon';
 import * as Clipboard from 'expo-clipboard';
 
 type ReferralStats = {
@@ -197,9 +198,10 @@ export default function ReferralProgramScreen() {
 
           {/* How It Works */}
           <View className="bg-success/10 rounded-xl p-4 border border-success/20 mb-4">
-            <Text className="text-success font-semibold text-base mb-3">
-              💰 How It Works
-            </Text>
+            <View className="flex-row items-center gap-2 mb-3">
+              <AppIcon name="banknote.fill" size={16} color="#22C55E" />
+              <Text className="text-success font-semibold text-base">How It Works</Text>
+            </View>
             <View className="space-y-2">
               <View className="flex-row items-start mb-2">
                 <Text className="text-success font-bold mr-2">1.</Text>
@@ -328,7 +330,7 @@ export default function ReferralProgramScreen() {
         {recentReferrals.length === 0 && (
           <View className="px-6 pb-6">
             <View className="bg-surface rounded-xl p-8 items-center">
-              <Text className="text-6xl mb-3">🎁</Text>
+              <AppIcon name="gift.fill" size={56} color="#9BA1A6" style={{ marginBottom: 12 }} />
               <Text className="text-foreground font-semibold text-base mb-2">
                 No Referrals Yet
               </Text>

@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator 
 import { Link, router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
+import { AppIcon } from "@/components/ui/app-icon";
 
 type UserType = "seeker" | "artisan";
 
@@ -164,7 +165,7 @@ export default function SignUpScreen() {
                 className="absolute right-3 top-3"
                 disabled={loading}
               >
-                <Text className="text-muted text-xl">{showPassword ? "👁️" : "👁️‍🗨️"}</Text>
+                <AppIcon name={showPassword ? "eye.slash.fill" : "eye.fill"} size={20} color="#687076" />
               </TouchableOpacity>
             </View>
           </View>
@@ -188,7 +189,7 @@ export default function SignUpScreen() {
                 className="absolute right-3 top-3"
                 disabled={loading}
               >
-                <Text className="text-muted text-xl">{showConfirmPassword ? "👁️" : "👁️‍🗨️"}</Text>
+                <AppIcon name={showConfirmPassword ? "eye.slash.fill" : "eye.fill"} size={20} color="#687076" />
               </TouchableOpacity>
             </View>
           </View>

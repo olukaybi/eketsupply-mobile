@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { IconSymbol } from "./ui/icon-symbol";
+import { AppIcon } from "./ui/app-icon";
 import { useColors } from "@/hooks/use-colors";
 import { useState } from "react";
 
@@ -42,9 +43,7 @@ export function VideoTestimonialPlayer({
           <Text className="text-foreground font-semibold">{customerName}</Text>
           <View className="flex-row items-center gap-1 mt-1">
             {[...Array(5)].map((_, i) => (
-              <Text key={i} className="text-xs">
-                {i < rating ? "⭐" : "☆"}
-              </Text>
+              <AppIcon key={i} name={i < rating ? "star.fill" : "star"} size={11} color={i < rating ? "#E65100" : "#D1D5DB"} />
             ))}
             <Text className="text-xs text-muted ml-1">{duration}s</Text>
           </View>

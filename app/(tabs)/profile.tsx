@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppIcon } from "@/components/ui/app-icon";
 import { useState } from "react";
 import * as Haptics from 'expo-haptics';
 
@@ -11,7 +12,7 @@ const SOCIAL_LINKS = [
     id: 'instagram',
     label: 'Instagram',
     handle: '@eketsupply',
-    icon: '📸',
+    iconName: 'camera.fill' as const,
     color: '#E1306C',
     url: 'https://www.instagram.com/eketsupply',
   },
@@ -19,7 +20,7 @@ const SOCIAL_LINKS = [
     id: 'facebook',
     label: 'Facebook',
     handle: 'EketSupply',
-    icon: '👥',
+    iconName: 'person.2.fill' as const,
     color: '#1877F2',
     url: 'https://www.facebook.com/eketsupply',
   },
@@ -27,7 +28,7 @@ const SOCIAL_LINKS = [
     id: 'x',
     label: 'X (Twitter)',
     handle: '@eketsupply',
-    icon: '🐦',
+    iconName: 'at' as const,
     color: '#000000',
     url: 'https://x.com/eketsupply',
   },
@@ -35,7 +36,7 @@ const SOCIAL_LINKS = [
     id: 'tiktok',
     label: 'TikTok',
     handle: '@eketsupply',
-    icon: '🎵',
+    iconName: 'music.note' as const,
     color: '#010101',
     url: 'https://www.tiktok.com/@eketsupply',
   },
@@ -304,7 +305,7 @@ export default function ProfileScreen() {
                     backgroundColor: social.color + '15',
                   }}
                 >
-                  <Text style={{ fontSize: 18 }}>{social.icon}</Text>
+                  <AppIcon name={social.iconName} size={20} color={social.color} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: '600', fontSize: 13, color: '#11181C' }}>{social.label}</Text>

@@ -10,6 +10,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { notifyReviewReply } from '@/lib/notification-service';
+import { AppIcon } from '@/components/ui/app-icon';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -51,7 +52,7 @@ function StarRow({ stars, count, total }: { stars: number; count: number; total:
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
       <Text style={{ fontSize: 12, color: '#687076', width: 8 }}>{stars}</Text>
-      <Text style={{ fontSize: 12, color: '#E65100', marginLeft: 4, marginRight: 8 }}>★</Text>
+      <AppIcon name="star.fill" size={12} color="#E65100" style={{ marginLeft: 4, marginRight: 8 }} />
       <View style={{ flex: 1, height: 8, backgroundColor: '#F3F4F6', borderRadius: 4, overflow: 'hidden' }}>
         <View
           style={{
@@ -201,7 +202,7 @@ function ReviewCard({ review, artisanId, artisanName, onReplySubmitted, onPhotoP
         {/* Stars */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
           {[1, 2, 3, 4, 5].map((s) => (
-            <Text key={s} style={{ fontSize: 14, color: s <= review.rating ? '#E65100' : '#D1D5DB' }}>★</Text>
+            <AppIcon key={s} name={s <= review.rating ? 'star.fill' : 'star'} size={14} color={s <= review.rating ? '#E65100' : '#D1D5DB'} />
           ))}
         </View>
       </View>
@@ -516,12 +517,7 @@ export default function MyReviewsScreen() {
             </Text>
             <View style={{ flexDirection: 'row', marginTop: 4 }}>
               {[1, 2, 3, 4, 5].map((s) => (
-                <Text
-                  key={s}
-                  style={{ fontSize: 18, color: s <= Math.round(avgRating) ? '#E65100' : '#D1D5DB' }}
-                >
-                  ★
-                </Text>
+                <AppIcon key={s} name={s <= Math.round(avgRating) ? 'star.fill' : 'star'} size={18} color={s <= Math.round(avgRating) ? '#E65100' : '#D1D5DB'} />
               ))}
             </View>
             <Text style={{ fontSize: 12, color: '#687076', marginTop: 4 }}>
@@ -573,7 +569,7 @@ export default function MyReviewsScreen() {
             onPress={() => setGalleryVisible(false)}
             style={{ position: 'absolute', top: 52, right: 20, zIndex: 10, padding: 8 }}
           >
-            <Text style={{ color: '#fff', fontSize: 28, fontWeight: '300' }}>✕</Text>
+            <AppIcon name="xmark" size={24} color="#fff" />
           </TouchableOpacity>
           <ScrollView
             horizontal

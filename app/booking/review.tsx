@@ -9,6 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { ScreenContainer } from '@/components/screen-container';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+import { AppIcon } from '@/components/ui/app-icon';
 
 const STAR_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
@@ -198,7 +199,7 @@ export default function ReviewScreen() {
       }
 
       Alert.alert(
-        'Review Submitted! 🌟',
+        'Review Submitted!',
         'Thank you for your feedback. It helps other customers find great artisans.',
         [{ text: 'Done', onPress: () => router.replace('/(tabs)/bookings') }]
       );
@@ -229,7 +230,7 @@ export default function ReviewScreen() {
     return (
       <ScreenContainer className="p-6">
         <View className="flex-1 items-center justify-center gap-4">
-          <Text className="text-5xl">✅</Text>
+          <AppIcon name="checkmark.circle.fill" size={56} color="#22C55E" />
           <Text className="text-xl font-bold text-foreground text-center">Already Reviewed</Text>
           <Text className="text-muted text-center">You have already submitted a review for this booking.</Text>
           <TouchableOpacity
@@ -298,7 +299,7 @@ export default function ReviewScreen() {
                   if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
               >
-                <Text style={{ fontSize: 44, color: star <= displayStar ? '#E65100' : '#D1D5DB' }}>★</Text>
+                <AppIcon name="star.fill" size={44} color={star <= displayStar ? '#E65100' : '#D1D5DB'} />
               </TouchableOpacity>
             ))}
           </View>
@@ -378,7 +379,7 @@ export default function ReviewScreen() {
                     alignItems: 'center', justifyContent: 'center',
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>✕</Text>
+                  <AppIcon name="xmark" size={11} color="#fff" />
                 </TouchableOpacity>
               </View>
             ))}

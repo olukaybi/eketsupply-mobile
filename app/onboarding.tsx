@@ -5,25 +5,27 @@ import { ScreenContainer } from '@/components/screen-container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/use-colors';
+import { AppIcon } from '@/components/ui/app-icon';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 
 const { width: _width } = Dimensions.get('window');
 
-const onboardingData = [
+const onboardingData: { id: number; icon: IconSymbolName; title: string; description: string }[] = [
   {
     id: 1,
-    icon: '🔍',
+    icon: 'magnifyingglass',
     title: 'Find Skilled Artisans',
     description: 'Browse verified professionals across Nigeria. From carpenters to electricians, plumbers to tailors - find the right expert for your project.',
   },
   {
     id: 2,
-    icon: '✓',
+    icon: 'checkmark.shield.fill',
     title: 'Verified Professionals',
     description: 'Every artisan is verified with ID and certifications. Read reviews, see portfolios, and check ratings before booking.',
   },
   {
     id: 3,
-    icon: '🔒',
+    icon: 'lock.fill',
     title: 'Secure Booking & Payment',
     description: 'Book services with confidence. Track your projects, communicate directly, and pay securely. Fix it Right, The First Time.',
   },
@@ -84,7 +86,7 @@ export default function OnboardingScreen() {
             className="w-32 h-32 rounded-full items-center justify-center mb-8"
             style={{ backgroundColor: colors.primary + '20' }}
           >
-            <Text className="text-7xl">{currentSlide.icon}</Text>
+            <AppIcon name={currentSlide.icon} size={72} color={colors.primary} />
           </View>
 
           {/* Title */}

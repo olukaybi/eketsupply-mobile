@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { supabase } from '@/lib/supabase';
+import { AppIcon } from '@/components/ui/app-icon';
 
 interface TimeSlot {
   datetime: Date;
@@ -212,9 +213,10 @@ export function SmartScheduling({
   return (
     <View>
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-foreground font-semibold text-base">
-          ⚡ Recommended Times
-        </Text>
+        <View className="flex-row items-center gap-2">
+          <AppIcon name="bolt.fill" size={14} color="#0a7ea4" />
+          <Text className="text-foreground font-semibold text-base">Recommended Times</Text>
+        </View>
         <TouchableOpacity onPress={() => setShowManual(!showManual)}>
           <Text className="text-primary text-sm">
             {showManual ? 'Hide' : 'Pick manually'}
@@ -264,7 +266,7 @@ export function SmartScheduling({
                 {isSelected && (
                   <View className="pt-2 border-t border-primary/30">
                     <Text className="text-primary text-xs font-semibold">
-                      ✓ Selected
+                      Selected
                     </Text>
                   </View>
                 )}

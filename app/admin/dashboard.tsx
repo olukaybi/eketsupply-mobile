@@ -27,6 +27,7 @@ import {
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
+import { AppIcon } from "@/components/ui/app-icon";
 // Push notifications are sent server-side via the webhook handler
 // No direct push-sender import needed in the mobile client
 
@@ -568,7 +569,7 @@ export default function AdminDashboard() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 40, marginBottom: 12 }}>✅</Text>
+                <AppIcon name="checkmark.circle.fill" size={40} color="#22C55E" style={{ marginBottom: 12 }} />
                 <Text style={{ fontSize: 16, fontWeight: "700", color: "#11181C" }}>
                   All caught up!
                 </Text>
@@ -596,7 +597,7 @@ export default function AdminDashboard() {
         {/* Bookings Tab */}
         {activeTab === "bookings" && (
           <View style={{ backgroundColor: "#fff", borderRadius: 14, padding: 24, alignItems: "center" }}>
-            <Text style={{ fontSize: 32, marginBottom: 12 }}>📋</Text>
+            <AppIcon name="list.bullet.clipboard.fill" size={32} color="#0a7ea4" style={{ marginBottom: 12 }} />
             <Text style={{ fontSize: 16, fontWeight: "700", color: "#11181C" }}>Bookings Overview</Text>
             <Text style={{ fontSize: 14, color: "#687076", textAlign: "center", marginTop: 8 }}>
               Full booking management coming soon. Use Supabase Dashboard → Table Editor → bookings to manage bookings directly.
