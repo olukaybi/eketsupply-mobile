@@ -21,6 +21,7 @@ type Artisan = {
   location: string;
   price: string;
   verified: boolean;
+  topReview?: string | null;
 };
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
@@ -74,7 +75,8 @@ export default function HomeScreen() {
           .select(`
             *,
             profiles!artisans_profile_id_fkey(full_name, email),
-            services(price)
+            services(price),
+            reviews(comment, rating)
           `)
           .eq('verified', true)
           .order('rating', { ascending: false })
@@ -88,6 +90,11 @@ export default function HomeScreen() {
         if (data) {
           const formattedArtisans: Artisan[] = data.map((artisan: ArtisanData) => {
             const price = artisan.services[0]?.price || '₦5,000 - ₦15,000';
+            // Pick the highest-rated review with a non-empty comment as the snippet
+            const reviewsArr: { comment: string | null; rating: number }[] = (artisan as any).reviews ?? [];
+            const topReview = reviewsArr
+              .filter((r) => r.comment && r.comment.trim().length > 10)
+              .sort((a, b) => b.rating - a.rating)[0]?.comment ?? null;
             return {
               id: artisan.id,
               name: artisan.profiles.full_name,
@@ -97,6 +104,7 @@ export default function HomeScreen() {
               location: artisan.location,
               price: price,
               verified: artisan.verified,
+              topReview,
             };
           });
           setArtisans(formattedArtisans);
@@ -198,6 +206,23 @@ export default function HomeScreen() {
       </View>
       <Text className="text-sm text-muted mb-1">📍 {item.location}</Text>
       <Text className="text-sm font-medium text-primary">{item.price}</Text>
+      {!!item.topReview && (
+        <View
+          style={{
+            marginTop: 8,
+            paddingTop: 8,
+            borderTopWidth: 0.5,
+            borderTopColor: '#E5E7EB',
+          }}
+        >
+          <Text
+            style={{ fontSize: 12, color: '#687076', fontStyle: 'italic', lineHeight: 16 }}
+            numberOfLines={2}
+          >
+            “{item.topReview}”
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 
