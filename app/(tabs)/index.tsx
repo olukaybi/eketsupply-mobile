@@ -22,6 +22,7 @@ type Artisan = {
   price: string;
   verified: boolean;
   topReview?: string | null;
+  responseRate?: number | null; // % of reviews with an artisan reply
 };
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
@@ -76,7 +77,7 @@ export default function HomeScreen() {
             *,
             profiles!artisans_profile_id_fkey(full_name, email),
             services(price),
-            reviews(comment, rating)
+            reviews(comment, rating, reply:review_replies(id))
           `)
           .eq('verified', true)
           .order('rating', { ascending: false })
@@ -91,10 +92,14 @@ export default function HomeScreen() {
           const formattedArtisans: Artisan[] = data.map((artisan: ArtisanData) => {
             const price = artisan.services[0]?.price || '₦5,000 - ₦15,000';
             // Pick the highest-rated review with a non-empty comment as the snippet
-            const reviewsArr: { comment: string | null; rating: number }[] = (artisan as any).reviews ?? [];
+            const reviewsArr: { comment: string | null; rating: number; reply?: { id: string }[] | null }[] = (artisan as any).reviews ?? [];
             const topReview = reviewsArr
               .filter((r) => r.comment && r.comment.trim().length > 10)
               .sort((a, b) => b.rating - a.rating)[0]?.comment ?? null;
+            // Compute response rate: % of reviews that have at least one reply
+            const totalReviews = reviewsArr.length;
+            const repliedCount = reviewsArr.filter((r) => Array.isArray(r.reply) ? r.reply.length > 0 : !!r.reply).length;
+            const responseRate = totalReviews > 0 ? Math.round((repliedCount / totalReviews) * 100) : null;
             return {
               id: artisan.id,
               name: artisan.profiles.full_name,
@@ -105,6 +110,7 @@ export default function HomeScreen() {
               price: price,
               verified: artisan.verified,
               topReview,
+              responseRate,
             };
           });
           setArtisans(formattedArtisans);
@@ -181,6 +187,81 @@ export default function HomeScreen() {
     );
   };
 
+  // Vertical card for filtered/search results — wider, shows full snippet
+  const renderArtisanRow = ({ item }: { item: Artisan }) => (
+    <TouchableOpacity
+      onPress={() => handleArtisanPress(item)}
+      style={{
+        backgroundColor: '#F5F5F5',
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 10,
+        marginHorizontal: 24,
+        borderWidth: 0.5,
+        borderColor: '#E5E7EB',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+      }}
+    >
+      {/* Avatar */}
+      <View
+        style={{
+          width: 48, height: 48, borderRadius: 24,
+          backgroundColor: '#1B5E20',
+          alignItems: 'center', justifyContent: 'center',
+          marginRight: 12, flexShrink: 0,
+        }}
+      >
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>{item.name.charAt(0)}</Text>
+      </View>
+
+      {/* Info */}
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: '#11181C' }}>{item.name}</Text>
+          {item.verified && (
+            <Text style={{ marginLeft: 4, color: '#22C55E', fontSize: 13 }}>✓</Text>
+          )}
+          {item.responseRate != null && item.responseRate >= 70 && (
+            <View
+              style={{
+                marginLeft: 6, paddingHorizontal: 6, paddingVertical: 2,
+                borderRadius: 10, backgroundColor: '#E8F5E9',
+              }}
+            >
+              <Text style={{ fontSize: 10, color: '#1B5E20', fontWeight: '700' }}>
+                {item.responseRate}% replies
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text style={{ fontSize: 13, color: '#687076', marginBottom: 4 }}>{item.service}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+          <Text style={{ fontSize: 12, color: '#E65100', marginRight: 3 }}>⭐</Text>
+          <Text style={{ fontSize: 13, fontWeight: '600', color: '#11181C' }}>{item.rating}</Text>
+          <Text style={{ fontSize: 12, color: '#687076', marginLeft: 3 }}>({item.reviews})</Text>
+          <Text style={{ fontSize: 12, color: '#687076', marginLeft: 8 }}>📍 {item.location}</Text>
+        </View>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: '#0a7ea4' }}>{item.price}</Text>
+        {!!item.topReview && (
+          <View
+            style={{
+              marginTop: 8, paddingTop: 8,
+              borderTopWidth: 0.5, borderTopColor: '#E5E7EB',
+            }}
+          >
+            <Text
+              style={{ fontSize: 12, color: '#687076', fontStyle: 'italic', lineHeight: 16 }}
+              numberOfLines={2}
+            >
+              “{item.topReview}”
+            </Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
   const renderArtisanCard = ({ item }: { item: Artisan }) => (
     <TouchableOpacity
       onPress={() => handleArtisanPress(item)}
@@ -199,10 +280,22 @@ export default function HomeScreen() {
           <Text className="text-sm text-muted">{item.service}</Text>
         </View>
       </View>
-      <View className="flex-row items-center mb-2">
+      <View className="flex-row items-center mb-2" style={{ flexWrap: 'wrap', gap: 4 }}>
         <Text className="text-warning mr-1">⭐</Text>
         <Text className="text-sm font-medium text-foreground">{item.rating}</Text>
         <Text className="text-sm text-muted ml-1">({item.reviews} reviews)</Text>
+        {item.responseRate != null && item.responseRate >= 70 && (
+          <View
+            style={{
+              marginLeft: 6, paddingHorizontal: 6, paddingVertical: 2,
+              borderRadius: 10, backgroundColor: '#E8F5E9',
+            }}
+          >
+            <Text style={{ fontSize: 10, color: '#1B5E20', fontWeight: '700' }}>
+              {item.responseRate}% replies
+            </Text>
+          </View>
+        )}
       </View>
       <Text className="text-sm text-muted mb-1">📍 {item.location}</Text>
       <Text className="text-sm font-medium text-primary">{item.price}</Text>
@@ -364,14 +457,25 @@ export default function HomeScreen() {
               <Text className="text-muted text-sm mt-2">Loading artisans...</Text>
             </View>
           ) : filteredArtisans.length > 0 ? (
-            <FlatList
-              horizontal
-              data={filteredArtisans}
-              renderItem={renderArtisanCard}
-              keyExtractor={(item) => item.id}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 24 }}
-            />
+            (selectedCategory || selectedLocation || searchQuery.trim()) ? (
+              // Vertical list for filtered/search results — wider cards with full snippet
+              <FlatList
+                data={filteredArtisans}
+                renderItem={renderArtisanRow}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+              />
+            ) : (
+              // Horizontal carousel for featured artisans
+              <FlatList
+                horizontal
+                data={filteredArtisans}
+                renderItem={renderArtisanCard}
+                keyExtractor={(item) => item.id}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 24 }}
+              />
+            )
           ) : (
             <View className="items-center justify-center py-8 px-6">
               <Text className="text-muted text-sm text-center">No artisans found. Please check your database setup.</Text>
