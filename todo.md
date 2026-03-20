@@ -604,3 +604,8 @@
 - [x] Send push notification to customer when artisan replies to their review
 - [x] Wire photo gallery viewer (full-screen tap) on My Reviews screen
 - [x] Surface top review snippet on browse/home artisan cards
+
+## Sprint: Review Enhancements Round 4 (Mar 20 2026)
+- [x] Review snippet persists on filtered search/category results on home screen
+- [x] Most-helpful review sort (by rating, recency, photo count) on artisan profile
+- [x] Artisan response rate badge on profile and browse cards

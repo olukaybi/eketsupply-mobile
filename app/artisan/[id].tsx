@@ -43,6 +43,7 @@ type ArtisanProfile = {
   completedJobs: number;
   responseTime: string;
   availability: string;
+  responseRate?: number | null; // % of reviews with an artisan reply
 };
 
 type BeforeAfterProject = {
@@ -92,6 +93,8 @@ export default function ArtisanProfileScreen() {
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  // Review sort state: 'top' = highest rating first, 'recent' = newest first, 'photos' = reviews with photos first
+  const [reviewSort, setReviewSort] = useState<'top' | 'recent' | 'photos'>('top');
 
   // Quote form state
   const [quoteForm, setQuoteForm] = useState({
@@ -167,6 +170,7 @@ export default function ArtisanProfileScreen() {
         }
 
         // Fetch reviews with photos, tags and artisan replies
+        // Fetch ALL reviews (no limit) so we can compute the response rate accurately
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
@@ -175,13 +179,12 @@ export default function ArtisanProfileScreen() {
             reply:review_replies(reply_text)
           `)
           .eq('artisan_id', id)
-          .order('created_at', { ascending: false })
-          .limit(5);
+          .order('created_at', { ascending: false });
 
         if (reviewsError) {
           console.error('Error fetching reviews:', reviewsError);
         } else if (reviewsData) {
-          setReviews((reviewsData as any[]).map(r => ({
+          const mapped = (reviewsData as any[]).map(r => ({
             id: r.id,
             author: (r.reviewer as any)?.full_name ?? r.reviewer_name ?? 'Customer',
             rating: r.rating,
@@ -190,7 +193,14 @@ export default function ArtisanProfileScreen() {
             photos: r.photo_urls ?? null,
             tags: r.tags ?? null,
             artisanReply: Array.isArray(r.reply) ? (r.reply[0]?.reply_text ?? null) : (r.reply?.reply_text ?? null),
-          })));
+          }));
+          setReviews(mapped);
+
+          // Compute response rate and update artisan profile state
+          const totalR = mapped.length;
+          const repliedR = mapped.filter(r => !!r.artisanReply).length;
+          const rr = totalR > 0 ? Math.round((repliedR / totalR) * 100) : null;
+          setArtisan(prev => prev ? { ...prev, responseRate: rr } : prev);
         }
 
         // Fetch portfolio photos
@@ -656,6 +666,17 @@ export default function ArtisanProfileScreen() {
               <Text className="text-2xl font-bold text-foreground">{artisan.reviews}</Text>
               <Text className="text-xs text-muted mt-1">Reviews</Text>
             </View>
+            {artisan.responseRate != null && (
+              <>
+                <View className="w-px bg-border" />
+                <View className="items-center flex-1">
+                  <Text className="text-2xl font-bold" style={{ color: '#1B5E20' }}>
+                    {artisan.responseRate}%
+                  </Text>
+                  <Text className="text-xs text-muted mt-1">Replies</Text>
+                </View>
+              </>
+            )}
           </View>
 
           {/* Quick Info */}
@@ -887,14 +908,73 @@ export default function ArtisanProfileScreen() {
         {/* Reviews */}
         <View className="px-6 mb-6">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-lg font-bold text-foreground">Reviews ({artisan.reviews})</Text>
-            <TouchableOpacity>
-              <Text className="text-sm text-primary font-medium">See All</Text>
-            </TouchableOpacity>
+            <View>
+              <Text className="text-lg font-bold text-foreground">Reviews ({artisan.reviews})</Text>
+              {artisan.responseRate != null && artisan.responseRate >= 50 && (
+                <View
+                  style={{
+                    flexDirection: 'row', alignItems: 'center',
+                    marginTop: 2,
+                  }}
+                >
+                  <View
+                    style={{
+                      paddingHorizontal: 8, paddingVertical: 3,
+                      borderRadius: 10, backgroundColor: '#E8F5E9',
+                    }}
+                  >
+                    <Text style={{ fontSize: 11, color: '#1B5E20', fontWeight: '700' }}>
+                      💬 Replies to {artisan.responseRate}% of reviews
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
+
+          {/* Sort controls */}
+          {reviews.length > 1 && (
+            <View
+              style={{
+                flexDirection: 'row', gap: 8, marginBottom: 12,
+              }}
+            >
+              {(['top', 'recent', 'photos'] as const).map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  onPress={() => setReviewSort(s)}
+                  style={{
+                    paddingHorizontal: 12, paddingVertical: 6,
+                    borderRadius: 20,
+                    backgroundColor: reviewSort === s ? '#1B5E20' : '#F5F5F5',
+                    borderWidth: 0.5,
+                    borderColor: reviewSort === s ? '#1B5E20' : '#E5E7EB',
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12, fontWeight: '600',
+                      color: reviewSort === s ? '#fff' : '#687076',
+                    }}
+                  >
+                    {s === 'top' ? '⭐ Top Rated' : s === 'recent' ? '🕒 Recent' : '📷 With Photos'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
           {reviews.length > 0 ? (
             <FlatList
-              data={reviews}
+              data={[...reviews].sort((a, b) => {
+                if (reviewSort === 'top') return b.rating - a.rating;
+                if (reviewSort === 'recent') return new Date(b.date).getTime() - new Date(a.date).getTime();
+                // 'photos': reviews with photos first, then by rating
+                const aHas = (a.photos?.length ?? 0) > 0 ? 1 : 0;
+                const bHas = (b.photos?.length ?? 0) > 0 ? 1 : 0;
+                if (bHas !== aHas) return bHas - aHas;
+                return b.rating - a.rating;
+              })}
               renderItem={renderReview}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
