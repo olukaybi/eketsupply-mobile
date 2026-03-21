@@ -1,0 +1,10 @@
+export const getPermissionsAsync = async () => ({ status: 'granted' });
+export const requestPermissionsAsync = async () => ({ status: 'granted' });
+export const getExpoPushTokenAsync = async () => ({ data: 'ExponentPushToken[test]' });
+export const scheduleNotificationAsync = async () => 'notification-id';
+export const cancelScheduledNotificationAsync = async () => {};
+export const addNotificationReceivedListener = () => ({ remove: () => {} });
+export const addNotificationResponseReceivedListener = () => ({ remove: () => {} });
+export const AndroidImportance = { MAX: 5, HIGH: 4, DEFAULT: 3 };
+export const setNotificationChannelAsync = async () => {};
+export const setNotificationHandler = () => {};

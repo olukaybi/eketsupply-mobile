@@ -637,3 +637,21 @@
 - [x] Integrate Sentry for Expo crash reporting (replace removed console.error with Sentry.captureException)
 - [x] Add Zod schema validation to Paystack tRPC router (amount bounds, email format, account number length)
 - [x] Add rate limiting to auth endpoints (brute-force protection)
+
+## Sprint: Production Hardening & Delivery (Mar 20 2026)
+- [ ] Add Helmet HTTP security headers middleware
+- [ ] Protect Paystack initializePayment and processRefund with protectedProcedure
+- [ ] Request EXPO_PUBLIC_SENTRY_DSN secret from user
+- [ ] Write Vitest unit tests for critical flows (auth, booking, payment, review)
+- [ ] Fix all test failures
+- [ ] Final TypeScript check — 0 errors
+- [ ] Save production checkpoint and deliver to client
+
+## Sprint: Production Hardening & Delivery — COMPLETED (Mar 20 2026)
+- [x] Add Helmet HTTP security headers middleware
+- [x] Protect Paystack initializePayment and processRefund with protectedProcedure
+- [x] Request EXPO_PUBLIC_SENTRY_DSN secret from user
+- [x] Write Vitest unit tests for critical flows (auth, booking, payment, review)
+- [x] Fix all test failures — 242/242 passing
+- [x] Final TypeScript check — 0 errors
+- [x] Save production checkpoint and deliver to client

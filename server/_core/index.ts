@@ -8,6 +8,7 @@ import { registerPaystackWebhook } from "../paystack-webhook";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { authLimiter, paystackLimiter, apiLimiter } from "./rate-limiter";
+import helmet from "helmet";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -31,6 +32,16 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Security headers — set before CORS so headers are always present
+  app.use(
+    helmet({
+      // Allow cross-origin requests needed for the mobile app
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      // Disable CSP on API routes (no HTML served here)
+      contentSecurityPolicy: false,
+    })
+  );
 
   // Enable CORS for all routes - reflect the request origin to support credentials
   app.use((req, res, next) => {

@@ -1,0 +1,10 @@
+export const useRouter = () => ({ push: () => {}, replace: () => {}, back: () => {}, navigate: () => {} });
+export const useLocalSearchParams = () => ({});
+export const useSegments = () => [];
+export const usePathname = () => '/';
+export const Link = 'Link';
+export const Stack = { Screen: 'Screen' };
+export const Tabs = { Screen: 'Screen' };
+export const router = { push: () => {}, replace: () => {}, back: () => {}, navigate: () => {} };
+export const useFocusEffect = (cb: () => void) => {};
+export const Redirect = 'Redirect';
