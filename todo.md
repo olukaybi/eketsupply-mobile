@@ -632,3 +632,8 @@
 - [x] Confirm all Supabase realtime subscriptions have cleanup (removeChannel in useEffect return)
 - [x] Confirm all user.id/profile.id accesses are guarded by null checks
 - [x] Confirm navigation routes are consistent (bookingId, artisanId params match screen expectations)
+
+## Sprint: Security & Observability Hardening (Mar 20 2026)
+- [x] Integrate Sentry for Expo crash reporting (replace removed console.error with Sentry.captureException)
+- [x] Add Zod schema validation to Paystack tRPC router (amount bounds, email format, account number length)
+- [x] Add rate limiting to auth endpoints (brute-force protection)

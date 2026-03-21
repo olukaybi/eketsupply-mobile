@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerPaystackWebhook } from "../paystack-webhook";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { authLimiter, paystackLimiter, apiLimiter } from "./rate-limiter";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -60,6 +61,16 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   registerOAuthRoutes(app);
+
+  // ─── Rate limiting ──────────────────────────────────────────────────────────
+  // Auth endpoints: 10 req / 15 min per IP (brute-force protection)
+  app.use("/api/auth", authLimiter);
+  app.use("/api/trpc/auth", authLimiter);
+  // Paystack endpoints: 20 req / 1 min per IP (payment enumeration protection)
+  app.use("/api/trpc/paystack", paystackLimiter);
+  // General API: 120 req / 1 min per IP (DDoS protection)
+  app.use("/api/trpc", apiLimiter);
+  // ────────────────────────────────────────────────────────────────────────────
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, timestamp: Date.now() });
