@@ -116,6 +116,13 @@ export function PaymentModal({
       case 'confirm':
         return (
           <View>
+            {/* TEST MODE BANNER — remove once Paystack compliance is approved */}
+            <View className="bg-warning/20 border border-warning rounded-lg px-3 py-2 mb-4 flex-row items-center gap-2">
+              <AppIcon name="exclamationmark.triangle.fill" size={14} color="#F59E0B" />
+              <Text className="text-warning text-xs font-semibold flex-1">
+                TEST MODE — No real charges. Switch to live keys after compliance approval.
+              </Text>
+            </View>
             <Text className="text-2xl font-bold text-foreground mb-4">Confirm Payment</Text>
 
             <View className="bg-surface rounded-xl p-4 mb-4">
