@@ -89,9 +89,9 @@ const config: ExpoConfig = {
     [
       "@sentry/react-native/expo",
       {
-        url: "https://sentry.butterflyotel.online",
+        url: "https://sentry.io",
         project: "eketsupply-mobile",
-        organization: "kaybi-enterprises-llc",
+        organization: "o4511079780122624",
       },
     ],
     [
