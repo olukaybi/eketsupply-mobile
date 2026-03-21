@@ -87,6 +87,14 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     [
+      "@sentry/react-native/expo",
+      {
+        url: "https://sentry.butterflyotel.online",
+        project: "eketsupply-mobile",
+        organization: "kaybi-enterprises-llc",
+      },
+    ],
+    [
       "expo-location",
       {
         locationAlwaysAndWhenInUsePermission: "Allow $(PRODUCT_NAME) to use your location to find nearby artisans.",
