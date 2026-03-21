@@ -20,7 +20,11 @@ import {
 import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
+import { initSentry, setUser, clearUser, captureException } from "@/lib/sentry";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
+
+// Initialise Sentry as early as possible (before any component renders)
+initSentry();
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -72,7 +76,15 @@ export default function RootLayout() {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user?.id) {
+        // Set Sentry user context for crash attribution
+        setUser({ id: session.user.id, email: session.user.email });
         // Register push token in background — don't block UI
+        registerForPushNotifications(session.user.id).catch((err) =>
+          captureException(err, { context: "push_token_registration" })
+        );
+      }
+      if (event === "SIGNED_OUT") {
+        clearUser();
       }
     });
     return () => authListener.subscription.unsubscribe();
