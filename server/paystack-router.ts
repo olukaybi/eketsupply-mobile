@@ -17,7 +17,7 @@
  */
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 
 // Secret key is only available server-side (no EXPO_PUBLIC prefix)
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || "";
@@ -60,7 +60,7 @@ export const paystackRouter = router({
    * Initialize a Paystack transaction.
    * Returns authorization_url (web) and access_code (mobile).
    */
-  initializePayment: publicProcedure
+  initializePayment: protectedProcedure
     .input(
       z.object({
         email: z.string().email("Invalid email address").max(254),
@@ -319,7 +319,7 @@ export const paystackRouter = router({
   /**
    * Process a refund.
    */
-  processRefund: publicProcedure
+  processRefund: protectedProcedure
     .input(
       z.object({
         transaction_reference: safeReference,

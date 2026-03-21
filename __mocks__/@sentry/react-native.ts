@@ -1,0 +1,11 @@
+export const init = () => {};
+export const captureException = (_err: unknown, _ctx?: unknown) => 'event-id';
+export const captureMessage = (_msg: string, _level?: unknown) => 'event-id';
+export const setUser = (_user: unknown) => {};
+export const configureScope = (fn: (scope: unknown) => void) => fn({ setUser: () => {}, addBreadcrumb: () => {} });
+export const addBreadcrumb = (_crumb: unknown) => {};
+export const withScope = (fn: (scope: unknown) => void) => fn({ setTag: () => {}, setExtra: () => {} });
+export const Severity = { Error: 'error', Warning: 'warning', Info: 'info', Debug: 'debug' };
+export const SeverityLevel = { Error: 'error', Warning: 'warning', Info: 'info', Debug: 'debug' };
+export const ReactNativeTracing = class {};
+export const BrowserTracing = class {};
