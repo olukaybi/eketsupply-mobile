@@ -106,7 +106,6 @@ export default function EmergencyBookingScreen() {
       setAvailableArtisans(data ?? []);
       setStep('artisans');
     } catch (err) {
-      console.error('Error finding artisans:', err);
       Alert.alert('Error', 'Could not find available artisans. Please try again.');
     } finally {
       setSearching(false);
@@ -186,7 +185,6 @@ export default function EmergencyBookingScreen() {
                 }
               }, 3000);
             } catch (err) {
-              console.error('Emergency booking error:', err);
               Alert.alert('Error', 'Failed to submit emergency booking. Please try again.');
             } finally {
               setSubmitting(false);

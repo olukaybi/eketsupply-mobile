@@ -89,7 +89,6 @@ export function SmartScheduling({
         });
       }
     } catch (error) {
-      console.error('Error generating suggestions:', error);
       setSuggestions(getDefaultSuggestions());
     } finally {
       setLoading(false);

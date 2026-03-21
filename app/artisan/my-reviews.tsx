@@ -415,7 +415,6 @@ export default function MyReviewsScreen() {
 
       setReviews(mapped);
     } catch (err) {
-      console.error('Error fetching reviews:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -446,7 +445,6 @@ export default function MyReviewsScreen() {
       setArtisanId(aid);
       await fetchReviews(aid);
     } catch (err) {
-      console.error('Error resolving artisan:', err);
       setLoading(false);
     }
   }, [user?.id, fetchReviews]);

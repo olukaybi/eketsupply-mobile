@@ -165,7 +165,6 @@ export default function BookingConfirmation() {
         artisan: (data as any).artisans ?? null,
       } as BookingDetails);
     } catch (err) {
-      console.error("[Confirmation] Failed to load booking:", err);
       Alert.alert("Error", "Could not load booking details. Please check your bookings tab.");
     } finally {
       setLoading(false);

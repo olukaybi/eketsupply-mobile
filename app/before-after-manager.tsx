@@ -97,7 +97,6 @@ export default function BeforeAfterManagerScreen() {
 
       setProjects(projectsData || []);
     } catch (error) {
-      console.error("Error loading artisan data:", error);
       Alert.alert("Error", "Failed to load before/after projects");
     } finally {
       setLoading(false);
@@ -121,7 +120,6 @@ export default function BeforeAfterManagerScreen() {
         }
       }
     } catch (error) {
-      console.error("Error picking image:", error);
       Alert.alert("Error", "Failed to pick image");
     }
   }
@@ -206,7 +204,6 @@ export default function BeforeAfterManagerScreen() {
       
       Alert.alert("Success", "Before/After project added successfully!");
     } catch (error) {
-      console.error("Error uploading project:", error);
       Alert.alert("Error", "Failed to upload project");
     } finally {
       setUploading(false);
@@ -243,7 +240,6 @@ export default function BeforeAfterManagerScreen() {
               setProjects(projects.filter((p) => p.id !== project.id));
               Alert.alert("Success", "Project deleted successfully");
             } catch (error) {
-              console.error("Error deleting project:", error);
               Alert.alert("Error", "Failed to delete project");
             }
           },

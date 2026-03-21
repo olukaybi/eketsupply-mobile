@@ -373,7 +373,6 @@ export default function AdminDashboard() {
               Alert.alert("Approved!", `${artisan.full_name} is now a verified artisan.`);
             } catch (err) {
               Alert.alert("Error", "Failed to approve artisan. Please try again.");
-              console.error("[Admin] Approve error:", err);
             } finally {
               setActionLoading(false);
             }
@@ -417,7 +416,6 @@ export default function AdminDashboard() {
       Alert.alert("Rejected", `${artisan.full_name}'s application has been rejected.`);
     } catch (err) {
       Alert.alert("Error", "Failed to reject artisan. Please try again.");
-      console.error("[Admin] Reject error:", err);
     } finally {
       setActionLoading(false);
     }

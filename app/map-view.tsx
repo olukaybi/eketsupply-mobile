@@ -65,7 +65,6 @@ export default function MapViewScreen() {
       setLocation(currentLocation);
       setLoading(false);
     } catch (error) {
-      console.error('Error getting location:', error);
       Alert.alert('Error', 'Could not get your location. Please try again.');
       setLoading(false);
     }
@@ -92,7 +91,6 @@ export default function MapViewScreen() {
         setArtisans(data.artisans || []);
       }
     } catch (error) {
-      console.error('Error fetching nearby artisans:', error);
       // For demo, set empty array
       setArtisans([]);
     }

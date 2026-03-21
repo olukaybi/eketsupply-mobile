@@ -18,7 +18,6 @@ export default function Index() {
         router.replace('/onboarding');
       }
     } catch (error) {
-      console.error('Error checking onboarding status:', error);
       // Default to onboarding on error
       router.replace('/onboarding');
     }

@@ -108,7 +108,6 @@ export default function AnalyticsScreen() {
         ratingTrend,
       });
     } catch (error) {
-      console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }

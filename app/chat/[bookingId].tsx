@@ -59,7 +59,6 @@ export default function ChatScreen() {
       
       setOtherPersonName(name);
     } catch (err) {
-      console.error('Error fetching booking details:', err);
     }
   }
 
@@ -73,7 +72,6 @@ export default function ChatScreen() {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching messages:', error);
         return;
       }
 
@@ -85,7 +83,6 @@ export default function ChatScreen() {
         p_user_id: user?.id
       });
     } catch (err) {
-      console.error('Error in fetchMessages:', err);
     } finally {
       setLoading(false);
     }
@@ -138,14 +135,12 @@ export default function ChatScreen() {
         });
 
       if (error) {
-        console.error('Error sending message:', error);
         return;
       }
 
       setNewMessage("");
       scrollViewRef.current?.scrollToEnd({ animated: true });
     } catch (err) {
-      console.error('Error in sendMessage:', err);
     } finally {
       setSending(false);
     }

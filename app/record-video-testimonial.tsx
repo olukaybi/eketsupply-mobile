@@ -104,7 +104,6 @@ export default function RecordVideoTestimonialScreen() {
         await uploadVideo(video.uri);
       }
     } catch (error) {
-      console.error("Error recording video:", error);
       setIsRecording(false);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -185,7 +184,6 @@ export default function RecordVideoTestimonialScreen() {
         ]
       );
     } catch (error) {
-      console.error("Error uploading video:", error);
       Alert.alert("Error", "Failed to upload video testimonial");
     } finally {
       setUploading(false);

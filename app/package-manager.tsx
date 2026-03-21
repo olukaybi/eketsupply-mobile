@@ -101,7 +101,6 @@ export default function PackageManagerScreen() {
       // Load packages
       await loadPackages(artisanData.id);
     } catch (error) {
-      console.error("Error loading data:", error);
       Alert.alert("Error", "Failed to load data");
     } finally {
       setLoading(false);
@@ -146,7 +145,6 @@ export default function PackageManagerScreen() {
 
       setPackages(packagesWithServices);
     } catch (error) {
-      console.error("Error loading packages:", error);
     }
   }
 
@@ -227,7 +225,6 @@ export default function PackageManagerScreen() {
 
       Alert.alert("Success", "Package created successfully!");
     } catch (error) {
-      console.error("Error creating package:", error);
       Alert.alert("Error", "Failed to create package");
     } finally {
       setSubmitting(false);
@@ -255,7 +252,6 @@ export default function PackageManagerScreen() {
         `Package ${!currentStatus ? "activated" : "deactivated"}`
       );
     } catch (error) {
-      console.error("Error toggling package:", error);
       Alert.alert("Error", "Failed to update package");
     }
   }
@@ -281,7 +277,6 @@ export default function PackageManagerScreen() {
               setPackages(packages.filter((pkg) => pkg.id !== packageId));
               Alert.alert("Success", "Package deleted");
             } catch (error) {
-              console.error("Error deleting package:", error);
               Alert.alert("Error", "Failed to delete package");
             }
           },

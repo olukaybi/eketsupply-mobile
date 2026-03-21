@@ -62,7 +62,6 @@ export default function PackageAnalyticsScreen() {
         .order('total_bookings', { ascending: false });
 
       if (error) {
-        console.error('Error fetching package analytics:', error);
         setLoading(false);
         return;
       }
@@ -84,7 +83,6 @@ export default function PackageAnalyticsScreen() {
         avg_completion_rate: avgCompletionRate,
       });
     } catch (error) {
-      console.error('Error in fetchPackageAnalytics:', error);
     } finally {
       setLoading(false);
     }

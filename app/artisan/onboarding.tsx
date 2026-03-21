@@ -425,7 +425,6 @@ export default function ArtisanOnboardingScreen() {
         [{ text: "Go to Dashboard", onPress: () => router.replace("/artisan/dashboard") }]
       );
     } catch (error: any) {
-      console.error("Onboarding error:", error);
       Alert.alert("Submission Failed", error?.message ?? "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);

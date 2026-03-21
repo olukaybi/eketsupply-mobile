@@ -79,7 +79,6 @@ export default function HomeScreen() {
           .limit(10);
 
         if (error) {
-          console.error('Error fetching artisans:', error);
           return;
         }
 
@@ -112,7 +111,6 @@ export default function HomeScreen() {
           setFilteredArtisans(formattedArtisans);
         }
       } catch (err) {
-        console.error('Error in fetchArtisans:', err);
       } finally {
         setLoadingArtisans(false);
       }
