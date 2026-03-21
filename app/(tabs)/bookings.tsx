@@ -139,7 +139,6 @@ export default function BookingsScreen() {
       await StoreReview.requestReview();
       await AsyncStorage.setItem('eketsupply_review_prompted', 'true');
     } catch (err) {
-      console.error('StoreReview error:', err);
     }
   }, []);
 
@@ -189,7 +188,6 @@ export default function BookingsScreen() {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching bookings:", error.message);
         Alert.alert("Error", "Could not load bookings. Please try again.");
         return;
       }
@@ -222,7 +220,6 @@ export default function BookingsScreen() {
         }
       }
     } catch (err) {
-      console.error("fetchBookings error:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -331,7 +328,6 @@ export default function BookingsScreen() {
       Alert.alert("Accepted!", "Customer has been notified.");
       fetchBookings();
     } catch (err) {
-      console.error("handleAcceptBooking:", err);
     }
   }
 

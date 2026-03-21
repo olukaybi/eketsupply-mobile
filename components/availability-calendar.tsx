@@ -114,7 +114,6 @@ export function AvailabilityCalendar({
 
         setTimeSlots(allSlots);
       } catch (err) {
-        console.error('Error fetching time slots:', err);
         setTimeSlots([]);
       } finally {
         setLoading(false);

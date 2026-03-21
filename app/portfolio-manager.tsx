@@ -86,7 +86,6 @@ export default function PortfolioManagerScreen() {
 
       setPhotos(photosData || []);
     } catch (error) {
-      console.error("Error loading artisan data:", error);
       Alert.alert("Error", "Failed to load portfolio");
     } finally {
       setLoading(false);
@@ -116,7 +115,6 @@ export default function PortfolioManagerScreen() {
         await uploadPhoto(result.assets[0].uri);
       }
     } catch (error) {
-      console.error("Error picking image:", error);
       Alert.alert("Error", "Failed to pick image");
     }
   }
@@ -167,7 +165,6 @@ export default function PortfolioManagerScreen() {
       setPhotos([...photos, photoData]);
       Alert.alert("Success", "Photo uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading photo:", error);
       Alert.alert("Error", "Failed to upload photo");
     } finally {
       setUploading(false);
@@ -208,7 +205,6 @@ export default function PortfolioManagerScreen() {
               setPhotos(photos.filter((p) => p.id !== photo.id));
               Alert.alert("Success", "Photo deleted successfully");
             } catch (error) {
-              console.error("Error deleting photo:", error);
               Alert.alert("Error", "Failed to delete photo");
             }
           },

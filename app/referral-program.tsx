@@ -116,7 +116,6 @@ export default function ReferralProgramScreen() {
 
       setRecentReferrals(referralsData || []);
     } catch (error) {
-      console.error('Error fetching referral data:', error);
     } finally {
       setLoading(false);
     }
@@ -138,7 +137,6 @@ export default function ReferralProgramScreen() {
         title: 'Join EketSupply',
       });
     } catch (error) {
-      console.error('Error sharing code:', error);
     }
   }
 

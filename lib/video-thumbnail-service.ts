@@ -23,7 +23,6 @@ export class VideoThumbnailService {
 
       return uri;
     } catch (error) {
-      console.error('Error generating thumbnail:', error);
       return null;
     }
   }
@@ -55,7 +54,6 @@ export class VideoThumbnailService {
         });
 
       if (error) {
-        console.error('Error uploading thumbnail:', error);
         return null;
       }
 
@@ -66,7 +64,6 @@ export class VideoThumbnailService {
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Error in uploadThumbnail:', error);
       return null;
     }
   }
@@ -92,7 +89,6 @@ export class VideoThumbnailService {
       const thumbnailUrl = await this.uploadThumbnail(thumbnailUri, artisanId);
       return thumbnailUrl;
     } catch (error) {
-      console.error('Error processing video thumbnail:', error);
       return null;
     }
   }
@@ -113,13 +109,11 @@ export class VideoThumbnailService {
         .eq('id', testimonialId);
 
       if (error) {
-        console.error('Error updating testimonial thumbnail:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in updateTestimonialThumbnail:', error);
       return false;
     }
   }
@@ -143,7 +137,6 @@ export class VideoThumbnailService {
 
       return data.thumbnail_url;
     } catch (error) {
-      console.error('Error getting cached thumbnail:', error);
       return null;
     }
   }
@@ -162,7 +155,6 @@ export class VideoThumbnailService {
         .limit(limit);
 
       if (error || !videos) {
-        console.error('Error fetching unprocessed videos:', error);
         return 0;
       }
 
@@ -184,13 +176,11 @@ export class VideoThumbnailService {
           // Small delay to avoid overwhelming the system
           await new Promise((resolve) => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(`Error processing video ${video.id}:`, error);
         }
       }
 
       return processedCount;
     } catch (error) {
-      console.error('Error in processUnprocessedVideos:', error);
       return 0;
     }
   }
@@ -214,13 +204,11 @@ export class VideoThumbnailService {
         .remove([filePath]);
 
       if (error) {
-        console.error('Error deleting thumbnail:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in deleteThumbnail:', error);
       return false;
     }
   }

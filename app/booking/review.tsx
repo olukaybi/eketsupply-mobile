@@ -73,7 +73,6 @@ export default function ReviewScreen() {
         }
       }
     } catch (err) {
-      console.error('Error fetching booking:', err);
     } finally {
       setLoading(false);
     }
@@ -119,7 +118,6 @@ export default function ReviewScreen() {
 
       return publicUrl;
     } catch (err) {
-      console.error('Photo upload error:', err);
       return null;
     }
   };
@@ -204,7 +202,6 @@ export default function ReviewScreen() {
         [{ text: 'Done', onPress: () => router.replace('/(tabs)/bookings') }]
       );
     } catch (err: any) {
-      console.error('Review submission error:', err);
       if (err?.code === '23505') {
         Alert.alert('Already Reviewed', 'You have already submitted a review for this booking.');
         setAlreadyReviewed(true);

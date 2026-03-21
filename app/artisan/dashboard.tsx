@@ -193,7 +193,6 @@ export default function ArtisanDashboardScreen() {
         ratingCount: ratings.length,
       });
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -236,11 +235,9 @@ export default function ArtisanDashboardScreen() {
             }
           }
         } catch (notifyErr) {
-          console.warn("Could not send review notification:", notifyErr);
         }
       }
     } catch (err) {
-      console.error("Error updating job status:", err);
     } finally {
       setUpdatingJob(null);
     }

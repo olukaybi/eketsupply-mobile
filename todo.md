@@ -620,3 +620,15 @@
 - [x] Replace emojis in emergency booking, admin dashboard, artisan onboarding, smart-scheduling, badge service
 - [x] Replace emojis in auth screens (sign-in, sign-up), chat, portfolio/before-after, map, package manager/analytics
 - [x] Replace emojis in referral program, verification upload, review prompt sheet, video testimonial player
+
+## Sprint: End-to-End QA Audit (Mar 20 2026)
+- [x] TypeScript strict check — 0 errors confirmed
+- [x] CRITICAL SECURITY: Move Paystack secret key from EXPO_PUBLIC (client-exposed) to server-side tRPC router
+- [x] Create server/paystack-router.ts — all secret-key API calls now server-only
+- [x] Rewrite lib/paystack-service.ts to proxy all secret-key calls through server tRPC
+- [x] Remove all console.log/warn/error from production app code — 0 remaining
+- [x] Create scripts/migrate-review-replies.mjs with full RLS policies for review_replies table
+- [x] Confirm all FlatList instances have keyExtractor
+- [x] Confirm all Supabase realtime subscriptions have cleanup (removeChannel in useEffect return)
+- [x] Confirm all user.id/profile.id accesses are guarded by null checks
+- [x] Confirm navigation routes are consistent (bookingId, artisanId params match screen expectations)

@@ -105,7 +105,6 @@ export function PaymentModal({
       );
 
     } catch (error) {
-      console.error('Payment error:', error);
       Alert.alert('Payment Failed', 'An error occurred while processing your payment. Please try again.');
       setPaymentStep('failed');
       setProcessing(false);

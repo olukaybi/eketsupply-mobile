@@ -83,7 +83,6 @@ export default function VerificationUploadScreen() {
         ]);
       }
     } catch (error) {
-      console.error('Error picking document:', error);
       Alert.alert('Error', 'Failed to pick document. Please try again.');
     } finally {
       setLoading(false);
@@ -137,7 +136,6 @@ export default function VerificationUploadScreen() {
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
           throw uploadError;
         }
 
@@ -171,7 +169,6 @@ export default function VerificationUploadScreen() {
         });
 
       if (requestError) {
-        console.error('Request error:', requestError);
         throw requestError;
       }
 
@@ -186,7 +183,6 @@ export default function VerificationUploadScreen() {
         ]
       );
     } catch (error) {
-      console.error('Error submitting verification:', error);
       Alert.alert('Error', 'Failed to submit verification. Please try again.');
     } finally {
       setSubmitting(false);

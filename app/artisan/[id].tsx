@@ -133,7 +133,6 @@ export default function ArtisanProfileScreen() {
           .single();
 
         if (artisanError) {
-          console.error('Error fetching artisan:', artisanError);
           return;
         }
 
@@ -160,7 +159,6 @@ export default function ArtisanProfileScreen() {
           .eq('artisan_id', id);
 
         if (servicesError) {
-          console.error('Error fetching services:', servicesError);
         } else if (servicesData) {
           setServices(servicesData.map(s => ({
             id: s.id,
@@ -183,7 +181,6 @@ export default function ArtisanProfileScreen() {
           .order('created_at', { ascending: false });
 
         if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
         } else if (reviewsData) {
           const mapped = (reviewsData as any[]).map(r => ({
             id: r.id,
@@ -212,7 +209,6 @@ export default function ArtisanProfileScreen() {
           .order('display_order', { ascending: true });
 
         if (portfolioError) {
-          console.error('Error fetching portfolio:', portfolioError);
         } else if (portfolioData) {
           setPortfolioPhotos(portfolioData.map(p => p.photo_url));
         }
@@ -225,7 +221,6 @@ export default function ArtisanProfileScreen() {
           .order('display_order', { ascending: true });
 
         if (beforeAfterError) {
-          console.error('Error fetching before/after:', beforeAfterError);
         } else if (beforeAfterData) {
           setBeforeAfterProjects(beforeAfterData);
         }
@@ -237,7 +232,6 @@ export default function ArtisanProfileScreen() {
           .eq('artisan_id', id);
 
         if (badgesError) {
-          console.error('Error fetching badges:', badgesError);
         } else if (badgesData) {
           setBadges(badgesData.map(b => b.badge_type));
         }
@@ -258,7 +252,6 @@ export default function ArtisanProfileScreen() {
           .limit(5);
 
         if (videoError) {
-          console.error('Error fetching video testimonials:', videoError);
         } else if (videoData) {
           setVideoTestimonials(videoData.map((v: any) => ({
             id: v.id,
@@ -284,7 +277,6 @@ export default function ArtisanProfileScreen() {
           .eq('is_active', true);
 
         if (packagesError) {
-          console.error('Error fetching packages:', packagesError);
         } else if (packagesData) {
           // Fetch services for each package
           const packagesWithServices = await Promise.all(
@@ -305,7 +297,6 @@ export default function ArtisanProfileScreen() {
           setServicePackages(packagesWithServices);
         }
       } catch (err) {
-        console.error('Error in fetchArtisanData:', err);
       } finally {
         setLoading(false);
       }
@@ -383,7 +374,6 @@ export default function ArtisanProfileScreen() {
         notes: '',
       });
     } catch (error) {
-      console.error('Error submitting quote:', error);
       Alert.alert('Error', 'Failed to submit quote request. Please try again.');
     } finally {
       setSubmitting(false);
@@ -469,7 +459,6 @@ export default function ArtisanProfileScreen() {
         notes: '',
       });
     } catch (error) {
-      console.error('Error submitting booking:', error);
       Alert.alert('Error', 'Failed to confirm booking. Please try again.');
     } finally {
       setSubmitting(false);
@@ -611,7 +600,6 @@ export default function ArtisanProfileScreen() {
                     message: `Check out ${artisan.name}, a verified ${artisan.service} on EketSupply!\n\n${artisan.rating} stars · ${artisan.completedJobs} jobs done\n${artisan.location}\n\nBook them on EketSupply: https://www.eketsupply.com`,
                   });
                 } catch (err) {
-                  console.error('Share error:', err);
                 }
               }}
               style={{

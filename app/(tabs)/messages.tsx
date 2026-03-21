@@ -144,7 +144,6 @@ export default function MessagesScreen() {
       convos.sort((a, b) => (b.unreadCount - a.unreadCount));
       setConversations(convos);
     } catch (err) {
-      console.error("Error fetching conversations:", err);
     } finally {
       setLoading(false);
     }

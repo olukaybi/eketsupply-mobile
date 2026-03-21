@@ -73,7 +73,6 @@ export default function RootLayout() {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user?.id) {
         // Register push token in background — don't block UI
-        registerForPushNotifications(session.user.id).catch(console.error);
       }
     });
     return () => authListener.subscription.unsubscribe();

@@ -50,7 +50,6 @@ export function ReviewModal({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     } catch (err) {
-      console.error('Error picking image:', err);
     }
   }
 
@@ -71,7 +70,6 @@ export function ReviewModal({
           });
 
         if (error) {
-          console.error('Error uploading photo:', error);
           continue;
         }
 
@@ -81,7 +79,6 @@ export function ReviewModal({
 
         uploadedUrls.push(publicUrl);
       } catch (err) {
-        console.error('Error processing photo:', err);
       }
     }
 
@@ -132,7 +129,6 @@ export function ReviewModal({
         });
 
       if (reviewError) {
-        console.error('Error submitting review:', reviewError);
         Alert.alert("Error", "Failed to submit review");
         return;
       }
@@ -161,7 +157,6 @@ export function ReviewModal({
       setComment("");
       onClose();
     } catch (err) {
-      console.error('Error in submitReview:', err);
       Alert.alert("Error", "Something went wrong");
     } finally {
       setSubmitting(false);
