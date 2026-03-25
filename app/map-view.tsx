@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
+// react-native-maps uses codegenNativeComponent which is not supported on web.
+// We do a lazy require so Metro doesn't crash the web bundle.
+const isWeb = Platform.OS === 'web';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let MapView: any = null, Marker: any = null, Circle: any = null;
+if (!isWeb) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const RNMaps = require('react-native-maps');
+  MapView = RNMaps.default;
+  Marker = RNMaps.Marker;
+  Circle = RNMaps.Circle;
+}
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
@@ -25,7 +36,8 @@ const RADIUS_OPTIONS = [1, 5, 10, 25]; // kilometers
 
 export default function MapViewScreen() {
   const colors = useColors();
-  const mapRef = useRef<MapView>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null);
   
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,6 +175,20 @@ export default function MapViewScreen() {
   }
 
   const responseBadge = selectedArtisan ? getResponseBadge(selectedArtisan.avg_response_minutes) : null;
+
+  // Web fallback — react-native-maps is not supported on web
+  if (isWeb) {
+    return (
+      <ScreenContainer>
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-2xl font-bold text-foreground mb-4">Map View</Text>
+          <Text className="text-center text-muted">
+            The interactive map is available on the iOS and Android apps. Please use the app to find artisans near you.
+          </Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
     <View className="flex-1">
