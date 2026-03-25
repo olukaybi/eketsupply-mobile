@@ -655,3 +655,11 @@
 - [x] Fix all test failures — 242/242 passing
 - [x] Final TypeScript check — 0 errors
 - [x] Save production checkpoint and deliver to client
+
+## Sprint: Data, Security & Admin (Mar 25 2026)
+- [ ] Seed 15 realistic artisans across Nigerian states with varied categories, ratings, and prices
+- [ ] Add Supabase RLS policy for chat_messages (users can only read their own booking messages)
+- [ ] Build Go Live admin compliance checklist screen with AsyncStorage persistence
+- [ ] Add Go Live screen to admin tab navigation
+- [ ] Run full test suite and confirm 246+ tests pass
+- [ ] Push to GitHub and save checkpoint

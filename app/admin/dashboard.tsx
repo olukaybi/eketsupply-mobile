@@ -549,6 +549,31 @@ export default function AdminDashboard() {
                 <Text style={{ fontSize: 20, color: "#856404" }}>→</Text>
               </TouchableOpacity>
             )}
+
+            {/* Go Live Checklist */}
+            <TouchableOpacity
+              onPress={() => router.push("/admin/go-live" as any)}
+              style={{
+                backgroundColor: "#E6F4FE",
+                borderRadius: 12,
+                padding: 16,
+                marginTop: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#0a7ea4",
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "700", color: "#0a7ea4" }}>
+                  Go Live Checklist
+                </Text>
+                <Text style={{ fontSize: 13, color: "#0a7ea4", marginTop: 2 }}>
+                  Track compliance items before switching to live payments
+                </Text>
+              </View>
+              <Text style={{ fontSize: 20, color: "#0a7ea4" }}>→</Text>
+            </TouchableOpacity>
           </>
         )}
 
