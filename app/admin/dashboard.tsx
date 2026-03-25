@@ -28,6 +28,7 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
 import { AppIcon } from "@/components/ui/app-icon";
+import { createArtisanSubaccount } from "@/lib/paystack-service";
 // Push notifications are sent server-side via the webhook handler
 // No direct push-sender import needed in the mobile client
 
@@ -362,7 +363,38 @@ export default function AdminDashboard() {
 
               if (error) throw error;
 
-              // Remove from pending list
+              // Auto-create Paystack subaccount if bank details are available
+              if (artisan.bank_name && artisan.account_name) {
+                try {
+                  const { data: artisanData } = await supabase
+                    .from("artisans")
+                    .select("bank_code, account_number, paystack_subaccount_code")
+                    .eq("id", artisan.id)
+                    .single();
+
+                  if (
+                    artisanData?.bank_code &&
+                    artisanData?.account_number &&
+                    !artisanData?.paystack_subaccount_code
+                  ) {
+                    const subaccountResult = await createArtisanSubaccount({
+                      full_name: artisan.full_name,
+                      bank_code: artisanData.bank_code,
+                      account_number: artisanData.account_number,
+                    });
+                    await supabase
+                      .from("artisans")
+                      .update({ paystack_subaccount_code: subaccountResult.subaccount_code })
+                      .eq("id", artisan.id);
+                    console.log(`[Admin] Paystack subaccount created: ${subaccountResult.subaccount_code}`);
+                  }
+                } catch (subErr) {
+                  // Non-fatal: log but don't block approval
+                  console.warn("[Admin] Paystack subaccount creation failed:", subErr);
+                }
+              }
+
+              // Remove from pending list and update stats
               setPendingArtisans((prev) => prev.filter((a) => a.id !== artisan.id));
               setStats((prev) => ({
                 ...prev,
