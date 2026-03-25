@@ -657,9 +657,15 @@
 - [x] Save production checkpoint and deliver to client
 
 ## Sprint: Data, Security & Admin (Mar 25 2026)
-- [ ] Seed 15 realistic artisans across Nigerian states with varied categories, ratings, and prices
-- [ ] Add Supabase RLS policy for chat_messages (users can only read their own booking messages)
-- [ ] Build Go Live admin compliance checklist screen with AsyncStorage persistence
-- [ ] Add Go Live screen to admin tab navigation
-- [ ] Run full test suite and confirm 246+ tests pass
-- [ ] Push to GitHub and save checkpoint
+- [x] Seed 15 realistic artisans across Nigerian states with varied categories, ratings, and prices
+- [x] Add Supabase RLS policy for chat_messages (users can only read their own booking messages)
+- [x] Build Go Live admin compliance checklist screen with AsyncStorage persistence
+- [x] Add Go Live screen to admin tab navigation
+- [x] Run full test suite and confirm 248 tests pass
+- [x] Push to GitHub and save checkpoint
+
+## Sprint: Schema Migration, Earnings Dashboard & Push Notifications (Mar 25 2026)
+- [~] Run supabase_artisan_schema_v2.sql migration (SQL ready, needs Supabase dashboard)
+- [x] Build artisan earnings dashboard (app/artisan/earnings.tsx)
+- [x] Add push notifications for artisan approval/rejection
+- [x] Run tests (248/248 pass), push to GitHub, save checkpoint

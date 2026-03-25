@@ -317,3 +317,28 @@ export async function notifyNewBooking(
   });
   await sendPushNotification({ userId: artisanId, type: "booking_received", title, body, data: { bookingId } });
 }
+
+export async function notifyArtisanApproved(artisanUserId: string): Promise<void> {
+  const { title, body } = buildNotificationContent("artisan_approved", {});
+  await sendPushNotification({
+    userId: artisanUserId,
+    type: "artisan_approved",
+    title,
+    body,
+    data: {},
+  });
+}
+
+export async function notifyArtisanRejected(
+  artisanUserId: string,
+  reason?: string
+): Promise<void> {
+  const { title, body } = buildNotificationContent("artisan_rejected", {});
+  await sendPushNotification({
+    userId: artisanUserId,
+    type: "artisan_rejected",
+    title,
+    body: reason ? `${body} Reason: ${reason}` : body,
+    data: { reason: reason ?? "" },
+  });
+}

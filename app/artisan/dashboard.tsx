@@ -439,6 +439,13 @@ export default function ArtisanDashboardScreen() {
               <IconSymbol name="star.fill" size={24} color="#E65100" />
               <Text className="text-xs font-medium text-foreground mt-2 text-center">My Reviews</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/artisan/earnings" as any)}
+              className="flex-1 rounded-2xl p-4 items-center border border-border bg-background"
+            >
+              <IconSymbol name="chart.line.uptrend.xyaxis" size={24} color="#1B5E20" />
+              <Text className="text-xs font-medium text-foreground mt-2 text-center">Earnings</Text>
+            </TouchableOpacity>
           </View>
         </View>
 

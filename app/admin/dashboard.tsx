@@ -29,13 +29,13 @@ import { ScreenContainer } from "@/components/screen-container";
 import { supabase } from "@/lib/supabase";
 import { AppIcon } from "@/components/ui/app-icon";
 import { createArtisanSubaccount } from "@/lib/paystack-service";
-// Push notifications are sent server-side via the webhook handler
-// No direct push-sender import needed in the mobile client
+import { notifyArtisanApproved, notifyArtisanRejected } from "@/lib/notification-service";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface PendingArtisan {
   id: string;
   user_id: string;
+  profile_id?: string;
   full_name: string;
   phone: string;
   skills: string[];
@@ -402,6 +402,10 @@ export default function AdminDashboard() {
                 pendingApplications: prev.pendingApplications - 1,
               }));
 
+              // Send push notification to artisan (non-fatal)
+              if (artisan.user_id) {
+                notifyArtisanApproved(artisan.user_id).catch(() => {});
+              }
               Alert.alert("Approved!", `${artisan.full_name} is now a verified artisan.`);
             } catch (err) {
               Alert.alert("Error", "Failed to approve artisan. Please try again.");
@@ -445,6 +449,13 @@ export default function AdminDashboard() {
       }));
 
       setRejectModal({ visible: false, artisan: null });
+      // Send push notification to artisan (non-fatal)
+      if (artisan.user_id) {
+        notifyArtisanRejected(
+          artisan.user_id,
+          rejectReason || "Application did not meet our requirements."
+        ).catch(() => {});
+      }
       Alert.alert("Rejected", `${artisan.full_name}'s application has been rejected.`);
     } catch (err) {
       Alert.alert("Error", "Failed to reject artisan. Please try again.");

@@ -138,6 +138,7 @@ const MAPPING = {
   "at":                                      "alternate-email",
   "music.note":                              "music-note",
   "banknote":                                "account-balance-wallet",
+  "percent":                                  "percent",
 } as IconMapping;
 
 /**
