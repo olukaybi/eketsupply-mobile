@@ -82,6 +82,26 @@ updates:
         update-types:
           - minor
           - patch
+    # Ignore major-version bumps on Expo, React Native, and React packages.
+    # These must be upgraded intentionally alongside an SDK upgrade — never automatically.
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native-*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@react-navigation/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@sentry/react-native"
+        update-types: ["version-update:semver-major"]
+
     # Prefix commit messages for easy filtering in git log
     commit-message:
       prefix: "chore(deps)"
